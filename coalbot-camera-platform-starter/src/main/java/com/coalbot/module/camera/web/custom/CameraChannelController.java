@@ -396,7 +396,7 @@ public class CameraChannelController {
     @Parameter(name = "callId", description = "推流时携带的自定义鉴权ID", required = true)
     @GetMapping(value = "/push/play-without-check")
     @ResponseBody
-    public StreamContent getStreamInfoByAppAndStreamWithoutCheck(HttpServletRequest request,
+    public RetResult<StreamContent> getStreamInfoByAppAndStreamWithoutCheck(HttpServletRequest request,
                                                                                 String app,
                                                                                 String stream,
                                                                                 String callId){
@@ -413,7 +413,7 @@ public class CameraChannelController {
             host=request.getLocalAddr();
         }
         streamInfo.changeStreamIp(host);
-        return new StreamContent(streamInfo);
+        return RetResponse.makeOKRsp(new StreamContent(streamInfo));
     }
 
     @ResponseBody
@@ -426,12 +426,12 @@ public class CameraChannelController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准收藏一个视频文件", required = false)
-    public int addCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
+    public RetResult<Integer> addCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
         log.info("[云端录像] 添加收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
-            return cloudRecordService.changeCollectById(recordId, true);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollectById(recordId, true));
         } else {
-            return cloudRecordService.changeCollect(true, app, stream, mediaServerId, startTime, endTime, callId);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollect(true, app, stream, mediaServerId, startTime, endTime, callId));
         }
     }
 
@@ -445,12 +445,12 @@ public class CameraChannelController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准精准移除一个视频文件的收藏", required = false)
-    public int deleteCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
+    public RetResult<Integer> deleteCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
         log.info("[云端录像] 移除收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
-            return cloudRecordService.changeCollectById(recordId, false);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollectById(recordId, false));
         } else {
-            return cloudRecordService.changeCollect(false, app, stream, mediaServerId, startTime, endTime, callId);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollect(false, app, stream, mediaServerId, startTime, endTime, callId));
         }
     }
 

@@ -41,7 +41,7 @@ public class LogController {
     @Parameter(name = "query", description = "检索内容", required = false)
     @Parameter(name = "startTime", description = "开始时间(yyyy-MM-dd HH:mm:ss)", required = false)
     @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
-    public List<LogFileInfo> queryList(@RequestParam(required = false) String query, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime
+    public RetResult<List<LogFileInfo>> queryList(@RequestParam(required = false) String query, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime
 
     ) {
         if (ObjectUtils.isEmpty(query)) {
@@ -53,7 +53,7 @@ public class LogController {
         if (ObjectUtils.isEmpty(endTime)) {
             endTime = null;
         }
-        return logService.queryList(query, startTime, endTime);
+        return RetResponse.makeOKRsp(logService.queryList(query, startTime, endTime));
     }
 
     /**
@@ -61,7 +61,7 @@ public class LogController {
      */
     @ResponseBody
     @GetMapping("/file/{fileName}")
-    public RetResult<Void> downloadFile(HttpServletResponse response, @PathVariable  String fileName) {
+    public RetResult<Void> downloadFile(HttpServletResponse response, @PathVariable String fileName) {
         try {
             File file = logService.getFileByName(fileName);
             if (file == null || !file.exists() || !file.isFile()) {

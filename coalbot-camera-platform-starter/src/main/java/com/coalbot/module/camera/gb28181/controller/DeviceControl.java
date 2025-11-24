@@ -35,13 +35,14 @@ public class DeviceControl {
 	@Operation(summary = "远程启动")
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
     @GetMapping("/teleboot/{deviceId}")
-    public void teleBootApi(@PathVariable String deviceId) {
+    public RetResult<Void> teleBootApi(@PathVariable String deviceId) {
         if (log.isDebugEnabled()) {
             log.debug("设备远程启动API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
 		Assert.notNull(device, "设备不存在");
 		deviceService.teleboot(device);
+		return RetResponse.makeOKRsp();
     }
 
 
@@ -129,13 +130,14 @@ public class DeviceControl {
 	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
 	@Parameter(name = "channelId", description = "通道国标编号")
 	@GetMapping("/i_frame")
-	public void iFrame(String deviceId, @RequestParam(required = false) String channelId) {
+	public RetResult<Void> iFrame(String deviceId, @RequestParam(required = false) String channelId) {
 		if (log.isDebugEnabled()) {
 			log.debug("强制关键帧API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
 		Assert.notNull(device, "设备不存在");
 		deviceService.iFrame(device, channelId);
+		return RetResponse.makeOKRsp();
 	}
 
 	@Operation(summary = "看守位控制")

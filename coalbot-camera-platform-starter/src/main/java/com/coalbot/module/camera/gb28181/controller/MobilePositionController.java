@@ -1,7 +1,6 @@
 package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.conf.exception.ControllerException;
-
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.MobilePosition;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
@@ -15,7 +14,6 @@ import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.util.StringUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +61,7 @@ public class MobilePositionController {
     @Parameter(name = "start", description = "开始时间")
     @Parameter(name = "end", description = "结束时间")
     @GetMapping("/history/{deviceId}")
-    public List<MobilePosition> positions(@PathVariable String deviceId,
+    public RetResult<List<MobilePosition>> positions(@PathVariable String deviceId,
                                                                      @RequestParam(required = false) String channelId,
                                                                      @RequestParam(required = false) String start,
                                                                      @RequestParam(required = false) String end) {
@@ -74,7 +72,7 @@ public class MobilePositionController {
         if (StringUtil.isEmpty(end)) {
             end = null;
         }
-        return mobilePositionService.queryMobilePositions(deviceId, channelId, start, end);
+        return RetResponse.makeOKRsp(mobilePositionService.queryMobilePositions(deviceId, channelId, start, end));
     }
 
     /**
@@ -85,8 +83,8 @@ public class MobilePositionController {
     @Operation(summary = "查询设备最新位置")
     @Parameter(name = "deviceId", description = "设备国标编号", required = true)
     @GetMapping("/latest/{deviceId}")
-    public MobilePosition latestPosition(@PathVariable String deviceId) {
-        return mobilePositionService.queryLatestPosition(deviceId);
+    public RetResult<MobilePosition> latestPosition(@PathVariable String deviceId) {
+        return RetResponse.makeOKRsp(mobilePositionService.queryLatestPosition(deviceId));
     }
 
     /**

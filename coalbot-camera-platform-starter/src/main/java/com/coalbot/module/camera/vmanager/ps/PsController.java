@@ -68,7 +68,7 @@ public class PsController {
     @Parameter(name = "stream", description = "形成的流的ID", required = true)
     @Parameter(name = "tcpMode", description = "收流模式， 0为UDP， 1为TCP被动", required = true)
     @Parameter(name = "callBack", description = "回调地址，如果收流超时会通道回调通知，回调为get请求，参数为callId", required = true)
-    public OtherPsSendInfo openRtpServer(Boolean isSend, @RequestParam(required = false)String ssrc, String callId, String stream, Integer tcpMode, String callBack) {
+    public RetResult<OtherPsSendInfo> openRtpServer(Boolean isSend, @RequestParam(required = false)String ssrc, String callId, String stream, Integer tcpMode, String callBack) {
 
         log.info("[第三方PS服务对接->开启收流和获取发流信息] isSend->{}, ssrc->{}, callId->{}, stream->{}, tcpMode->{}, callBack->{}",
                 isSend, ssrc, callId, stream, tcpMode==0?"UDP":"TCP被动", callBack);
@@ -139,7 +139,7 @@ public class PsController {
             redisTemplate.opsForValue().set(key, otherPsSendInfo, 300, TimeUnit.SECONDS);
             log.info("[第三方PS服务对接->开启收流和获取发流信息] 结果，callId->{}， {}", callId, otherPsSendInfo);
         }
-        return otherPsSendInfo;
+        return RetResponse.makeOKRsp(otherPsSendInfo);
     }
 
     @GetMapping(value = "/receive/close")
@@ -264,7 +264,7 @@ public class PsController {
 
     @GetMapping(value = "/getTestPort")
     @ResponseBody
-    public int getTestPort() {
+    public RetResult<Integer> getTestPort() {
         MediaServer defaultMediaServer = mediaServerService.getDefaultMediaServer();
 
 //        for (int i = 0; i <300; i++) {
@@ -279,6 +279,6 @@ public class PsController {
 //            }).start();
 //        }
 
-        return sendRtpServerService.getNextPort(defaultMediaServer);
+        return RetResponse.makeOKRsp(sendRtpServerService.getNextPort(defaultMediaServer));
     }
 }

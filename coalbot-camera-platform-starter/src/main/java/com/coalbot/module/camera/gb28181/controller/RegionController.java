@@ -104,32 +104,32 @@ public class RegionController {
     @Parameter(name = "regionDeviceId", description = "行政区划节点编号", required = true)
     @ResponseBody
     @GetMapping("/one")
-    public Region queryRegionByDeviceId(
+    public RetResult<Region> queryRegionByDeviceId(
             @RequestParam(required = true) String regionDeviceId
     ){
         if (ObjectUtils.isEmpty(regionDeviceId.trim())) {
             throw new ControllerException(ErrorCode.ERROR400);
         }
-        return regionService.queryRegionByDeviceId(regionDeviceId);
+        return RetResponse.makeOKRsp(regionService.queryRegionByDeviceId(regionDeviceId));
     }
 
     @Operation(summary = "获取所属的行政区划下的行政区划")
     @Parameter(name = "parent", description = "所属的行政区划", required = false)
     @ResponseBody
     @GetMapping("/base/child/list")
-    public List<Region> getAllChild(@RequestParam(required = false) String parent){
+    public RetResult<List<Region>> getAllChild(@RequestParam(required = false) String parent){
         if (ObjectUtils.isEmpty(parent)) {
             parent = null;
         }
-        return regionService.getAllChild(parent);
+        return RetResponse.makeOKRsp(regionService.getAllChild(parent));
     }
 
     @Operation(summary = "获取所属的行政区划下的行政区划")
     @Parameter(name = "deviceId", description = "当前的行政区划", required = false)
     @ResponseBody
     @GetMapping("/path")
-    public List<Region> getPath(String deviceId){
-        return regionService.getPath(deviceId);
+    public RetResult<List<Region>> getPath(String deviceId){
+        return RetResponse.makeOKRsp(regionService.getPath(deviceId));
     }
 
     @Operation(summary = "从通道中同步行政区划")
@@ -143,8 +143,8 @@ public class RegionController {
     @Operation(summary = "根据行政区划编号从文件中查询层级和描述")
     @ResponseBody
     @GetMapping("/description")
-    public String getDescription(String civilCode){
-        return regionService.getDescription(civilCode);
+    public RetResult<String> getDescription(String civilCode){
+        return RetResponse.makeOKRsp(regionService.getDescription(civilCode));
     }
 
     @Operation(summary = "根据行政区划编号从文件中查询层级并添加")
@@ -154,6 +154,5 @@ public class RegionController {
         regionService.addByCivilCode(civilCode);
         return RetResponse.makeOKRsp();
     }
-
 
 }

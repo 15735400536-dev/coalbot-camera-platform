@@ -72,8 +72,8 @@ public class JT1078TerminalController {
     @Operation(summary = "查询设备")
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @GetMapping("/query")
-    public JTDevice getDevice(String deviceId) {
-        return service.getDeviceById(deviceId);
+    public RetResult<JTDevice> getDevice(String deviceId) {
+        return RetResponse.makeOKRsp(service.getDeviceById(deviceId));
     }
 
 
@@ -83,19 +83,19 @@ public class JT1078TerminalController {
     @Parameter(name = "deviceId", description = "设备ID", required = true)
     @Parameter(name = "query", description = "查询内容")
     @GetMapping("/channel/list")
-    public PageInfo<JTChannel> getChannels(int page, int count,
-                                           @RequestParam(required = true) String deviceId,
-                                           @RequestParam(required = false) String query) {
+    public RetResult<PageInfo<JTChannel>> getChannels(int page, int count,
+                                                      @RequestParam(required = true) String deviceId,
+                                                      @RequestParam(required = false) String query) {
         assert deviceId != null;
-        return service.getChannelList(page, count, deviceId, query);
+        return RetResponse.makeOKRsp(service.getChannelList(page, count, deviceId, query));
     }
 
     @Operation(summary = "JT-查询单个部标通道")
     @Parameter(name = "id", description = "通道数据库ID", required = true)
     @GetMapping("/channel/one")
-    public JTChannel getChannel(String id) {
+    public RetResult<JTChannel> getChannel(String id) {
         assert id != null;
-        return service.getChannelByDbId(id);
+        return RetResponse.makeOKRsp(service.getChannelByDbId(id));
     }
 
     @Operation(summary = "JT-更新通道")
@@ -111,11 +111,11 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-新增通道")
     @Parameter(name = "channel", description = "通道", required = true)
     @PostMapping("/channel/add")
-    public JTChannel addChannel(@RequestBody JTChannel channel) {
+    public RetResult<JTChannel> addChannel(@RequestBody JTChannel channel) {
         assert channel.getChannelId() != null;
         assert channel.getTerminalDbId() != null;
         service.addChannel(channel);
-        return channel;
+        return RetResponse.makeOKRsp(channel);
     }
 
     @Operation(summary = "JT-删除通道")

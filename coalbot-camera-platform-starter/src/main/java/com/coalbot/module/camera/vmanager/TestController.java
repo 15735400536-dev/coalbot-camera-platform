@@ -5,6 +5,8 @@ import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.media.event.hook.Hook;
 import com.coalbot.module.camera.media.event.hook.HookSubscribe;
+import com.coalbot.module.core.response.RetResponse;
+import com.coalbot.module.core.response.RetResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,13 +30,13 @@ public class TestController {
     private RedisTemplate<Object, Object> redisTemplate;
 
     @GetMapping("/hook/list")
-    public List<Hook> all(){
-        return subscribe.getAll();
+    public RetResult<List<Hook>> all() {
+        return RetResponse.makeOKRsp(subscribe.getAll());
     }
 
 
     @GetMapping("/redis")
-    public List<InviteInfo> redis(){
+    public RetResult<List<InviteInfo>> redis() {
         InviteSessionType type = InviteSessionType.PLAY;
         String channelId = null;
         String stream = null;
@@ -52,12 +54,12 @@ public class TestController {
                 System.out.println(cursor.next().getKey());
                 result.add((InviteInfo) cursor.next().getValue());
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
 
-        }finally {
+        } finally {
             cursor.close();
         }
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
 //    @Bean

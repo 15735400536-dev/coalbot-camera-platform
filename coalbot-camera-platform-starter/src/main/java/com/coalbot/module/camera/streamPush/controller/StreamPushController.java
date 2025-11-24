@@ -78,11 +78,11 @@ public class StreamPushController {
     @Parameter(name = "query", description = "查询内容")
     @Parameter(name = "pushing", description = "是否正在推流")
     @Parameter(name = "mediaServerId", description = "流媒体ID")
-    public PageInfo<StreamPush> list(@RequestParam(required = false) Integer page,
-                                     @RequestParam(required = false) Integer count,
-                                     @RequestParam(required = false) String query,
-                                     @RequestParam(required = false) Boolean pushing,
-                                     @RequestParam(required = false) String mediaServerId) {
+    public RetResult<PageInfo<StreamPush>> list(@RequestParam(required = false) Integer page,
+                                                @RequestParam(required = false) Integer count,
+                                                @RequestParam(required = false) String query,
+                                                @RequestParam(required = false) Boolean pushing,
+                                                @RequestParam(required = false) String mediaServerId) {
 
         if (ObjectUtils.isEmpty(query)) {
             query = null;
@@ -91,7 +91,7 @@ public class StreamPushController {
             mediaServerId = null;
         }
         PageInfo<StreamPush> pushList = streamPushService.getPushList(page, count, query, pushing, mediaServerId);
-        return pushList;
+        return RetResponse.makeOKRsp(pushList);
     }
 
 
@@ -205,7 +205,6 @@ public class StreamPushController {
             resultHolder.invokeAllResult(msg);
         }
 
-
         return result;
     }
 
@@ -218,7 +217,7 @@ public class StreamPushController {
     @PostMapping(value = "/add")
     @ResponseBody
     @Operation(summary = "添加推流信息")
-    public StreamPush add(@RequestBody StreamPush stream) {
+    public RetResult<StreamPush> add(@RequestBody StreamPush stream) {
         if (ObjectUtils.isEmpty(stream.getGbId())) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "国标ID不可为空");
         }
@@ -232,7 +231,7 @@ public class StreamPushController {
         }
         stream.setDataType(ChannelDataType.STREAM_PUSH);
         stream.setDataDeviceId(stream.getId());
-        return stream;
+        return RetResponse.makeOKRsp(stream);
     }
 
     @PostMapping(value = "/update")

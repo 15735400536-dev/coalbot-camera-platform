@@ -136,7 +136,7 @@ public class MediaController {
     @Parameter(name = "app", description = "应用名", required = true)
     @Parameter(name = "stream", description = "流id", required = true)
     @Parameter(name = "mediaServerId", description = "媒体服务器id")
-    public StreamContent getPlayUrl(@RequestParam String app, @RequestParam String stream,
+    public RetResult<StreamContent> getPlayUrl(@RequestParam String app, @RequestParam String stream,
                                     @RequestParam(required = false) String mediaServerId){
         boolean authority = false;
         // 是否登陆用户, 登陆用户返回完整信息
@@ -149,6 +149,6 @@ public class MediaController {
         if (streamInfo == null){
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "获取播放地址失败");
         }
-        return new StreamContent(streamInfo);
+        return RetResponse.makeOKRsp(new StreamContent(streamInfo));
     }
 }

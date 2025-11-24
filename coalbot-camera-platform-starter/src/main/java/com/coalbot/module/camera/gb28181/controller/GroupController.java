@@ -42,7 +42,7 @@ public class GroupController {
     @Parameter(name = "parent", description = "所属分组编号", required = true)
     @ResponseBody
     @GetMapping("/tree/list")
-    public List<GroupTree> queryForTree(
+    public RetResult<List<GroupTree>> queryForTree(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String parent,
             @RequestParam(required = false) Boolean hasChannel
@@ -50,7 +50,7 @@ public class GroupController {
         if (ObjectUtils.isEmpty(query)) {
             query = null;
         }
-        return groupService.queryForTree(query, parent, hasChannel);
+        return RetResponse.makeOKRsp(groupService.queryForTree(query, parent, hasChannel));
     }
 
     @Operation(summary = "查询分组")
@@ -58,10 +58,10 @@ public class GroupController {
     @Parameter(name = "channel", description = "true为查询通道，false为查询节点", required = true)
     @ResponseBody
     @GetMapping("/tree/query")
-    public PageInfo<Group> queryTree(Integer page, Integer count,
+    public RetResult<PageInfo<Group>> queryTree(Integer page, Integer count,
                                       @RequestParam(required = true) String query
     ){
-        return groupService.queryList(page, count, query);
+        return RetResponse.makeOKRsp(groupService.queryList(page, count, query));
     }
 
     @Operation(summary = "更新分组")
@@ -90,8 +90,8 @@ public class GroupController {
     @Parameter(name = "deviceId", description = "当前的行政区划", required = false)
     @ResponseBody
     @GetMapping("/path")
-    public List<Group> getPath(String deviceId, String businessGroup){
-        return groupService.getPath(deviceId, businessGroup);
+    public RetResult<List<Group>> getPath(String deviceId, String businessGroup){
+        return RetResponse.makeOKRsp(groupService.getPath(deviceId, businessGroup));
     }
 
 //    @Operation(summary = "根据分组Id查询分组")

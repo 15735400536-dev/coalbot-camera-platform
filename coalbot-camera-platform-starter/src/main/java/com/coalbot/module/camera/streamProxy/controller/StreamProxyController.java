@@ -83,9 +83,8 @@ public class StreamProxyController {
     @Parameter(name = "stream", description = "流Id")
     @GetMapping(value = "/one")
     @ResponseBody
-    public StreamProxy one(String app, String stream) {
-
-        return streamProxyService.getStreamProxyByAppAndStream(app, stream);
+    public RetResult<StreamProxy> one(String app, String stream) {
+        return RetResponse.makeOKRsp(streamProxyService.getStreamProxyByAppAndStream(app, stream));
     }
 
     @Operation(summary = "新增代理", parameters = {
@@ -93,7 +92,7 @@ public class StreamProxyController {
     })
     @PostMapping(value = "/add")
     @ResponseBody
-    public StreamProxy add(@RequestBody StreamProxy param) {
+    public RetResult<StreamProxy> add(@RequestBody StreamProxy param) {
         log.info("添加代理： " + JSONObject.toJSONString(param));
         if (ObjectUtils.isEmpty(param.getRelatesMediaServerId())) {
             param.setRelatesMediaServerId(null);
@@ -106,7 +105,7 @@ public class StreamProxyController {
         }
         param.setServerId(userSetting.getServerId());
         streamProxyService.add(param);
-        return param;
+        return RetResponse.makeOKRsp(param);
     }
 
     @Operation(summary = "更新代理", parameters = {
@@ -114,7 +113,7 @@ public class StreamProxyController {
     })
     @PostMapping(value = "/update")
     @ResponseBody
-    public StreamProxy update(@RequestBody StreamProxy param) {
+    public RetResult<StreamProxy> update(@RequestBody StreamProxy param) {
         log.info("更新代理： " + JSONObject.toJSONString(param));
         if (param.getId() == null) {
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "缺少代理信息的ID");
@@ -126,7 +125,7 @@ public class StreamProxyController {
             param.setGbDeviceId(null);
         }
         streamProxyService.update(param);
-        return param;
+        return RetResponse.makeOKRsp(param);
     }
 
     @GetMapping(value = "/ffmpeg_cmd/list")

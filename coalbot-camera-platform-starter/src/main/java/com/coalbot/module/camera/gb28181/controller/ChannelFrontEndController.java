@@ -23,7 +23,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.List;
 
 
-@Tag(name  = "全局通道前端控制")
+@Tag(name = "全局通道前端控制")
 @RestController
 @Slf4j
 @RequestMapping(value = "/api/common/channel/front-end")
@@ -43,10 +43,10 @@ public class ChannelFrontEndController {
     @Parameter(name = "tiltSpeed", description = "垂直速度(0-100)", required = true)
     @Parameter(name = "zoomSpeed", description = "缩放速度(0-100)", required = true)
     @GetMapping("/ptz")
-    public DeferredResult<RetResult<String>> ptz(String channelId, String command, Integer panSpeed, Integer tiltSpeed, Integer zoomSpeed){
+    public DeferredResult<RetResult<String>> ptz(String channelId, String command, Integer panSpeed, Integer tiltSpeed, Integer zoomSpeed) {
 
         if (log.isDebugEnabled()) {
-            log.debug("[通用通道]云台控制 API调用，channelId：{} ，command：{} ，panSpeed：{} ，tiltSpeed：{} ，zoomSpeed：{}",channelId, command, panSpeed, tiltSpeed, zoomSpeed);
+            log.debug("[通用通道]云台控制 API调用，channelId：{} ，command：{} ，panSpeed：{} ，tiltSpeed：{} ，zoomSpeed：{}", channelId, command, panSpeed, tiltSpeed, zoomSpeed);
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -54,17 +54,17 @@ public class ChannelFrontEndController {
 
         if (panSpeed == null) {
             panSpeed = 50;
-        }else if (panSpeed < 0 || panSpeed > 100) {
+        } else if (panSpeed < 0 || panSpeed > 100) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "panSpeed 为 0-100的数字");
         }
         if (tiltSpeed == null) {
             tiltSpeed = 50;
-        }else if (tiltSpeed < 0 || tiltSpeed > 100) {
+        } else if (tiltSpeed < 0 || tiltSpeed > 100) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "tiltSpeed 为 0-100的数字");
         }
         if (zoomSpeed == null) {
             zoomSpeed = 50;
-        }else if (zoomSpeed < 0 || zoomSpeed > 100) {
+        } else if (zoomSpeed < 0 || zoomSpeed > 100) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "zoomSpeed 为 0-100的数字");
         }
 
@@ -72,7 +72,7 @@ public class ChannelFrontEndController {
         controlCode.setPanSpeed(panSpeed);
         controlCode.setTiltSpeed(tiltSpeed);
         controlCode.setZoomSpeed(zoomSpeed);
-        switch (command){
+        switch (command) {
             case "left":
                 controlCode.setPan(0);
                 break;
@@ -113,7 +113,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -134,10 +134,10 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: in, out, stop", required = true)
     @Parameter(name = "speed", description = "光圈速度(0-100)", required = true)
     @GetMapping("/fi/iris")
-    public DeferredResult<RetResult<String>> iris(String channelId, String command, Integer speed){
+    public DeferredResult<RetResult<String>> iris(String channelId, String command, Integer speed) {
 
         if (log.isDebugEnabled()) {
-            log.debug("[通用通道]光圈控制 API调用，channelId：{} ，command：{} ，speed：{} ",channelId, command, speed);
+            log.debug("[通用通道]光圈控制 API调用，channelId：{} ，command：{} ，speed：{} ", channelId, command, speed);
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
@@ -145,14 +145,14 @@ public class ChannelFrontEndController {
 
         if (speed == null) {
             speed = 50;
-        }else if (speed < 0 || speed > 100) {
+        } else if (speed < 0 || speed > 100) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-100的数字");
         }
 
         FrontEndControlCodeForFI controlCode = new FrontEndControlCodeForFI();
         controlCode.setIrisSpeed(speed);
 
-        switch (command){
+        switch (command) {
             case "in":
                 controlCode.setIris(1);
                 break;
@@ -165,7 +165,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -188,7 +188,7 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: near, far, stop", required = true)
     @Parameter(name = "speed", description = "聚焦速度(0-100)", required = true)
     @GetMapping("/fi/focus")
-    public DeferredResult<RetResult<String>> focus(String channelId, String command, Integer speed){
+    public DeferredResult<RetResult<String>> focus(String channelId, String command, Integer speed) {
 
         if (log.isDebugEnabled()) {
             log.debug("[通用通道]聚焦控制 API调用，channelId：{} ，command：{} ，speed：{} ", channelId, command, speed);
@@ -196,7 +196,7 @@ public class ChannelFrontEndController {
 
         if (speed == null) {
             speed = 50;
-        }else if (speed < 0 || speed > 100) {
+        } else if (speed < 0 || speed > 100) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-100的数字");
         }
 
@@ -205,7 +205,7 @@ public class ChannelFrontEndController {
 
         FrontEndControlCodeForFI controlCode = new FrontEndControlCodeForFI();
         controlCode.setFocusSpeed(speed);
-        switch (command){
+        switch (command) {
             case "near":
                 controlCode.setFocus(0);
                 break;
@@ -218,7 +218,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -248,7 +248,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<List<Preset>>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<List<Preset>> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -273,7 +273,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -335,7 +335,7 @@ public class ChannelFrontEndController {
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -439,7 +439,7 @@ public class ChannelFrontEndController {
         Assert.notNull(channel, "通道不存在");
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -466,7 +466,6 @@ public class ChannelFrontEndController {
         controlCode.setCode(1);
         controlCode.setScanId(scanId);
         return scanControl(channelId, controlCode);
-
     }
 
     @Operation(summary = "扫描指令-停止自动扫描")
@@ -521,14 +520,14 @@ public class ChannelFrontEndController {
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
     @GetMapping("/wiper")
-    public DeferredResult<RetResult<String>> wiper(String channelId, String command){
+    public DeferredResult<RetResult<String>> wiper(String channelId, String command) {
 
         CommonGBChannel channel = channelService.getOne(channelId);
         Assert.notNull(channel, "通道不存在");
 
         FrontEndControlCodeForWiper controlCode = new FrontEndControlCodeForWiper();
 
-        switch (command){
+        switch (command) {
             case "on":
                 controlCode.setCode(1);
                 break;
@@ -540,7 +539,7 @@ public class ChannelFrontEndController {
         }
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -564,14 +563,14 @@ public class ChannelFrontEndController {
     @Parameter(name = "command", description = "控制指令,允许值: on, off", required = true)
     @Parameter(name = "auxiliaryId", description = "开关编号", required = true)
     @GetMapping("/auxiliary")
-    public DeferredResult<com.coalbot.module.core.response.RetResult<String>> auxiliarySwitch(String channelId, String command, Integer auxiliaryId){
+    public DeferredResult<com.coalbot.module.core.response.RetResult<String>> auxiliarySwitch(String channelId, String command, Integer auxiliaryId) {
 
         CommonGBChannel channel = channelService.getOne(channelId);
         Assert.notNull(channel, "通道不存在");
 
         FrontEndControlCodeForAuxiliary controlCode = new FrontEndControlCodeForAuxiliary();
         controlCode.setAuxiliaryId(auxiliaryId);
-        switch (command){
+        switch (command) {
             case "on":
                 controlCode.setCode(1);
                 break;
@@ -583,7 +582,7 @@ public class ChannelFrontEndController {
         }
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时", "");
             result.setResult(RetResult);
         });

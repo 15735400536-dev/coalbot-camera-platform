@@ -28,7 +28,7 @@ import java.util.Date;
 /**
  * 级联平台管理
  */
-@Tag(name  = "级联平台管理")
+@Tag(name = "级联平台管理")
 @Slf4j
 @RestController
 @RequestMapping("/api/platform")
@@ -43,28 +43,28 @@ public class PlatformController {
     @Autowired
     private SipConfig sipConfig;
 
-	@Autowired
-	private IPlatformService platformService;
+    @Autowired
+    private IPlatformService platformService;
 
 
     @Operation(summary = "获取国标服务的配置")
     @GetMapping("/server_config")
-    public JSONObject serverConfig() {
+    public RetResult<JSONObject> serverConfig() {
         JSONObject result = new JSONObject();
         result.put("deviceIp", sipConfig.getShowIp());
         result.put("devicePort", sipConfig.getPort());
         result.put("username", sipConfig.getId());
         result.put("password", sipConfig.getPassword());
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     @Operation(summary = "获取级联服务器信息")
     @Parameter(name = "id", description = "平台国标编号", required = true)
     @GetMapping("/info/{id}")
-    public Platform getPlatform(@PathVariable String id) {
+    public RetResult<Platform> getPlatform(@PathVariable String id) {
         Platform parentPlatform = platformService.queryPlatformByServerGBId(id);
         if (parentPlatform != null) {
-            return  parentPlatform;
+            return RetResponse.makeOKRsp(parentPlatform);
         } else {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "未查询到此平台");
         }
@@ -75,7 +75,7 @@ public class PlatformController {
     @Parameter(name = "page", description = "当前页")
     @Parameter(name = "count", description = "每页查询数量")
     @Parameter(name = "query", description = "查询内容")
-    public PageInfo<Platform> platforms(int page, int count,
+    public RetResult<PageInfo<Platform>> platforms(int page, int count,
                                         @RequestParam(required = false) String query) {
 
         PageInfo<Platform> parentPlatformPageInfo = platformService.queryPlatformList(page, count, query);
@@ -85,7 +85,7 @@ public class PlatformController {
                 platform.setCatalogSubscribe(subscribeHolder.getCatalogSubscribe(platform.getServerGBId()) != null);
             }
         }
-        return parentPlatformPageInfo;
+        return RetResponse.makeOKRsp(parentPlatformPageInfo);
     }
 
     @Operation(summary = "添加上级平台信息")
@@ -167,8 +167,8 @@ public class PlatformController {
         boolean result = platformService.delete(id);
         if (result) {
             return RetResponse.makeOKRsp();
-        }else {
-            return  RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
+        } else {
+            return RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
         }
     }
 
@@ -191,7 +191,7 @@ public class PlatformController {
     @Parameter(name = "hasShare", description = "是否已经共享")
     @GetMapping("/channel/list")
     @ResponseBody
-    public PageInfo<PlatformChannel> queryChannelList(int page, int count,
+    public RetResult<PageInfo<PlatformChannel>> queryChannelList(int page, int count,
                                                       @RequestParam(required = false) String platformId,
                                                       @RequestParam(required = false) String query,
                                                       @RequestParam(required = false) Integer channelType,
@@ -203,7 +203,7 @@ public class PlatformController {
             query = null;
         }
 
-        return platformChannelService.queryChannelList(page, count, query, channelType,  online, platformId, hasShare);
+        return RetResponse.makeOKRsp(platformChannelService.queryChannelList(page, count, query, channelType, online, platformId, hasShare));
     }
 
     @Operation(summary = "向上级平台添加国标通道")
@@ -220,7 +220,7 @@ public class PlatformController {
                 log.info("[国标级联]添加所有通道到上级平台， {}", param.getPlatformId());
                 result = platformChannelService.addAllChannel(param.getPlatformId());
             }
-        }else {
+        } else {
             result = platformChannelService.addChannels(param.getPlatformId(), param.getChannelIds());
         }
         if (result <= 0) {
@@ -243,7 +243,7 @@ public class PlatformController {
                 log.info("[国标级联]移除所有通道，上级平台， {}", param.getPlatformId());
                 result = platformChannelService.removeAllChannel(param.getPlatformId());
             }
-        }else {
+        } else {
             result = platformChannelService.removeChannels(param.getPlatformId(), param.getChannelIds());
         }
         if (result <= 0) {

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @Configuration("mediaConfig")
 @Order(0)
 @Data
-public class MediaConfig{
+public class MediaConfig {
 
     // 修改必须配置，不再支持自动获取
     @Value("${media.id}")
@@ -108,11 +108,10 @@ public class MediaConfig{
     private String type;
 
 
-
     public int getRtpProxyPort() {
         if (rtpProxyPort == null) {
             return 0;
-        }else {
+        } else {
             return rtpProxyPort;
         }
 
@@ -121,18 +120,18 @@ public class MediaConfig{
     public Integer getJttProxyPort() {
         if (jttProxyPort == null) {
             return 0;
-        }else {
+        } else {
             return jttProxyPort;
         }
     }
 
     public String getSdpIp() {
-        if (ObjectUtils.isEmpty(sdpIp)){
+        if (ObjectUtils.isEmpty(sdpIp)) {
             return ip;
-        }else {
+        } else {
             if (isValidIPAddress(sdpIp)) {
                 return sdpIp;
-            }else {
+            } else {
                 // 按照域名解析
                 String hostAddress = null;
                 try {
@@ -146,14 +145,14 @@ public class MediaConfig{
     }
 
     public String getStreamIp() {
-        if (ObjectUtils.isEmpty(streamIp)){
+        if (ObjectUtils.isEmpty(streamIp)) {
             return ip;
-        }else {
+        } else {
             return streamIp;
         }
     }
 
-    public MediaServer getMediaSerItem(){
+    public MediaServer getMediaSerItem() {
         MediaServer mediaServer = new MediaServer();
         mediaServer.setId(id);
         mediaServer.setIp(ip);

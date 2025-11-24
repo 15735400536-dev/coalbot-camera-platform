@@ -55,7 +55,7 @@ public class RecordPlanController {
         if (param.getAllLink() != null) {
             if (param.getAllLink()) {
                 recordPlanService.linkAll(param.getPlanId());
-            }else {
+            } else {
                 recordPlanService.cleanAll(param.getPlanId());
             }
             return RetResponse.makeOKRsp();
@@ -68,7 +68,7 @@ public class RecordPlanController {
         List<String> channelIds = new ArrayList<>();
         if (param.getChannelIds() != null) {
             channelIds.addAll(param.getChannelIds());
-        }else {
+        } else {
             List<String> chanelIdList = deviceChannelService.queryChaneIdListByDeviceDbIds(param.getDeviceDbIds());
             if (chanelIdList != null && !chanelIdList.isEmpty()) {
                 channelIds = chanelIdList;
@@ -82,11 +82,11 @@ public class RecordPlanController {
     @GetMapping("/get")
     @Operation(summary = "查询录制计划")
     @Parameter(name = "planId", description = "计划ID", required = true)
-    public RecordPlan get(String planId) {
+    public RetResult<RecordPlan> get(String planId) {
         if (planId == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "计划ID不可为NULL");
         }
-        return recordPlanService.get(planId);
+        return RetResponse.makeOKRsp(recordPlanService.get(planId));
     }
 
     @ResponseBody
@@ -95,11 +95,11 @@ public class RecordPlanController {
     @Parameter(name = "query", description = "检索内容", required = false)
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
-    public PageInfo<RecordPlan> query(@RequestParam(required = false) String query, @RequestParam Integer page, @RequestParam Integer count) {
+    public RetResult<PageInfo<RecordPlan>> query(@RequestParam(required = false) String query, @RequestParam Integer page, @RequestParam Integer count) {
         if (query != null && ObjectUtils.isEmpty(query.trim())) {
             query = null;
         }
-        return recordPlanService.query(page, count, query);
+        return RetResponse.makeOKRsp(recordPlanService.query(page, count, query));
     }
 
     @Operation(summary = "分页查询录制计划关联的所有通道")
@@ -112,19 +112,19 @@ public class RecordPlanController {
     @Parameter(name = "hasLink", description = "是否已经关联")
     @GetMapping("/channel/list")
     @ResponseBody
-    public PageInfo<CommonGBChannel> queryChannelList(int page, int count,
-                                                      @RequestParam(required = false) String planId,
-                                                      @RequestParam(required = false) String query,
-                                                      @RequestParam(required = false) Integer channelType,
-                                                      @RequestParam(required = false) Boolean online,
-                                                      @RequestParam(required = false) Boolean hasLink) {
+    public RetResult<PageInfo<CommonGBChannel>> queryChannelList(int page, int count,
+                                                                 @RequestParam(required = false) String planId,
+                                                                 @RequestParam(required = false) String query,
+                                                                 @RequestParam(required = false) Integer channelType,
+                                                                 @RequestParam(required = false) Boolean online,
+                                                                 @RequestParam(required = false) Boolean hasLink) {
 
         Assert.notNull(planId, "录制计划ID不可为NULL");
         if (org.springframework.util.ObjectUtils.isEmpty(query)) {
             query = null;
         }
 
-        return recordPlanService.queryChannelList(page, count, query, channelType,  online, planId, hasLink);
+        return RetResponse.makeOKRsp(recordPlanService.queryChannelList(page, count, query, channelType, online, planId, hasLink));
     }
 
     @ResponseBody

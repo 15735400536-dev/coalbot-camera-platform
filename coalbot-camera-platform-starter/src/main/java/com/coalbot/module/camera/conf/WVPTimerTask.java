@@ -22,7 +22,7 @@ public class WVPTimerTask {
     private SipConfig sipConfig;
 
     @Scheduled(fixedDelay = 2, timeUnit = TimeUnit.SECONDS)   //每3秒执行一次
-    public void execute(){
+    public void execute() {
         redisCatchStorage.updateWVPInfo(ServerInfo.create(sipConfig.getShowIp(), serverPort), 3);
     }
 }

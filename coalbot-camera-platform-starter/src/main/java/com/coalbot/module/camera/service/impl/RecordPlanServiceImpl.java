@@ -46,7 +46,6 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
     private IMediaServerService mediaServerService;
 
 
-
     /**
      * 流离开的处理
      */
@@ -55,7 +54,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
     public void onApplicationEvent(MediaDepartureEvent event) {
         // 流断开，检查是否还处于录像状态， 如果是则继续录像
         String channelId = recording(event.getApp(), event.getStream());
-        if(channelId == null) {
+        if (channelId == null) {
             return;
         }
         // 重新拉起
@@ -85,12 +84,12 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
 
         if (startChannelIdList.isEmpty()) {
             // 当前没有录像任务, 如果存在旧的正在录像的就移除
-            if(!recordStreamMap.isEmpty()) {
+            if (!recordStreamMap.isEmpty()) {
                 Set<String> recordStreamSet = new HashSet<>(recordStreamMap.keySet());
                 stopStreams(recordStreamSet, recordStreamMap);
                 recordStreamMap.clear();
             }
-        }else {
+        } else {
             // 当前存在录像任务, 获取正在录像中存在但是当前录制列表不存在的内容,进行停止; 获取正在录像中没有但是当前需录制的列表中存在的进行开启.
             Set<String> recordStreamSet = new HashSet<>(recordStreamMap.keySet());
             startChannelIdList.forEach(recordStreamSet::remove);
@@ -127,7 +126,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
     /**
      * 获取当前时间段应该录像的通道Id列表
      */
-    private List<String> queryCurrentChannelRecord(){
+    private List<String> queryCurrentChannelRecord() {
         // 获取当前时间在一周内的序号, 数据库存储的从第几个30分钟开始, 0-47, 包括首尾
         LocalDateTime now = LocalDateTime.now();
         int week = now.getDayOfWeek().getValue();
@@ -146,13 +145,13 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
                 }
                 // 查看是否有人观看,存在则不做处理,等待后续自然处理,如果无人观看,则关闭该流
                 MediaInfo mediaInfo = mediaServerService.getMediaInfo(streamInfo.getMediaServer(), streamInfo.getApp(), streamInfo.getStream());
-                if (mediaInfo.getReaderCount() == null ||  mediaInfo.getReaderCount() == 0) {
+                if (mediaInfo.getReaderCount() == null || mediaInfo.getReaderCount() == 0) {
                     mediaServerService.closeStreams(streamInfo.getMediaServer(), streamInfo.getApp(), streamInfo.getStream());
                     log.info("[录制计划] 停止, 通道ID: {}", channelId);
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error("[录制计划] 停止时异常", e);
-            }finally {
+            } finally {
                 recordStreamMap.remove(channelId);
             }
         }
@@ -203,10 +202,10 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
         plan.setUpdateTime(new Date());
         recordPlanMapper.update(plan);
         recordPlanMapper.cleanItems(plan.getId());
-        if (plan.getPlanItemList() != null && !plan.getPlanItemList().isEmpty()){
+        if (plan.getPlanItemList() != null && !plan.getPlanItemList().isEmpty()) {
             List<RecordPlanItem> planItemList = new ArrayList<>();
             for (RecordPlanItem recordPlanItem : plan.getPlanItemList()) {
-                if (recordPlanItem.getStart() == null || recordPlanItem.getStop() == null || recordPlanItem.getWeekDay() == null){
+                if (recordPlanItem.getStart() == null || recordPlanItem.getStop() == null || recordPlanItem.getWeekDay() == null) {
                     continue;
                 }
                 if (recordPlanItem.getPlanId() == null) {
@@ -214,7 +213,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
                 }
                 planItemList.add(recordPlanItem);
             }
-            if(!planItemList.isEmpty()) {
+            if (!planItemList.isEmpty()) {
                 recordPlanMapper.batchAddItem(plan.getId(), planItemList);
             }
         }
@@ -256,7 +255,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
         }
         if (planId == null) {
             channelMapper.removeRecordPlan(channelIds);
-        }else {
+        } else {
             channelMapper.addRecordPlan(channelIds, planId);
         }
         // 查看当前的待录制列表是否变化,如果变化,则调用录制计划马上开始录制

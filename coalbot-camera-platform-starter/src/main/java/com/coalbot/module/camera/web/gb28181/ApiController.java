@@ -2,6 +2,8 @@ package com.coalbot.module.camera.web.gb28181;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.SipConfig;
+import com.coalbot.module.core.response.RetResponse;
+import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class ApiController {
 
 
     @GetMapping("/getserverinfo")
-    private JSONObject getserverinfo(){
+    private RetResult<JSONObject> getserverinfo(){
         JSONObject result = new JSONObject();
         result.put("Authorization","ceshi");
         result.put("Hardware","");
@@ -47,7 +49,7 @@ public class ApiController {
         result.put("LogoText","");
         result.put("CopyrightText","");
 
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     @GetMapping(value = "/userinfo")
@@ -85,7 +87,7 @@ public class ApiController {
      */
     @GetMapping(value = "/login")
     @ResponseBody
-    private JSONObject login(String username,String password ){
+    private RetResult<JSONObject> login(String username, String password ){
         if (log.isDebugEnabled()) {
             log.debug(String.format("模拟接口> 登录 API调用，username：%s ，password：%s ",
                     username, password));
@@ -101,6 +103,6 @@ public class ApiController {
                 "Nzc2YmU5MzBjM2JjNjg1ZWFiNGI5ZjhhN2Y0N2RlZjg3NWUyOTJkY2VkYjkwYmEwMTA0NyIsInQiOjE2MDA5MzM2OTcsInUiOiI" +
                 "4ODlkZDYyM2ViIn0eyJlIj.GciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJhb");
         result.put("Token","ynBDDiKMg");
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 }

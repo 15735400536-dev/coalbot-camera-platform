@@ -1,6 +1,8 @@
 package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.gb28181.session.SseSessionManager;
+import com.coalbot.module.core.response.RetResponse;
+import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,9 +36,9 @@ public class SseController {
      * @param browserId 浏览器ID
      */
     @GetMapping("/emit")
-    public SseEmitter emit(HttpServletResponse response, @RequestParam String browserId) throws IOException, InterruptedException {
+    public RetResult<SseEmitter> emit(HttpServletResponse response, @RequestParam String browserId) throws IOException, InterruptedException {
 //        response.setContentType("text/event-stream");
 //        response.setCharacterEncoding("utf-8");
-        return sseSessionManager.conect(browserId);
+        return RetResponse.makeOKRsp(sseSessionManager.conect(browserId));
     }
 }

@@ -57,7 +57,7 @@ public class ApiDeviceController {
      * @return
      */
     @GetMapping(value = "/list")
-    public JSONObject list( @RequestParam(required = false)Integer start,
+    public RetResult<JSONObject> list( @RequestParam(required = false)Integer start,
                             @RequestParam(required = false)Integer limit,
                             @RequestParam(required = false)String q,
                             @RequestParam(required = false)Boolean online ){
@@ -99,11 +99,11 @@ public class ApiDeviceController {
             deviceJSONList.add(deviceJsonObject);
         });
         result.put("DeviceList",deviceJSONList);
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     @GetMapping(value = "/channellist")
-    public JSONObject channellist( String serial,
+    public RetResult<JSONObject> channellist( String serial,
                                    @RequestParam(required = false)String channel_type,
                                    @RequestParam(required = false)String code ,
                                    @RequestParam(required = false)String dir_serial ,
@@ -171,7 +171,7 @@ public class ApiDeviceController {
             channleJSONList.add(deviceJOSNChannel);
         });
         result.put("ChannelList", channleJSONList);
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     /**

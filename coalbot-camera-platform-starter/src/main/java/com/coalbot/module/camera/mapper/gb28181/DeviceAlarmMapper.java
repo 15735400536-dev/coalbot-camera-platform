@@ -22,7 +22,7 @@ public interface DeviceAlarmMapper {
     int add(DeviceAlarm alarm);
 
 
-    @Select( value = {" <script>" +
+    @Select(value = {" <script>" +
             " SELECT * FROM wvp_device_alarm " +
             " WHERE 1=1 " +
             " <if test=\"deviceId != null\" >  AND device_id = #{deviceId}</if>" +
@@ -46,6 +46,6 @@ public interface DeviceAlarmMapper {
             " <if test=\"time != null and id == null \" > AND alarm_time &lt;= #{time}</if>" +
             " <if test=\"id != null\" > AND id = #{id}</if>" +
             " </script>"
-            )
+    )
     int clearAlarmBeforeTime(@Param("id") String id, @Param("deviceIdList") List<String> deviceIdList, @Param("time") String time);
 }

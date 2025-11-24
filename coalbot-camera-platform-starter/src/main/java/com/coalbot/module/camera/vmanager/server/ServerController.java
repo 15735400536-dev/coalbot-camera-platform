@@ -8,7 +8,6 @@ import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.VersionInfo;
 import com.coalbot.module.camera.conf.exception.ControllerException;
-
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.jt1078.config.JT1078Config;
@@ -26,9 +25,7 @@ import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +40,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
 import oshi.software.os.OperatingSystem;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -100,23 +98,23 @@ public class ServerController {
     @GetMapping(value = "/media_server/list")
     @ResponseBody
     @Operation(summary = "流媒体服务列表")
-    public List<MediaServer> getMediaServerList() {
-        return mediaServerService.getAll();
+    public RetResult<List<MediaServer>> getMediaServerList() {
+        return RetResponse.makeOKRsp(mediaServerService.getAll());
     }
 
     @GetMapping(value = "/media_server/online/list")
     @ResponseBody
     @Operation(summary = "在线流媒体服务列表")
-    public List<MediaServer> getOnlineMediaServerList() {
-        return mediaServerService.getAllOnline();
+    public RetResult<List<MediaServer>> getOnlineMediaServerList() {
+        return RetResponse.makeOKRsp(mediaServerService.getAllOnline());
     }
 
     @GetMapping(value = "/media_server/one/{id}")
     @ResponseBody
     @Operation(summary = "停止视频回放")
     @Parameter(name = "id", description = "流媒体服务ID", required = true)
-    public MediaServer getMediaServer(@PathVariable String id) {
-        return mediaServerService.getOne(id);
+    public RetResult<MediaServer> getMediaServer(@PathVariable String id) {
+        return RetResponse.makeOKRsp(mediaServerService.getOne(id));
     }
 
     @Operation(summary = "测试流媒体服务")
@@ -125,8 +123,8 @@ public class ServerController {
     @Parameter(name = "secret", description = "流媒体服务secret", required = true)
     @GetMapping(value = "/media_server/check")
     @ResponseBody
-    public MediaServer checkMediaServer(@RequestParam String ip, @RequestParam int port, @RequestParam String secret, @RequestParam String type) {
-        return mediaServerService.checkMediaServer(ip, port, secret, type);
+    public RetResult<MediaServer> checkMediaServer(@RequestParam String ip, @RequestParam int port, @RequestParam String secret, @RequestParam String type) {
+        return RetResponse.makeOKRsp(mediaServerService.checkMediaServer(ip, port, secret, type));
     }
 
     @Operation(summary = "测试流媒体录像管理服务")
@@ -180,12 +178,12 @@ public class ServerController {
     @Parameter(name = "mediaServerId", description = "流媒体ID", required = true)
     @GetMapping(value = "/media_server/media_info")
     @ResponseBody
-    public MediaInfo getMediaInfo(String app, String stream, String mediaServerId) {
+    public RetResult<MediaInfo> getMediaInfo(String app, String stream, String mediaServerId) {
         MediaServer mediaServer = mediaServerService.getOneFromCluster(mediaServerId);
         if (mediaServer == null) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "流媒体不存在");
         }
-        return mediaServerService.getMediaInfo(mediaServer, app, stream);
+        return RetResponse.makeOKRsp(mediaServerService.getMediaInfo(mediaServer, app, stream));
     }
 
 
@@ -201,29 +199,28 @@ public class ServerController {
     @Operation(summary = "获取系统配置信息")
     @GetMapping(value = "/system/configInfo")
     @ResponseBody
-    public SystemConfigInfo getConfigInfo() {
+    public RetResult<SystemConfigInfo> getConfigInfo() {
         SystemConfigInfo systemConfigInfo = new SystemConfigInfo();
         systemConfigInfo.setVersion(versionInfo.getVersion());
         systemConfigInfo.setSip(sipConfig);
         systemConfigInfo.setAddOn(userSetting);
         systemConfigInfo.setServerPort(serverPort);
         systemConfigInfo.setJt1078Config(jt1078Config);
-        return systemConfigInfo;
+        return RetResponse.makeOKRsp(systemConfigInfo);
     }
 
     @Operation(summary = "获取版本信息")
     @GetMapping(value = "/version")
     @ResponseBody
-    public VersionPo VersionPogetVersion() {
-        return versionInfo.getVersion();
+    public RetResult<VersionPo> VersionPogetVersion() {
+        return RetResponse.makeOKRsp(versionInfo.getVersion());
     }
 
     @GetMapping(value = "/config")
     @Operation(summary = "获取配置信息")
     @Parameter(name = "type", description = "配置类型（sip, base）", required = true)
     @ResponseBody
-    public JSONObject getVersion(String type) {
-
+    public RetResult<JSONObject> getVersion(String type) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("server.port", serverPort);
         if (ObjectUtils.isEmpty(type)) {
@@ -241,38 +238,37 @@ public class ServerController {
                     break;
             }
         }
-        return jsonObject;
+        return RetResponse.makeOKRsp(jsonObject);
     }
 
     @GetMapping(value = "/system/info")
     @ResponseBody
     @Operation(summary = "获取系统信息")
-    public SystemAllInfo getSystemInfo() {
+    public RetResult<SystemAllInfo> getSystemInfo() {
         SystemAllInfo systemAllInfo = redisCatchStorage.getSystemInfo();
-
-        return systemAllInfo;
+        return RetResponse.makeOKRsp(systemAllInfo);
     }
 
     @GetMapping(value = "/media_server/load")
     @ResponseBody
     @Operation(summary = "获取负载信息")
-    public List<MediaServerLoad> getMediaLoad() {
+    public RetResult<List<MediaServerLoad>> getMediaLoad() {
         List<MediaServerLoad> result = new ArrayList<>();
         List<MediaServer> allOnline = mediaServerService.getAllOnline();
         if (allOnline.isEmpty()) {
-            return result;
+            return RetResponse.makeOKRsp(result);
         } else {
             for (MediaServer mediaServerItem : allOnline) {
                 result.add(mediaServerService.getLoad(mediaServerItem));
             }
         }
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     @GetMapping(value = "/resource/info")
     @ResponseBody
     @Operation(summary = "获取负载信息")
-    public ResourceInfo getResourceInfo() {
+    public RetResult<ResourceInfo> getResourceInfo() {
         ResourceInfo result = new ResourceInfo();
         ResourceBaseInfo deviceInfo = deviceService.getOverview();
         result.setDevice(deviceInfo);
@@ -282,14 +278,13 @@ public class ServerController {
         result.setPush(pushInfo);
         ResourceBaseInfo proxyInfo = proxyService.getOverview();
         result.setProxy(proxyInfo);
-
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     @GetMapping(value = "/info")
     @ResponseBody
     @Operation(summary = "获取系统信息")
-    public Map<String, Map<String, String>> getInfo(HttpServletRequest request) {
+    public RetResult<Map<String, Map<String, String>>> getInfo(HttpServletRequest request) {
         Map<String, Map<String, String>> result = new LinkedHashMap<>();
         Map<String, String> hardwareMap = new LinkedHashMap<>();
         result.put("硬件信息", hardwareMap);
@@ -335,15 +330,13 @@ public class ServerController {
         platformMap.put("GIT地址", version.getGIT_URL());
         platformMap.put("GIT日期", version.getGIT_DATE());
         platformMap.put("GIT版本", version.getGIT_Revision_SHORT());
-        platformMap.put("DOCKER环境", new File("/.dockerenv").exists()?"是":"否");
+        platformMap.put("DOCKER环境", new File("/.dockerenv").exists() ? "是" : "否");
 
         Map<String, String> docmap = new LinkedHashMap<>();
         result.put("文档地址", docmap);
         docmap.put("部署文档", "https://doc.wvp-pro.cn");
         docmap.put("接口文档", String.format("%s://%s:%s/doc.html", request.getScheme(), request.getServerName(), request.getServerPort()));
-
-
-        return result;
+        return RetResponse.makeOKRsp(result);
     }
 
     /**
@@ -371,20 +364,20 @@ public class ServerController {
     @GetMapping(value = "/map/config")
     @ResponseBody
     @Operation(summary = "获取地图配置")
-    public List<MapConfig> getMapConfig() {
+    public RetResult<List<MapConfig>> getMapConfig() {
         if (mapService == null) {
-            return Collections.emptyList();
+            return RetResponse.makeOKRsp(Collections.emptyList());
         }
-        return mapService.getConfig();
+        return RetResponse.makeOKRsp(mapService.getConfig());
     }
 
     @GetMapping(value = "/map/model-icon/list")
     @ResponseBody
     @Operation(summary = "获取地图配置图标")
-    public List<MapModelIcon> getMapModelIconList() {
+    public RetResult<List<MapModelIcon>> getMapModelIconList() {
         if (mapService == null) {
-            return Collections.emptyList();
+            return RetResponse.makeOKRsp(Collections.emptyList());
         }
-        return mapService.getModelList();
+        return RetResponse.makeOKRsp(mapService.getModelList());
     }
 }

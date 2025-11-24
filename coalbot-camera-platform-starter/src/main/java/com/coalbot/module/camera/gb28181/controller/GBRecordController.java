@@ -4,7 +4,6 @@ import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
-
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.RecordInfo;
@@ -18,12 +17,10 @@ import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,7 +193,7 @@ public class GBRecordController {
 	@Parameter(name = "channelId", description = "通道国标编号", required = true)
 	@Parameter(name = "stream", description = "流ID", required = true)
 	@GetMapping("/download/progress/{deviceId}/{channelId}/{stream}")
-	public StreamContent getProgress(@PathVariable String deviceId, @PathVariable String channelId, @PathVariable String stream) {
+	public RetResult<StreamContent> getProgress(@PathVariable String deviceId, @PathVariable String channelId, @PathVariable String stream) {
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
 		if (device == null) {
 			log.warn("[获取历史媒体下载进度] 未找到设备 deviceId: {},channelId:{}", deviceId, channelId);
@@ -212,6 +209,6 @@ public class GBRecordController {
 		if (downLoadInfo == null) {
 			throw new ControllerException(ErrorCode.ERROR404);
 		}
-		return new StreamContent(downLoadInfo);
+		return RetResponse.makeOKRsp(new StreamContent(downLoadInfo));
 	}
 }

@@ -69,7 +69,7 @@ public class CloudRecordController {
     @Parameter(name = "year", description = "年，置空则查询当年", required = false)
     @Parameter(name = "month", description = "月，置空则查询当月", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部", required = false)
-    public List<String> openRtpServer(
+    public RetResult<List<String>> openRtpServer(
             @RequestParam(required = true) String app,
             @RequestParam(required = true) String stream,
             @RequestParam(required = false) Integer year,
@@ -97,10 +97,10 @@ public class CloudRecordController {
             mediaServers = mediaServerService.getAllOnlineList();
         }
         if (mediaServers.isEmpty()) {
-            return new ArrayList<>();
+            return RetResponse.makeOKRsp(new ArrayList<>());
         }
 
-        return cloudRecordService.getDateList(app, stream, year, month, mediaServers);
+        return RetResponse.makeOKRsp(cloudRecordService.getDateList(app, stream, year, month, mediaServers));
     }
 
     @ResponseBody
@@ -116,16 +116,16 @@ public class CloudRecordController {
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
     @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
     @Parameter(name = "ascOrder", description = "是否升序排序， 升序： true， 降序： false", required = false)
-    public PageInfo<CloudRecordItem> openRtpServer(@RequestParam(required = false) String query,
-                                                   @RequestParam(required = false) String app,
-                                                   @RequestParam(required = false) String stream,
-                                                   @RequestParam int page,
-                                                   @RequestParam int count,
-                                                   @RequestParam(required = false) String startTime,
-                                                   @RequestParam(required = false) String endTime,
-                                                   @RequestParam(required = false) String mediaServerId,
-                                                   @RequestParam(required = false) String callId,
-                                                   @RequestParam(required = false) Boolean ascOrder
+    public RetResult<PageInfo<CloudRecordItem>> openRtpServer(@RequestParam(required = false) String query,
+                                                              @RequestParam(required = false) String app,
+                                                              @RequestParam(required = false) String stream,
+                                                              @RequestParam int page,
+                                                              @RequestParam int count,
+                                                              @RequestParam(required = false) String startTime,
+                                                              @RequestParam(required = false) String endTime,
+                                                              @RequestParam(required = false) String mediaServerId,
+                                                              @RequestParam(required = false) String callId,
+                                                              @RequestParam(required = false) Boolean ascOrder
 
     ) {
         log.info("[云端录像] 查询 app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", app, stream, mediaServerId, page, count, startTime, endTime, callId);
@@ -159,7 +159,7 @@ public class CloudRecordController {
         if (callId != null && ObjectUtils.isEmpty(callId.trim())) {
             callId = null;
         }
-        return cloudRecordService.getList(page, count, query, app, stream, startTime, endTime, mediaServers, callId, ascOrder);
+        return RetResponse.makeOKRsp(cloudRecordService.getList(page, count, query, app, stream, startTime, endTime, mediaServers, callId, ascOrder));
     }
 
     @ResponseBody
@@ -172,7 +172,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "remoteHost", description = "返回地址时的远程地址", required = false)
-    public String addTask(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost) {
+    public RetResult<String> addTask(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost) {
         MediaServer mediaServer;
         if (mediaServerId == null) {
             mediaServer = mediaServerService.getDefaultMediaServer();
@@ -186,7 +186,7 @@ public class CloudRecordController {
                 remoteHost = request.getScheme() + "://" + mediaServer.getIp() + ":" + mediaServer.getRecordAssistPort();
             }
         }
-        return cloudRecordService.addTask(app, stream, mediaServer, startTime, endTime, callId, remoteHost, mediaServerId != null);
+        return RetResponse.makeOKRsp(cloudRecordService.addTask(app, stream, mediaServer, startTime, endTime, callId, remoteHost, mediaServerId != null));
     }
 
     @ResponseBody
@@ -195,12 +195,12 @@ public class CloudRecordController {
     @Parameter(name = "taskId", description = "任务Id", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID", required = false)
     @Parameter(name = "isEnd", description = "是否结束", required = false)
-    public JSONArray queryTaskList(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String callId, @RequestParam(required = false) String taskId, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) Boolean isEnd) {
+    public RetResult<JSONArray> queryTaskList(HttpServletRequest request, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String callId, @RequestParam(required = false) String taskId, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) Boolean isEnd) {
         if (ObjectUtils.isEmpty(mediaServerId)) {
             mediaServerId = null;
         }
 
-        return cloudRecordService.queryTask(app, stream, callId, taskId, mediaServerId, isEnd, request.getScheme());
+        return RetResponse.makeOKRsp(cloudRecordService.queryTask(app, stream, callId, taskId, mediaServerId, isEnd, request.getScheme()));
     }
 
     @ResponseBody
@@ -213,12 +213,12 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准收藏一个视频文件", required = false)
-    public int addCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
+    public RetResult<Integer> addCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
         log.info("[云端录像] 添加收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
-            return cloudRecordService.changeCollectById(recordId, true);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollectById(recordId, true));
         } else {
-            return cloudRecordService.changeCollect(true, app, stream, mediaServerId, startTime, endTime, callId);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollect(true, app, stream, mediaServerId, startTime, endTime, callId));
         }
     }
 
@@ -232,12 +232,12 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "鉴权ID", required = false)
     @Parameter(name = "callId", description = "鉴权ID", required = false)
     @Parameter(name = "recordId", description = "录像记录的ID，用于精准精准移除一个视频文件的收藏", required = false)
-    public int deleteCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
+    public RetResult<Integer> deleteCollect(@RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String callId, @RequestParam(required = false) String recordId) {
         log.info("[云端录像] 移除收藏，app={}，stream={},mediaServerId={},startTime={},endTime={},callId={},recordId={}", app, stream, mediaServerId, startTime, endTime, callId, recordId);
         if (recordId != null) {
-            return cloudRecordService.changeCollectById(recordId, false);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollectById(recordId, false));
         } else {
-            return cloudRecordService.changeCollect(false, app, stream, mediaServerId, startTime, endTime, callId);
+            return RetResponse.makeOKRsp(cloudRecordService.changeCollect(false, app, stream, mediaServerId, startTime, endTime, callId));
         }
     }
 
@@ -245,8 +245,8 @@ public class CloudRecordController {
     @GetMapping("/play/path")
     @Operation(summary = "获取播放地址")
     @Parameter(name = "recordId", description = "录像记录的ID", required = true)
-    public DownloadFileInfo getPlayUrlPath(@RequestParam(required = true) String recordId) {
-        return cloudRecordService.getPlayUrlPath(recordId);
+    public RetResult<DownloadFileInfo> getPlayUrlPath(@RequestParam(required = true) String recordId) {
+        return RetResponse.makeOKRsp(cloudRecordService.getPlayUrlPath(recordId));
     }
 
     @ResponseBody
@@ -529,7 +529,7 @@ public class CloudRecordController {
     @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
     @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
     @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
-    public PageInfo<CloudRecordUrl> getListWithUrl(HttpServletRequest request, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam int page, @RequestParam int count, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost
+    public RetResult<PageInfo<CloudRecordUrl>> getListWithUrl(HttpServletRequest request, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam int page, @RequestParam int count, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost
 
     ) {
         log.info("[云端录像] 查询URL app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", app, stream, mediaServerId, page, count, startTime, endTime, callId);
@@ -601,6 +601,6 @@ public class CloudRecordController {
             }
             cloudRecordUrlPageInfo.setList(cloudRecordUrlList);
         }
-        return cloudRecordUrlPageInfo;
+        return RetResponse.makeOKRsp(cloudRecordUrlPageInfo);
     }
 }

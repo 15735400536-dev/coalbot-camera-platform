@@ -123,7 +123,7 @@ public class JT1078Controller {
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号, 一般为从1开始的数字", required = true)
     @GetMapping("/talk/start")
-    public StreamContent startTalk(HttpServletRequest request,
+    public RetResult<StreamContent> startTalk(HttpServletRequest request,
                                    @Parameter(required = true) String phoneNumber,
                                    @Parameter(required = true) String channelId) {
 
@@ -139,7 +139,7 @@ public class JT1078Controller {
             streamInfo.changeStreamIp(host);
         }
         streamInfo.setIp("localhost");
-        return new StreamContent(streamInfo);
+        return RetResponse.makeOKRsp(new StreamContent(streamInfo));
     }
 
     @Operation(summary = "JT-结束对讲")
@@ -307,7 +307,7 @@ public class JT1078Controller {
     @Parameter(name = "streamType", description = "码流类型：0.所有码流 1.主码流 2.子码流(如果此通道只传输音频,此字段置0)", required = true)
     @Parameter(name = "storageType", description = "存储器类型", required = true)
     @GetMapping("/playback/downloadUrl")
-    public String getRecordTempUrl(HttpServletRequest request,
+    public RetResult<String> getRecordTempUrl(HttpServletRequest request,
                                    @Parameter(required = true) String phoneNumber,
                                    @Parameter(required = true) String channelId,
                                    @Parameter(required = true) String startTime,
@@ -323,7 +323,7 @@ public class JT1078Controller {
         if (!ftpSetting.getEnable()) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "未启用ftp服务，无法下载录像");
         }
-        return service.getRecordTempUrl(phoneNumber, channelId, startTime, endTime, alarmSign, mediaType, streamType, storageType);
+        return RetResponse.makeOKRsp(service.getRecordTempUrl(phoneNumber, channelId, startTime, endTime, alarmSign, mediaType, streamType, storageType));
     }
 
     @Operation(summary = "JT-录像-下载")
@@ -380,9 +380,9 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询终端参数")
     @Parameter(name = "phoneNumber", description = "设备手机号", required = true)
     @GetMapping("/config/get")
-    public JTDeviceConfig config(String phoneNumber, String[] params) {
+    public RetResult<JTDeviceConfig> config(String phoneNumber, String[] params) {
         log.info("[JT-查询终端参数] phoneNumber：{}", phoneNumber);
-        return service.queryConfig(phoneNumber, params);
+        return RetResponse.makeOKRsp(service.queryConfig(phoneNumber, params));
     }
 
     @Operation(summary = "JT-设置终端参数")
@@ -425,19 +425,19 @@ public class JT1078Controller {
     @Operation(summary = "JT-查询终端属性")
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/attribute")
-    public JTDeviceAttribute attribute(String phoneNumber) {
+    public RetResult<JTDeviceAttribute> attribute(String phoneNumber) {
 
         log.info("[JT-查询终端属性] phoneNumber: {}", phoneNumber);
-        return service.attribute(phoneNumber);
+        return RetResponse.makeOKRsp(service.attribute(phoneNumber));
     }
 
     @Operation(summary = "JT-查询位置信息")
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/position-info")
-    public JTPositionBaseInfo queryPositionInfo(String phoneNumber) {
+    public RetResult<JTPositionBaseInfo> queryPositionInfo(String phoneNumber) {
 
         log.info("[JT-查询位置信息] phoneNumber: {}", phoneNumber);
-        return service.queryPositionInfo(phoneNumber);
+        return RetResponse.makeOKRsp(service.queryPositionInfo(phoneNumber));
     }
 
     @Operation(summary = "JT-临时位置跟踪控制")
@@ -467,10 +467,10 @@ public class JT1078Controller {
     @Operation(summary = "JT-链路检测")
     @Parameter(name = "phoneNumber", description = "设备编号", required = true)
     @GetMapping("/link-detection")
-    public Integer linkDetection(String phoneNumber) {
+    public RetResult<Integer> linkDetection(String phoneNumber) {
 
         log.info("[JT-链路检测] phoneNumber: {}", phoneNumber);
-        return service.linkDetection(phoneNumber);
+        return RetResponse.makeOKRsp(service.linkDetection(phoneNumber));
     }
 
     @Operation(summary = "JT-文本信息下发")

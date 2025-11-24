@@ -6,7 +6,6 @@ import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
-
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.SsrcTransaction;
@@ -25,12 +24,10 @@ import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +146,7 @@ public class PlayController {
     @Parameter(name = "deviceId", description = "设备国标编号", required = true)
     @Parameter(name = "channelId", description = "通道国标编号", required = true)
     @GetMapping("/stop/{deviceId}/{channelId}")
-    public JSONObject playStop(@PathVariable String deviceId, @PathVariable String channelId) {
+    public RetResult<JSONObject> playStop(@PathVariable String deviceId, @PathVariable String channelId) {
 
         log.debug(String.format("设备预览/回放停止API调用，streamId：%s_%s", deviceId, channelId));
 
@@ -166,7 +163,7 @@ public class PlayController {
         JSONObject json = new JSONObject();
         json.put("deviceId", deviceId);
         json.put("channelId", channelId);
-        return json;
+        return RetResponse.makeOKRsp(json);
     }
 
     /**
@@ -204,7 +201,6 @@ public class PlayController {
         }
 
         return playService.audioBroadcast(deviceId, channelId, broadcastMode);
-
     }
 
     @Operation(summary = "停止语音广播")
@@ -226,7 +222,7 @@ public class PlayController {
 
     @Operation(summary = "获取所有的ssrc")
     @GetMapping("/ssrc")
-    public JSONObject getSSRC() {
+    public RetResult<JSONObject> getSSRC() {
         if (log.isDebugEnabled()) {
             log.debug("获取所有的ssrc");
         }
@@ -244,7 +240,7 @@ public class PlayController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", objects);
         jsonObject.put("count", objects.size());
-        return jsonObject;
+        return RetResponse.makeOKRsp(jsonObject);
     }
 
     @Operation(summary = "获取截图")
