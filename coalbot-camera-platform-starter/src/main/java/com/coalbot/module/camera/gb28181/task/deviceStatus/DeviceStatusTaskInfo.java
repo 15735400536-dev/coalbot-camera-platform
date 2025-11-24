@@ -1,0 +1,17 @@
+package com.coalbot.module.camera.gb28181.task.deviceStatus;
+
+import com.coalbot.module.camera.gb28181.bean.SipTransactionInfo;
+import lombok.Data;
+
+@Data
+public class DeviceStatusTaskInfo{
+
+    private String deviceId;
+
+    private SipTransactionInfo transactionInfo;
+
+    /**
+     * 过期时间,单位毫秒
+     */
+    private long expireTime;
+}

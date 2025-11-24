@@ -1,0 +1,42 @@
+package com.coalbot.module.camera.streamProxy.service.impl;
+
+import com.coalbot.module.camera.common.StreamInfo;
+import com.coalbot.module.camera.common.enums.ChannelDataType;
+import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
+import com.coalbot.module.camera.gb28181.bean.Platform;
+import com.coalbot.module.camera.gb28181.service.ISourcePlayService;
+import com.coalbot.module.camera.service.bean.ErrorCallback;
+import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.sip.message.Response;
+
+@Slf4j
+@Service(ChannelDataType.PLAY_SERVICE + ChannelDataType.STREAM_PROXY)
+public class SourcePlayServiceForStreamProxyImpl implements ISourcePlayService {
+
+    @Autowired
+    private IStreamProxyPlayService playService;
+
+    @Override
+    public void play(CommonGBChannel channel, Platform platform, Boolean record, ErrorCallback<StreamInfo> callback) {
+        // 拉流代理通道
+        try {
+            playService.start(channel.getDataDeviceId(), record, callback);
+        }catch (Exception e) {
+            callback.run(Response.BUSY_HERE, "busy here", null);
+        }
+    }
+
+    @Override
+    public void stopPlay(CommonGBChannel channel) {
+        // 拉流代理通道
+        try {
+            playService.stop(channel.getDataDeviceId());
+        }catch (Exception e) {
+            log.error("[停止点播失败] {}({})", channel.getGbName(), channel.getGbDeviceId(), e);
+        }
+    }
+}
