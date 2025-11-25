@@ -2,11 +2,9 @@ package com.coalbot.module.camera.gb28181.transmit.event.request.impl;
 
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.VideoManagerConstants;
-import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.service.*;
 import com.coalbot.module.camera.gb28181.session.AudioBroadcastManager;
@@ -22,6 +20,7 @@ import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.core.exception.CommonException;
 import gov.nist.javax.sdp.TimeDescriptionImpl;
 import gov.nist.javax.sdp.fields.TimeField;
 import gov.nist.javax.sdp.fields.URIField;
@@ -222,7 +221,7 @@ public class InviteRequestProcessor extends SIPRequestProcessorParent implements
                                 if (deviceChannel != null) {
                                     redisCatchStorage.sendPlatformStartPlayMsg(sendRtpItem, deviceChannel, platform);
                                 }
-                            }catch (ControllerException e) {
+                            }catch (CommonException e) {
                                 log.warn("[上级INVITE] tcp主动模式 发流失败", e);
                                 sendBye(platform, inviteInfo.getCallId());
                             }
@@ -239,13 +238,13 @@ public class InviteRequestProcessor extends SIPRequestProcessorParent implements
             }
         } catch (InviteDecodeException e) {
             try {
-                responseAck(request, e.getCode(), e.getMsg());
+                responseAck(request, e.getCode(), e.getMessage());
             } catch (SipException | InvalidArgumentException | ParseException sendException) {
                 log.error("[命令发送失败] invite BAD_REQUEST: {}", sendException.getMessage());
             }
         }catch (PlayException e) {
             try {
-                responseAck(request, e.getCode(), e.getMsg());
+                responseAck(request, e.getCode(), e.getMessage());
             } catch (SipException | InvalidArgumentException | ParseException sendException) {
                 log.error("[命令发送失败] invite 点播失败: {}", sendException.getMessage());
             }

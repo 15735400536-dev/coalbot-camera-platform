@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.bean.RecordInfo;
@@ -22,6 +22,7 @@ import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.cloudRecord.bean.CloudRecordUrl;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -69,14 +70,14 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         Long endTimeStamp = null;
         if (startTime != null ) {
             if (!DateUtil.verification(startTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "开始时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("开始时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             startTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestampMs(startTime);
 
         }
         if (endTime != null ) {
             if (!DateUtil.verification(endTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "结束时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("结束时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             endTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestampMs(endTime);
 
@@ -138,7 +139,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         AssertUtils.notNull(app,"应用名为NULL");
         AssertUtils.notNull(stream,"流ID为NULL");
         if (mediaServerItem.getRecordAssistPort() == 0) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "为配置Assist服务");
+            throw new CommonException("为配置Assist服务");
         }
         Long startTimeStamp = null;
         Long endTimeStamp = null;
@@ -155,11 +156,11 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         List<String> filePathList = cloudRecordServiceMapper.queryRecordFilePathList(app, stream, startTimeStamp,
                 endTimeStamp, callId, filterMediaServer ? mediaServers : null);
         if (filePathList == null || filePathList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未检索到视频文件");
+            throw new CommonException("未检索到视频文件");
         }
         JSONObject result =  assistRESTfulUtils.addTask(mediaServerItem, app, stream, startTime, endTime, callId, filePathList, remoteHost);
         if (result.getInteger("code") != 0) {
-            throw new ControllerException(result.getInteger("code"), result.getString("msg"));
+            throw new CommonException(result.getString("msg"));
         }
         return result.getString("data");
     }
@@ -174,12 +175,12 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
             mediaServerItem = mediaServerService.getOne(mediaServerId);
         }
         if (mediaServerItem == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的流媒体");
+            throw new CommonException("未找到可用的流媒体");
         }
 
         JSONObject result =  assistRESTfulUtils.queryTaskList(mediaServerItem, app, stream, callId, taskId, isEnd, scheme);
         if (result == null || result.getInteger("code") != 0) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), result == null ? "查询任务列表失败" : result.getString("msg"));
+            throw new CommonException(result == null ? "查询任务列表失败" : result.getString("msg"));
         }
         return result.getJSONArray("data");
     }
@@ -191,14 +192,14 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         Long endTimeStamp = null;
         if (startTime != null ) {
             if (!DateUtil.verification(startTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "开始时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("开始时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             startTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestamp(startTime);
 
         }
         if (endTime != null ) {
             if (!DateUtil.verification(endTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "结束时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("结束时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             endTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestamp(endTime);
 
@@ -209,7 +210,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
             mediaServerItems = new ArrayList<>();
             MediaServer mediaServerItem = mediaServerService.getOne(mediaServerId);
             if (mediaServerItem == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+                throw new CommonException("未找到流媒体: " + mediaServerId);
             }
             mediaServerItems.add(mediaServerItem);
         } else {
@@ -219,7 +220,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         List<CloudRecordItem> all = cloudRecordServiceMapper.getList(null, app, stream, startTimeStamp, endTimeStamp,
                 callId, mediaServerItems, null, null);
         if (all.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到待收藏的视频");
+            throw new CommonException("未找到待收藏的视频");
         }
         int limitCount = 50;
         int resultCount = 0;
@@ -247,7 +248,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
     public DownloadFileInfo getPlayUrlPath(String recordId) {
         CloudRecordItem recordItem = cloudRecordServiceMapper.queryOne(recordId);
         if (recordItem == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "资源不存在");
+            throw new CommonException("资源不存在");
         }
         if (!userSetting.getServerId().equals(recordItem.getServerId())) {
             return redisRpcPlayService.getRecordPlayUrl(recordItem.getServerId(), recordId);
@@ -265,14 +266,14 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         Long endTimeStamp = null;
         if (startTime != null ) {
             if (!DateUtil.verification(startTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "开始时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("开始时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             startTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestampMs(startTime);
 
         }
         if (endTime != null ) {
             if (!DateUtil.verification(endTime, DateUtil.formatter)) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "结束时间格式错误，正确格式为： " + DateUtil.formatter);
+                throw new CommonException("结束时间格式错误，正确格式为： " + DateUtil.formatter);
             }
             endTimeStamp = DateUtil.yyyy_MM_dd_HH_mm_ssToTimestampMs(endTime);
 
@@ -286,7 +287,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
 
         CloudRecordItem recordItem = cloudRecordServiceMapper.queryOne(cloudRecordId);
         if (recordItem == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "无录像");
+            throw new CommonException("无录像");
         }
         String mediaServerId = recordItem.getMediaServerId();
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
@@ -295,7 +296,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
             mediaServer = mediaServerService.getMediaServerForMinimumLoad(null);
         }
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "无可用流媒体");
+            throw new CommonException("无可用流媒体");
         }
         String fileName = recordItem.getFileName().substring(0 , recordItem.getFileName().indexOf("."));
         String filePath = recordItem.getFilePath();
@@ -317,12 +318,12 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
 
         List<CloudRecordItem> recordItemList = cloudRecordServiceMapper.getList(null, app, stream, startTimestamp, endTimestamp, null, null, null, false);
         if (recordItemList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "此时间无录像");
+            throw new CommonException("此时间无录像");
         }
         String mediaServerId = recordItemList.get(0).getMediaServerId();
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "媒体节点不存在： " + mediaServerId);
+            throw new CommonException("媒体节点不存在： " + mediaServerId);
         }
         String dateDir = null;
         String filePath = recordItemList.get(0).getFilePath();
@@ -337,7 +338,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
     public void seekRecord(String mediaServerId,String app, String stream, Double seek, String schema) {
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "媒体节点不存在： " + mediaServerId);
+            throw new CommonException("媒体节点不存在： " + mediaServerId);
         }
         mediaServerService.seekRecordStamp(mediaServer, app, stream, seek, schema);
     }
@@ -346,7 +347,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
     public void setRecordSpeed(String mediaServerId, String app, String stream, Integer speed, String schema) {
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "媒体节点不存在： " + mediaServerId);
+            throw new CommonException("媒体节点不存在： " + mediaServerId);
         }
         mediaServerService.setRecordSpeed(mediaServer, app, stream, speed, schema);
     }
@@ -370,7 +371,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
                     log.warn("[录像文件] 删除磁盘文件成功： {}", cloudRecordItem.getFilePath());
                     cloudRecordItemIdListForDelete.add(cloudRecordItem);
                 }
-            }catch (ControllerException e) {
+            }catch (CommonException e) {
                 if (stringBuilder.length() > 0) {
                     stringBuilder.append(", ");
                 }
@@ -383,7 +384,7 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
         }
         if (stringBuilder.length() > 0) {
             stringBuilder.append(" 删除失败");
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), stringBuilder.toString());
+            throw new CommonException(stringBuilder.toString());
         }
     }
 

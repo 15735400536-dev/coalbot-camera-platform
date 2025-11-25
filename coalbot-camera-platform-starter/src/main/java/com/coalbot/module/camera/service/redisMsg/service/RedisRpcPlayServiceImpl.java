@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.redis.RedisRpcConfig;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcRequest;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcResponse;
@@ -16,6 +15,7 @@ import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,10 +69,10 @@ public class RedisRpcPlayServiceImpl implements IRedisRpcPlayService {
         request.setToId(serverId);
         RedisRpcResponse response = redisRpcConfig.request(request, 50, TimeUnit.MICROSECONDS);
         if (response == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }else {
             if (response.getStatusCode() != ErrorCode.SUCCESS.getCode()) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
+                throw new CommonException(ErrorCode.ERROR100.getMsg());
             }
         }
     }

@@ -3,7 +3,7 @@ package com.coalbot.module.camera.streamProxy.service.impl;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.mapper.streamProxy.StreamProxyMapper;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.event.hook.Hook;
@@ -17,6 +17,7 @@ import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class StreamProxyPlayServiceImpl implements IStreamProxyPlayService {
         log.info("[拉流代理]， 开始拉流，ID：{}", id);
         StreamProxy streamProxy = streamProxyMapper.select(id);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR404.getCode(), "代理信息未找到");
+            throw new CommonException("代理信息未找到");
         }
         log.info("[拉流代理] 类型： {}， app：{}, stream: {}, 流地址： {}", streamProxy.getType(), streamProxy.getApp(), streamProxy.getStream(), streamProxy.getSrcUrl());
         if (record != null) {
@@ -96,7 +97,7 @@ public class StreamProxyPlayServiceImpl implements IStreamProxyPlayService {
             mediaServer = mediaServerService.getOne(mediaServerId);
         }
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), mediaServerId == null?"未找到可用的媒体节点":"未找到节点" + mediaServerId);
+            throw new CommonException(mediaServerId == null?"未找到可用的媒体节点":"未找到节点" + mediaServerId);
         }
 
         // 设置流超时的定时任务
@@ -131,7 +132,7 @@ public class StreamProxyPlayServiceImpl implements IStreamProxyPlayService {
     public void stop(String id) {
         StreamProxy streamProxy = streamProxyMapper.select(id);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR404.getCode(), "代理信息未找到");
+            throw new CommonException("代理信息未找到");
         }
         if (!userSetting.getServerId().equals(streamProxy.getServerId())) {
             redisRpcPlayService.stopProxy(streamProxy.getServerId(), streamProxy.getId());
@@ -148,7 +149,7 @@ public class StreamProxyPlayServiceImpl implements IStreamProxyPlayService {
 
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "媒体节点不存在");
+            throw new CommonException("媒体节点不存在");
         }
         if (ObjectUtils.isEmpty(streamProxy.getStreamKey())) {
             mediaServerService.closeStreams(mediaServer, streamProxy.getApp(), streamProxy.getStream());

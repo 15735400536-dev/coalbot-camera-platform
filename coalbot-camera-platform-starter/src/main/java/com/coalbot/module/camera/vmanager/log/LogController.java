@@ -1,9 +1,9 @@
 package com.coalbot.module.camera.vmanager.log;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.service.ILogService;
 import com.coalbot.module.camera.service.bean.LogFileInfo;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,7 +65,7 @@ public class LogController {
         try {
             File file = logService.getFileByName(fileName);
             if (file == null || !file.exists() || !file.isFile()) {
-                throw new ControllerException(ErrorCode.ERROR400);
+                throw new CommonException(ErrorCode.ERROR400.getMsg());
             }
             final InputStream in = Files.newInputStream(file.toPath());
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);

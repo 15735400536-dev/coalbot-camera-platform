@@ -3,7 +3,6 @@ package com.coalbot.module.camera.web.custom;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
@@ -24,6 +23,7 @@ import com.coalbot.module.camera.vmanager.bean.StreamContent;
 import com.coalbot.module.camera.vmanager.cloudRecord.bean.CloudRecordUrl;
 import com.coalbot.module.camera.web.custom.bean.*;
 import com.coalbot.module.camera.web.custom.service.CameraChannelService;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -363,7 +363,7 @@ public class CameraChannelController {
         if (streamAuthorityInfo == null
                 || streamAuthorityInfo.getCallId() == null
                 || !streamAuthorityInfo.getCallId().equals(callId)) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "播放地址鉴权失败");
+            throw new CommonException("播放地址鉴权失败");
         }
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
@@ -548,7 +548,7 @@ public class CameraChannelController {
             mediaServers = new ArrayList<>();
             MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
             if (mediaServer == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+                throw new CommonException("未找到流媒体: " + mediaServerId);
             }
             mediaServers.add(mediaServer);
         } else {
@@ -574,7 +574,7 @@ public class CameraChannelController {
         }
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体节点");
+            throw new CommonException("未找到流媒体节点");
         }
         if (remoteHost == null) {
             remoteHost = request.getScheme() + "://" + request.getLocalAddr() + ":" + (request.getScheme().equals("https") ? mediaServer.getHttpSSlPort() : mediaServer.getHttpPort());

@@ -69,7 +69,6 @@ public class SIPProcessorObserver implements ISIPProcessorObserver {
             return;
         }
         requestProcessorMap.get(method).process(requestEvent);
-
     }
 
     /**
@@ -193,8 +192,5 @@ public class SIPProcessorObserver implements ISIPProcessorObserver {
     public void processDialogTerminated(DialogTerminatedEvent dialogTerminatedEvent) {
         CallIdHeader callId = dialogTerminatedEvent.getDialog().getCallId();
     }
-
-
-
 
 }

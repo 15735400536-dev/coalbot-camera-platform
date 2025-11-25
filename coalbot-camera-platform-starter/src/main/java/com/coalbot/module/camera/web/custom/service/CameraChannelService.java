@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.bean.FrontEndControlCodeForPTZ;
 import com.coalbot.module.camera.gb28181.bean.Group;
@@ -18,12 +17,11 @@ import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.Coordtransform;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.web.custom.bean.*;
 import com.coalbot.module.camera.web.custom.conf.SyTokenManager;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.github.xiaoymin.knife4j.core.util.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -552,7 +550,7 @@ public class CameraChannelService implements CommandLineRunner {
         if (speed == null) {
             speed = 50;
         }else if (speed < 0 || speed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "panSpeed 为 0-100的数字");
+            throw new CommonException("panSpeed 为 0-100的数字");
         }
 
         FrontEndControlCodeForPTZ controlCode = new FrontEndControlCodeForPTZ();

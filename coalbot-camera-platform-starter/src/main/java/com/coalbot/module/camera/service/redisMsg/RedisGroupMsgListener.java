@@ -5,11 +5,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Group;
 import com.coalbot.module.camera.gb28181.bean.RedisGroupMessage;
 import com.coalbot.module.camera.gb28181.service.IGroupService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,8 +141,8 @@ public class RedisGroupMsgListener implements MessageListener {
                 // 存储分组数据
                 groupService.saveByAlias(aliasGroupToSave.values());
 
-            } catch (ControllerException e) {
-                log.warn("[REDIS消息-业务分组同步回复] 失败, \r\n{}", e.getMsg());
+            } catch (CommonException e) {
+                log.warn("[REDIS消息-业务分组同步回复] 失败, \r\n{}", e.getMessage());
             } catch (Exception e) {
                 log.warn("[REDIS消息-业务分组同步回复] 发现未处理的异常, \r\n{}", new String(msg.getBody()));
                 log.error("[REDIS消息-业务分组同步回复] 异常内容： ", e);

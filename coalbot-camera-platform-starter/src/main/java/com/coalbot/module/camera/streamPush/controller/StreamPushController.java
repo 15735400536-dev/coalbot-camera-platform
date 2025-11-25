@@ -6,7 +6,6 @@ import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.StreamPushQueryDTO;
 import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.callback.RequestMessage;
@@ -22,6 +21,7 @@ import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -111,7 +111,7 @@ public class StreamPushController {
     @Parameter(name = "id", description = "应用名", required = true)
     public RetResult<Void> delete(String id) {
         if (streamPushService.delete(id) <= 0) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         return RetResponse.makeOKRsp();
     }
@@ -229,15 +229,15 @@ public class StreamPushController {
     @Operation(summary = "添加推流信息")
     public RetResult<StreamPush> add(@RequestBody StreamPush stream) {
         if (ObjectUtils.isEmpty(stream.getGbId())) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "国标ID不可为空");
+            throw new CommonException("国标ID不可为空");
         }
         if (ObjectUtils.isEmpty(stream.getApp()) && ObjectUtils.isEmpty(stream.getStream())) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "app或stream不可为空");
+            throw new CommonException("app或stream不可为空");
         }
         stream.setGbStatus("OFF");
         stream.setPushing(false);
         if (!streamPushService.add(stream)) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         stream.setDataType(ChannelDataType.STREAM_PUSH);
         stream.setDataDeviceId(stream.getId());
@@ -249,10 +249,10 @@ public class StreamPushController {
     @Operation(summary = "更新推流信息")
     public RetResult<Void> update(@RequestBody StreamPush stream) {
         if (ObjectUtils.isEmpty(stream.getId())) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "ID不可为空");
+            throw new CommonException("ID不可为空");
         }
         if (!streamPushService.update(stream)) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         return RetResponse.makeOKRsp();
     }

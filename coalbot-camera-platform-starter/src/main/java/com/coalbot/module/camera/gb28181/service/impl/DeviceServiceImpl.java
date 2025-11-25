@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.coalbot.module.camera.common.CommonCallback;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
 import com.coalbot.module.camera.gb28181.event.channel.ChannelEvent;
@@ -36,6 +35,7 @@ import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -47,7 +47,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.ResponseEvent;
@@ -637,7 +636,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
     public SyncStatus getChannelSyncStatus(String deviceId) {
         Device device = deviceMapper.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR404.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         if (!userSetting.getServerId().equals(device.getServerId())) {
             return redisRpcService.getChannelSyncStatus(device.getServerId(), deviceId);
@@ -923,7 +922,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
             if (subscribeTaskRunner.containsKey(SubscribeTaskForMobilPosition.getKey(device))) {
                 subscribeTaskRunner.removeSubscribe(SubscribeTaskForMobilPosition.getKey(device));
             }
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备已离线");
+            throw new CommonException("设备已离线");
         }
 
         if (device.getSubscribeCycleForMobilePosition() == cycle) {
@@ -1020,7 +1019,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 设备配置: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
     }
 
@@ -1038,7 +1037,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 获取设备配置: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
     }
 
@@ -1052,7 +1051,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
             sipCommander.teleBootCmd(device);
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 远程启动: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -1070,7 +1069,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 开始/停止录像: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
     }
 
@@ -1087,7 +1086,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 布防/撤防操作: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
     }
 
@@ -1103,7 +1102,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 布防/撤防操作: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
 
     }
@@ -1119,7 +1118,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
             sipCommander.iFrameCmd(device, channelId);
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 强制关键帧操作: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage());
+            throw new CommonException("命令发送: " + e.getMessage());
         }
     }
 
@@ -1136,7 +1135,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 看守位控制: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -1161,7 +1160,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 拉框放大: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " +  e.getMessage());
+            throw new CommonException("命令发送失败: " +  e.getMessage());
         }
     }
 
@@ -1186,7 +1185,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 拉框放大: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " +  e.getMessage());
+            throw new CommonException("命令发送失败: " +  e.getMessage());
         }
     }
 
@@ -1212,7 +1211,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 获取设备状态: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -1239,7 +1238,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 获取设备状态: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -1256,7 +1255,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 获取设备信息: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -1273,7 +1272,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 预制位查询: {}", e.getMessage());
             callback.run(ErrorCode.ERROR100.getCode(), "命令发送: " + e.getMessage(), null);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 

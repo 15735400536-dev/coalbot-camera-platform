@@ -1,15 +1,14 @@
 package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.common.StreamInfo;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.media.zlm.dto.StreamAuthorityInfo;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,7 +70,7 @@ public class MediaController {
                     && streamAuthorityInfo.getCallId().equals(callId)) {
                 authority = true;
             }else {
-                throw new ControllerException(ErrorCode.ERROR400.getCode(), "获取播放地址鉴权失败");
+                throw new CommonException("获取播放地址鉴权失败");
             }
         }else {
             // 是否登陆用户, 登陆用户返回完整信息
@@ -147,7 +146,7 @@ public class MediaController {
         authority = true;
         StreamInfo streamInfo = mediaServerService.getStreamInfoByAppAndStreamWithCheck(app, stream, mediaServerId, authority);
         if (streamInfo == null){
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "获取播放地址失败");
+            throw new CommonException("获取播放地址失败");
         }
         return RetResponse.makeOKRsp(new StreamContent(streamInfo));
     }

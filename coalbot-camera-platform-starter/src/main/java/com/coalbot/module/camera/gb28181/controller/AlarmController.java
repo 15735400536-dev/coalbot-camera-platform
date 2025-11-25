@@ -1,6 +1,5 @@
 package com.coalbot.module.camera.gb28181.controller;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.DeviceAlarmQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceAlarm;
@@ -12,7 +11,7 @@ import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommander;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.TypeUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -81,7 +80,7 @@ public class AlarmController {
         if (ObjectUtils.isEmpty(time)) {
             time = null;
         }else if (!DateUtil.verification(time, DateUtil.formatter) ){
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "time格式为" + DateUtil.PATTERN);
+            throw new CommonException("time格式为" + DateUtil.PATTERN);
         }
         List<String> deviceIdList = null;
         if (deviceIds != null) {
@@ -126,10 +125,10 @@ public class AlarmController {
                 commanderForPlatform.sendAlarmMessage(platform, deviceAlarm);
             } catch (SipException | InvalidArgumentException | ParseException e) {
                 log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " +  e.getMessage());
+                throw new CommonException("命令发送失败: " +  e.getMessage());
             }
         }else {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(),"无法确定" + deviceId + "是平台还是设备");
+            throw new CommonException("无法确定" + deviceId + "是平台还是设备");
         }
         return RetResponse.makeOKRsp();
     }
@@ -182,13 +181,13 @@ public class AlarmController {
 //        if (ObjectUtils.isEmpty(startTime)) {
 //            startTime = null;
 //        }else if (!DateUtil.verification(startTime, DateUtil.formatter) ){
-//            throw new ControllerException(ErrorCode.ERROR400.getCode(), "startTime格式为" + DateUtil.PATTERN);
+//            throw new CommonException("startTime格式为" + DateUtil.PATTERN);
 //        }
 //
 //        if (ObjectUtils.isEmpty(endTime)) {
 //            endTime = null;
 //        }else if (!DateUtil.verification(endTime, DateUtil.formatter) ){
-//            throw new ControllerException(ErrorCode.ERROR400.getCode(), "endTime格式为" + DateUtil.PATTERN);
+//            throw new CommonException("endTime格式为" + DateUtil.PATTERN);
 //        }
 //
 //        return RetResponse.makeOKRsp(deviceAlarmService.getAllAlarm(page, count, deviceId, channelId, alarmPriority, alarmMethod,

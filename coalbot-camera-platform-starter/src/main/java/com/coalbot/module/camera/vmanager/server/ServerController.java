@@ -7,7 +7,6 @@ import com.coalbot.module.camera.common.VersionPo;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.VersionInfo;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.jt1078.config.JT1078Config;
@@ -21,6 +20,7 @@ import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
 import com.coalbot.module.camera.streamPush.service.IStreamPushService;
 import com.coalbot.module.camera.vmanager.bean.*;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -135,7 +135,7 @@ public class ServerController {
     public RetResult<Void> checkMediaRecordServer(@RequestParam String ip, @RequestParam int port) {
         boolean checkResult = mediaServerService.checkMediaRecordServer(ip, port);
         if (!checkResult) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "连接失败");
+            throw new CommonException("连接失败");
         }
         return RetResponse.makeOKRsp();
     }
@@ -166,7 +166,7 @@ public class ServerController {
     public RetResult<Void> deleteMediaServer(@RequestParam String id) {
         MediaServer mediaServer = mediaServerService.getOne(id);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "流媒体不存在");
+            throw new CommonException("流媒体不存在");
         }
         mediaServerService.delete(mediaServer);
         return RetResponse.makeOKRsp();
@@ -181,7 +181,7 @@ public class ServerController {
     public RetResult<MediaInfo> getMediaInfo(String app, String stream, String mediaServerId) {
         MediaServer mediaServer = mediaServerService.getOneFromCluster(mediaServerId);
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "流媒体不存在");
+            throw new CommonException("流媒体不存在");
         }
         return RetResponse.makeOKRsp(mediaServerService.getMediaInfo(mediaServer, app, stream));
     }

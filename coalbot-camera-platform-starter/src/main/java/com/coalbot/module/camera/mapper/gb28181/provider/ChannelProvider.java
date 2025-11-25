@@ -324,7 +324,7 @@ public class ChannelProvider {
             if (!first) {
                 sqlBuild.append(",");
             }
-            sqlBuild.append(id);
+            sqlBuild.append("'").append(id).append("'");
             first = false;
         }
         sqlBuild.append(" )");
@@ -342,7 +342,7 @@ public class ChannelProvider {
             if (!first) {
                 sqlBuild.append(",");
             }
-            sqlBuild.append(id);
+            sqlBuild.append("'").append(id).append("'");
             first = false;
         }
         sqlBuild.append(" )");
@@ -380,7 +380,7 @@ public class ChannelProvider {
             if (!first) {
                 sqlBuild.append(",");
             }
-            sqlBuild.append(id);
+            sqlBuild.append("'").append(id).append("'");
             first = false;
         }
         sqlBuild.append(" )");
@@ -405,7 +405,7 @@ public class ChannelProvider {
                 if (!first) {
                     sqlBuild.append(",");
                 }
-                sqlBuild.append(id);
+                sqlBuild.append("'").append(id).append("'");
                 first = false;
             }
             sqlBuild.append(" )");

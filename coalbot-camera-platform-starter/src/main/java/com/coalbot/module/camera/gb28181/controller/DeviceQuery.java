@@ -3,7 +3,6 @@ package com.coalbot.module.camera.gb28181.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.GbDeviceChannelQueryDTO;
 import com.coalbot.module.camera.dto.GbDeviceQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Device;
@@ -18,6 +17,7 @@ import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -30,7 +30,6 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.ibatis.annotations.Options;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -265,13 +264,13 @@ public class DeviceQuery {
     public RetResult<Void> addDevice(@RequestBody Device device) {
 
         if (device == null || device.getDeviceId() == null) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
 
         // 查看deviceId是否存在
         boolean exist = deviceService.isExist(device.getDeviceId());
         if (exist) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备编号已存在");
+            throw new CommonException("设备编号已存在");
         }
         deviceService.addCustomDevice(device);
         return RetResponse.makeOKRsp();
@@ -283,7 +282,7 @@ public class DeviceQuery {
     @PostMapping("/device/update")
     public RetResult<Void> updateDevice(@RequestBody Device device) {
         if (device == null || device.getDeviceId() == null || device.getId() == null) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         deviceService.updateCustomDevice(device);
         return RetResponse.makeOKRsp();

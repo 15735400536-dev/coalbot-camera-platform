@@ -2,7 +2,6 @@ package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.CommonGBChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.*;
@@ -16,6 +15,7 @@ import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -408,10 +408,10 @@ public class ChannelController {
 
         DeferredResult<RetResult<List<CommonRecordInfo>>> result = new DeferredResult<>(Long.valueOf(userSetting.getRecordInfoTimeout()), TimeUnit.MILLISECONDS);
         if (!DateUtil.verification(startTime, DateUtil.formatter)) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "startTime格式为" + DateUtil.PATTERN);
+            throw new CommonException("startTime格式为" + DateUtil.PATTERN);
         }
         if (!DateUtil.verification(endTime, DateUtil.formatter)) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "endTime格式为" + DateUtil.PATTERN);
+            throw new CommonException("endTime格式为" + DateUtil.PATTERN);
         }
         CommonGBChannel channel = channelService.getOne(channelId);
         AssertUtils.notNull(channel, "通道不存在");
@@ -572,7 +572,7 @@ public class ChannelController {
     @PostMapping("/map/thin/draw")
     public RetResult<String> drawThin(@RequestBody DrawThinParam param) {
         if (param == null || param.getZoomParam() == null || param.getZoomParam().isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         return RetResponse.makeOKRsp(channelService.drawThin(param.getZoomParam(), param.getExtent(), param.getGeoCoordSys()));
     }

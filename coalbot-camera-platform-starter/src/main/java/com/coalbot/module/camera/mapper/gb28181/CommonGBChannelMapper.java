@@ -246,7 +246,7 @@ public interface CommonGBChannelMapper {
 
 
     @SelectProvider(type = ChannelProvider.class, method = "queryByIds")
-    List<CommonGBChannel> queryByIds(Collection<String> ids);
+    List<CommonGBChannel> queryByIds(@Param("ids") Collection<String> ids);
 
     @Delete(value = {" <script>" +
             " delete from wcp_device_channel" +

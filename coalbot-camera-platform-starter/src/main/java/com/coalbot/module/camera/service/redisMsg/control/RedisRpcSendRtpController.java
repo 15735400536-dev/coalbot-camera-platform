@@ -1,7 +1,6 @@
 package com.coalbot.module.camera.service.redisMsg.control;
 
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcRequest;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcResponse;
 import com.coalbot.module.camera.gb28181.bean.SendRtpInfo;
@@ -14,6 +13,8 @@ import com.coalbot.module.camera.service.redisMsg.dto.RedisRpcController;
 import com.coalbot.module.camera.service.redisMsg.dto.RedisRpcMapping;
 import com.coalbot.module.camera.service.redisMsg.dto.RpcController;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
+import com.coalbot.module.core.response.RetCode;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -113,9 +114,9 @@ public class RedisRpcSendRtpController extends RpcController {
         }
         try {
             mediaServerService.startSendRtp(mediaServer, sendRtpItem);
-        }catch (ControllerException exception) {
-            log.info("[redis-rpc] 发流失败： {}/{}, 目标地址： {}：{}， {}", sendRtpItem.getApp(), sendRtpItem.getStream(), sendRtpItem.getIp(), sendRtpItem.getPort(), exception.getMsg());
-            RetResult RetResult = RetResponse.makeRsp(exception.getCode(), exception.getMsg());
+        }catch (CommonException exception) {
+            log.info("[redis-rpc] 发流失败： {}/{}, 目标地址： {}：{}， {}", sendRtpItem.getApp(), sendRtpItem.getStream(), sendRtpItem.getIp(), sendRtpItem.getPort(), exception.getMessage());
+            RetResult RetResult = RetResponse.makeRsp(RetCode.INTERNAL_SERVER_ERROR.code, exception.getMessage());
             response.setBody(RetResult);
             return response;
         }
@@ -150,10 +151,10 @@ public class RedisRpcSendRtpController extends RpcController {
         }
         try {
             mediaServerService.stopSendRtp(mediaServer, sendRtpItem.getApp(), sendRtpItem.getStream(), sendRtpItem.getSsrc());
-        }catch (ControllerException exception) {
+        }catch (CommonException exception) {
             log.info("[redis-rpc] 停止推流失败： {}/{}, 目标地址： {}：{}， code： {}, msg: {}", sendRtpItem.getApp(),
-                    sendRtpItem.getStream(), sendRtpItem.getIp(), sendRtpItem.getPort(), exception.getCode(), exception.getMsg() );
-            response.setBody(RetResponse.makeRsp(exception.getCode(), exception.getMsg()));
+                    sendRtpItem.getStream(), sendRtpItem.getIp(), sendRtpItem.getPort(), RetCode.INTERNAL_SERVER_ERROR.code, exception.getMessage() );
+            response.setBody(RetResponse.makeRsp(RetCode.INTERNAL_SERVER_ERROR.code, exception.getMessage()));
             return response;
         }
         log.info("[redis-rpc] 停止推流成功： {}/{}, 目标地址： {}：{}", sendRtpItem.getApp(), sendRtpItem.getStream(), sendRtpItem.getIp(), sendRtpItem.getPort() );

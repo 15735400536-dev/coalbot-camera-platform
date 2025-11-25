@@ -3,8 +3,7 @@ package com.coalbot.module.camera.gb28181.service.impl;
 import com.coalbot.module.camera.common.*;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
-import com.coalbot.module.camera.conf.exception.ServiceException;
+
 import com.coalbot.module.camera.conf.exception.SsrcTransactionNotFoundException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.AudioBroadcastEvent;
@@ -36,8 +35,8 @@ import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -299,7 +298,7 @@ public class PlayServiceImpl implements IPlayService {
         MediaServer mediaServerItem = getNewMediaServerItem(device);
         if (mediaServerItem == null) {
             log.warn("[点播] 未找到可用的zlm deviceId: {},channelId:{}", device.getDeviceId(), channel.getDeviceId());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的zlm");
+            throw new CommonException("未找到可用的zlm");
         }
         play(mediaServerItem, device, channel, null, userSetting.getRecordSip(), callback);
     }
@@ -308,17 +307,17 @@ public class PlayServiceImpl implements IPlayService {
     public SSRCInfo play(MediaServer mediaServerItem, String deviceId, String channelId, String ssrc, ErrorCallback<StreamInfo> callback) {
         if (mediaServerItem == null) {
             log.warn("[点播] 未找到可用的zlm deviceId: {},channelId:{}", deviceId, channelId);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的zlm");
+            throw new CommonException("未找到可用的zlm");
         }
         Device device = redisCatchStorage.getDevice(deviceId);
         if (device.getStreamMode().equalsIgnoreCase("TCP-ACTIVE") && !mediaServerItem.isRtpEnable()) {
             log.warn("[点播] 单端口收流时不支持TCP主动方式收流 deviceId: {},channelId:{}", deviceId, channelId);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "单端口收流时不支持TCP主动方式收流");
+            throw new CommonException("单端口收流时不支持TCP主动方式收流");
         }
         DeviceChannel channel = deviceChannelService.getOneForSource(deviceId, channelId);
         if (channel == null) {
             log.warn("[点播] 未找到通道 deviceId: {},channelId:{}", deviceId, channelId);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到通道");
+            throw new CommonException("未找到通道");
         }
 
         return play(mediaServerItem, device, channel, ssrc, userSetting.getRecordSip(), callback);
@@ -550,7 +549,7 @@ public class PlayServiceImpl implements IPlayService {
                 return;
             }
             sendRtpInfo.setPort(localPort);
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             mediaServerService.releaseSsrc(mediaServerItem.getId(), sendRtpInfo.getSsrc());
             log.info("[语音对讲]失败 deviceId: {}, channelId: {}", device.getDeviceId(), channel.getDeviceId());
             audioEvent.call("失败, " + e.getMessage());
@@ -742,10 +741,10 @@ public class PlayServiceImpl implements IPlayService {
     public void playBack(Device device, DeviceChannel channel, String startTime,
                          String endTime, ErrorCallback<StreamInfo> callback) {
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         if (channel == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道不存在");
+            throw new CommonException("通道不存在");
         }
         if (!userSetting.getServerId().equals(device.getServerId())) {
             redisRpcPlayService.playback(device.getServerId(), channel.getId(), startTime, endTime, callback);
@@ -754,11 +753,11 @@ public class PlayServiceImpl implements IPlayService {
 
         MediaServer newMediaServerItem = getNewMediaServerItem(device);
         if (newMediaServerItem == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的节点");
+            throw new CommonException("未找到可用的节点");
         }
         if (device.getStreamMode().equalsIgnoreCase("TCP-ACTIVE") && ! newMediaServerItem.isRtpEnable()) {
             log.warn("[录像回放] 单端口收流时不支持TCP主动方式收流 deviceId: {},channelId:{}", device.getDeviceId(), channel.getDeviceId());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "单端口收流时不支持TCP主动方式收流");
+            throw new CommonException("单端口收流时不支持TCP主动方式收流");
         }
 
         playBack(newMediaServerItem, device, channel, startTime, endTime, callback);
@@ -1240,11 +1239,11 @@ public class PlayServiceImpl implements IPlayService {
 
         Device device = deviceService.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "未找到设备： " + deviceId);
+            throw new CommonException("未找到设备： " + deviceId);
         }
         DeviceChannel deviceChannel = deviceChannelService.getOne(deviceId, channelDeviceId);
         if (deviceChannel == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "未找到通道： " + channelDeviceId);
+            throw new CommonException("未找到通道： " + channelDeviceId);
         }
 
         if (!userSetting.getServerId().equals(device.getServerId())) {
@@ -1379,15 +1378,15 @@ public class PlayServiceImpl implements IPlayService {
     }
 
     @Override
-    public void playbackPause(String streamId) throws ServiceException, InvalidArgumentException, ParseException, SipException {
+    public void playbackPause(String streamId) throws CommonException, InvalidArgumentException, ParseException, SipException {
 
         InviteInfo inviteInfo = inviteStreamService.getInviteInfoByStream(InviteSessionType.PLAYBACK, streamId);
         if (null == inviteInfo || inviteInfo.getStreamInfo() == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "streamId不存在");
+            throw new CommonException("streamId不存在");
         }
         Device device = deviceService.getDeviceByDeviceId(inviteInfo.getDeviceId());
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         if (!userSetting.getServerId().equals(device.getServerId())) {
             redisRpcPlayService.playbackPause(device.getServerId(), streamId);
@@ -1399,7 +1398,7 @@ public class PlayServiceImpl implements IPlayService {
         MediaServer mediaServerItem = inviteInfo.getStreamInfo().getMediaServer();
         if (null == mediaServerItem) {
             log.warn("mediaServer 不存在!");
-            throw new ServiceException("mediaServer不存在");
+            throw new CommonException("mediaServer不存在");
         }
         // zlm 暂停RTP超时检查
         // 使用zlm中的流ID
@@ -1409,7 +1408,7 @@ public class PlayServiceImpl implements IPlayService {
         }
         Boolean result = mediaServerService.pauseRtpCheck(mediaServerItem, streamKey);
         if (!result) {
-            throw new ServiceException("暂停RTP接收失败");
+            throw new CommonException("暂停RTP接收失败");
         }
 
         DeviceChannel channel = deviceChannelService.getOneById(inviteInfo.getChannelId());
@@ -1417,14 +1416,14 @@ public class PlayServiceImpl implements IPlayService {
     }
 
     @Override
-    public void playbackResume(String streamId) throws ServiceException, InvalidArgumentException, ParseException, SipException {
+    public void playbackResume(String streamId) throws CommonException, InvalidArgumentException, ParseException, SipException {
         InviteInfo inviteInfo = inviteStreamService.getInviteInfoByStream(InviteSessionType.PLAYBACK, streamId);
         if (null == inviteInfo || inviteInfo.getStreamInfo() == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "streamId不存在");
+            throw new CommonException("streamId不存在");
         }
         Device device = deviceService.getDeviceByDeviceId(inviteInfo.getDeviceId());
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         if (!userSetting.getServerId().equals(device.getServerId())) {
             redisRpcPlayService.playbackResume(device.getServerId(), streamId);
@@ -1436,7 +1435,7 @@ public class PlayServiceImpl implements IPlayService {
         MediaServer mediaServerItem = inviteInfo.getStreamInfo().getMediaServer();
         if (null == mediaServerItem) {
             log.warn("mediaServer 不存在!");
-            throw new ServiceException("mediaServer不存在");
+            throw new CommonException("mediaServer不存在");
         }
         // 使用zlm中的流ID
         String streamKey = inviteInfo.getStream();
@@ -1445,7 +1444,7 @@ public class PlayServiceImpl implements IPlayService {
         }
         boolean result = mediaServerService.resumeRtpCheck(mediaServerItem, streamKey);
         if (!result) {
-            throw new ServiceException("继续RTP接收失败");
+            throw new CommonException("继续RTP接收失败");
         }
         DeviceChannel channel = deviceChannelService.getOneById(inviteInfo.getChannelId());
         cmder.playResumeCmd(device, channel, inviteInfo.getStreamInfo());
@@ -1457,7 +1456,7 @@ public class PlayServiceImpl implements IPlayService {
 
         if (null == inviteInfo || inviteInfo.getStreamInfo() == null) {
             log.warn("streamId不存在!");
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "streamId不存在");
+            throw new CommonException("streamId不存在");
         }
         Device device = deviceService.getDeviceByDeviceId(inviteInfo.getDeviceId());
         DeviceChannel channel = deviceChannelService.getOneById(inviteInfo.getChannelId());
@@ -1470,7 +1469,7 @@ public class PlayServiceImpl implements IPlayService {
 
         if (null == inviteInfo || inviteInfo.getStreamInfo() == null) {
             log.warn("streamId不存在!");
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "streamId不存在");
+            throw new CommonException("streamId不存在");
         }
         Device device = deviceService.getDeviceByDeviceId(inviteInfo.getDeviceId());
         DeviceChannel channel = deviceChannelService.getOneById(inviteInfo.getChannelId());
@@ -1490,7 +1489,7 @@ public class PlayServiceImpl implements IPlayService {
                     mediaServerService.startSendRtp(mediaInfo, sendRtpInfo);
                 }
                 redisCatchStorage.sendPlatformStartPlayMsg(sendRtpInfo, channel, platform);
-            }catch (ControllerException e) {
+            }catch (CommonException e) {
                 log.error("RTP推流失败: {}", e.getMessage());
                 startSendRtpStreamFailHand(sendRtpInfo, platform, callIdHeader);
                 return;
@@ -1679,7 +1678,7 @@ public class PlayServiceImpl implements IPlayService {
                     cmder.streamByeCmd(device, channel.getDeviceId(), "rtp", inviteInfo.getStream(), null, null);
                 } catch (InvalidArgumentException | SipException | ParseException | SsrcTransactionNotFoundException e) {
                     log.error("[命令发送失败] 停止点播/回放/下载， 发送BYE: {}", e.getMessage());
-                    throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+                    throw new CommonException("命令发送失败: " + e.getMessage());
                 }
             }
 
@@ -1735,7 +1734,7 @@ public class PlayServiceImpl implements IPlayService {
         MediaServer mediaServerItem = getNewMediaServerItem(device);
         if (mediaServerItem == null) {
             log.warn("[点播] 未找到可用的zlm deviceId: {},channelId:{}", device.getDeviceId(), deviceChannel.getDeviceId());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的zlm");
+            throw new CommonException("未找到可用的zlm");
         }
         play(mediaServerItem, device, deviceChannel, null, record, callback);
 

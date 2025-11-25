@@ -1,7 +1,6 @@
 package com.coalbot.module.camera.gb28181.transmit.event.request.impl.message.notify.cmd;
 
 import com.coalbot.module.camera.common.enums.ChannelDataType;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.service.*;
 import com.coalbot.module.camera.gb28181.session.AudioBroadcastManager;
@@ -12,6 +11,7 @@ import com.coalbot.module.camera.gb28181.transmit.event.request.impl.message.not
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
+import com.coalbot.module.core.exception.CommonException;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Element;
@@ -174,7 +174,7 @@ public class BroadcastNotifyMessageHandler extends SIPRequestProcessorParent imp
                                     // 发流
                                     try {
                                         mediaServerService.startSendRtp(hookData.getMediaServer(), sendRtpItem);
-                                    }catch (ControllerException e) {
+                                    }catch (CommonException e) {
                                         log.info("[语音喊话] 推流失败, 结果： {}", e.getMessage());
                                         return;
                                     }

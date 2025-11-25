@@ -1,7 +1,6 @@
 package com.coalbot.module.camera.gb28181.controller;
 
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.gb28181.service.IPTZService;
@@ -9,6 +8,7 @@ import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,13 +55,13 @@ public class PtzController {
         }
 
         if (parameter1 == null || parameter1 < 0 || parameter1 > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "parameter1 为 0-255的数字");
+            throw new CommonException("parameter1 为 0-255的数字");
         }
         if (parameter2 == null || parameter2 < 0 || parameter2 > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "parameter2 为 0-255的数字");
+            throw new CommonException("parameter2 为 0-255的数字");
         }
         if (combindCode2 == null || combindCode2 < 0 || combindCode2 > 15) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "combindCode2 为 0-15的数字");
+            throw new CommonException("combindCode2 为 0-15的数字");
         }
 
         Device device = deviceService.getDeviceByDeviceId(deviceId);
@@ -88,17 +88,17 @@ public class PtzController {
         if (horizonSpeed == null) {
             horizonSpeed = 100;
         } else if (horizonSpeed < 0 || horizonSpeed > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "horizonSpeed 为 0-255的数字");
+            throw new CommonException("horizonSpeed 为 0-255的数字");
         }
         if (verticalSpeed == null) {
             verticalSpeed = 100;
         } else if (verticalSpeed < 0 || verticalSpeed > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "verticalSpeed 为 0-255的数字");
+            throw new CommonException("verticalSpeed 为 0-255的数字");
         }
         if (zoomSpeed == null) {
             zoomSpeed = 16;
         } else if (zoomSpeed < 0 || zoomSpeed > 15) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "zoomSpeed 为 0-15的数字");
+            throw new CommonException("zoomSpeed 为 0-15的数字");
         }
 
         int cmdCode = 0;
@@ -161,7 +161,7 @@ public class PtzController {
         if (speed == null) {
             speed = 100;
         } else if (speed < 0 || speed > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-255的数字");
+            throw new CommonException("speed 为 0-255的数字");
         }
 
         int cmdCode = 0x40;
@@ -197,7 +197,7 @@ public class PtzController {
         if (speed == null) {
             speed = 100;
         } else if (speed < 0 || speed > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-255的数字");
+            throw new CommonException("speed 为 0-255的数字");
         }
 
         int cmdCode = 0x40;
@@ -247,7 +247,7 @@ public class PtzController {
     @GetMapping("/preset/add/{deviceId}/{channelId}")
     public RetResult<Void> addPreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
+            throw new CommonException("预置位编号必须为1-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x81, 1, presetId, 0);
         return RetResponse.makeOKRsp();
@@ -260,7 +260,7 @@ public class PtzController {
     @GetMapping("/preset/call/{deviceId}/{channelId}")
     public RetResult<Void> callPreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
+            throw new CommonException("预置位编号必须为1-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x82, 1, presetId, 0);
         return RetResponse.makeOKRsp();
@@ -273,7 +273,7 @@ public class PtzController {
     @GetMapping("/preset/delete/{deviceId}/{channelId}")
     public RetResult<Void> deletePreset(@PathVariable String deviceId, @PathVariable String channelId, Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为1-255之间的数字");
+            throw new CommonException("预置位编号必须为1-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x83, 1, presetId, 0);
         return RetResponse.makeOKRsp();
@@ -287,7 +287,7 @@ public class PtzController {
     @GetMapping("/cruise/point/add/{deviceId}/{channelId}")
     public RetResult<Void> addCruisePoint(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer presetId) {
         if (presetId == null || cruiseId == null || presetId < 1 || presetId > 255 || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "编号必须为1-255之间的数字");
+            throw new CommonException("编号必须为1-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x84, cruiseId, presetId, 0);
         return RetResponse.makeOKRsp();
@@ -301,10 +301,10 @@ public class PtzController {
     @GetMapping("/cruise/point/delete/{deviceId}/{channelId}")
     public RetResult<Void> deleteCruisePoint(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer presetId) {
         if (presetId == null || presetId < 0 || presetId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "预置位编号必须为0-255之间的数字, 为0时删除整个巡航");
+            throw new CommonException("预置位编号必须为0-255之间的数字, 为0时删除整个巡航");
         }
         if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
+            throw new CommonException("巡航组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x85, cruiseId, presetId, 0);
         return RetResponse.makeOKRsp();
@@ -318,10 +318,10 @@ public class PtzController {
     @GetMapping("/cruise/speed/{deviceId}/{channelId}")
     public RetResult<Void> setCruiseSpeed(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer speed) {
         if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
+            throw new CommonException("巡航组号必须为0-255之间的数字");
         }
         if (speed == null || speed < 1 || speed > 4095) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航速度必须为1-4095之间的数字");
+            throw new CommonException("巡航速度必须为1-4095之间的数字");
         }
         int parameter2 = speed & 0xFF;
         int combindCode2 = speed >> 8;
@@ -337,10 +337,10 @@ public class PtzController {
     @GetMapping("/cruise/time/{deviceId}/{channelId}")
     public RetResult<Void> setCruiseTime(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId, Integer time) {
         if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
+            throw new CommonException("巡航组号必须为0-255之间的数字");
         }
         if (time == null || time < 1 || time > 4095) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航停留时间必须为1-4095之间的数字");
+            throw new CommonException("巡航停留时间必须为1-4095之间的数字");
         }
         int parameter2 = time & 0xFF;
         int combindCode2 = time >> 8;
@@ -355,7 +355,7 @@ public class PtzController {
     @GetMapping("/cruise/start/{deviceId}/{channelId}")
     public RetResult<Void> startCruise(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId) {
         if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
+            throw new CommonException("巡航组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x88, cruiseId, 0, 0);
         return RetResponse.makeOKRsp();
@@ -368,7 +368,7 @@ public class PtzController {
     @GetMapping("/cruise/stop/{deviceId}/{channelId}")
     public RetResult<Void> stopCruise(@PathVariable String deviceId, @PathVariable String channelId, Integer cruiseId) {
         if (cruiseId == null || cruiseId < 0 || cruiseId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "巡航组号必须为0-255之间的数字");
+            throw new CommonException("巡航组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0, 0, 0, 0);
         return RetResponse.makeOKRsp();
@@ -381,7 +381,7 @@ public class PtzController {
     @GetMapping("/scan/start/{deviceId}/{channelId}")
     public RetResult<Void> startScan(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
         if (scanId == null || scanId < 0 || scanId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
+            throw new CommonException("扫描组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x89, scanId, 0, 0);
         return RetResponse.makeOKRsp();
@@ -394,7 +394,7 @@ public class PtzController {
     @GetMapping("/scan/stop/{deviceId}/{channelId}")
     public RetResult<Void> stopScan(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
         if (scanId == null || scanId < 0 || scanId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
+            throw new CommonException("扫描组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0, 0, 0, 0);
         return RetResponse.makeOKRsp();
@@ -407,7 +407,7 @@ public class PtzController {
     @GetMapping("/scan/set/left/{deviceId}/{channelId}")
     public RetResult<Void> setScanLeft(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
         if (scanId == null || scanId < 0 || scanId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
+            throw new CommonException("扫描组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x89, scanId, 1, 0);
         return RetResponse.makeOKRsp();
@@ -420,7 +420,7 @@ public class PtzController {
     @GetMapping("/scan/set/right/{deviceId}/{channelId}")
     public RetResult<Void> setScanRight(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId) {
         if (scanId == null || scanId < 0 || scanId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
+            throw new CommonException("扫描组号必须为0-255之间的数字");
         }
         frontEndCommand(deviceId, channelId, 0x89, scanId, 2, 0);
         return RetResponse.makeOKRsp();
@@ -435,10 +435,10 @@ public class PtzController {
     @GetMapping("/scan/set/speed/{deviceId}/{channelId}")
     public RetResult<Void> setScanSpeed(@PathVariable String deviceId, @PathVariable String channelId, Integer scanId, Integer speed) {
         if (scanId == null || scanId < 0 || scanId > 255) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "扫描组号必须为0-255之间的数字");
+            throw new CommonException("扫描组号必须为0-255之间的数字");
         }
         if (speed == null || speed < 1 || speed > 4095) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "自动扫描速度必须为1-4095之间的数字");
+            throw new CommonException("自动扫描速度必须为1-4095之间的数字");
         }
         int parameter2 = speed & 0xFF;
         int combindCode2 = speed >> 8;

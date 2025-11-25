@@ -5,7 +5,6 @@ import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.common.enums.DeviceControlType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
 import com.coalbot.module.camera.gb28181.event.record.RecordInfoEndEvent;
@@ -28,6 +27,7 @@ import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
 import com.coalbot.module.camera.web.gb28181.dto.DeviceChannelExtend;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -227,7 +227,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
     public DeviceChannel getOne(String deviceId, String channelId){
         Device device = deviceMapper.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备：" + deviceId);
+            throw new CommonException("未找到设备：" + deviceId);
         }
         return channelMapper.getOneByDeviceId(device.getId(), channelId);
     }
@@ -236,7 +236,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
     public DeviceChannel getOneForSource(String deviceId, String channelId){
         Device device = deviceMapper.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备：" + deviceId);
+            throw new CommonException("未找到设备：" + deviceId);
         }
         return channelMapper.getOneByDeviceIdForSource(device.getId(), channelId);
     }
@@ -271,7 +271,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
     public List<DeviceChannel> queryChaneListByDeviceId(String deviceId) {
         Device device = deviceMapper.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到通道：" + deviceId);
+            throw new CommonException("未找到通道：" + deviceId);
         }
         return channelMapper.queryChannelsByDeviceDbId(device.getId());
     }
@@ -549,7 +549,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
     public PageInfo queryChannelsByDeviceId(String deviceId, String query, Boolean hasSubChannel, Boolean online, int page, int count) {
         Device device = deviceMapper.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备：" + deviceId);
+            throw new CommonException("未找到设备：" + deviceId);
         }
         if (query != null) {
             query = query.replaceAll("/", "//")
@@ -660,7 +660,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
             }));
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 查询录像: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " +  e.getMessage());
+            throw new CommonException("命令发送失败: " +  e.getMessage());
         }
     }
 

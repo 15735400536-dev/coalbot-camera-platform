@@ -35,7 +35,7 @@ public class SourcePlaybackServiceForGbImpl implements ISourcePlaybackService {
         try {
             playService.playBack(channel, startTime, stopTime, callback);
         } catch (PlayException e) {
-            callback.run(e.getCode(), e.getMsg(), null);
+            callback.run(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             callback.run(Response.BUSY_HERE, "busy here", null);
         }

@@ -1,7 +1,7 @@
 package com.coalbot.module.camera.gb28181.service.impl;
 
 import com.coalbot.module.camera.common.CivilCodePo;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.bean.Region;
 import com.coalbot.module.camera.gb28181.bean.RegionTree;
@@ -58,7 +58,7 @@ public class RegionServiceImpl implements IRegionService {
         try {
             regionMapper.add(region);
         }catch (DuplicateKeyException e){
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "此行政区划已存在");
+            throw new CommonException("此行政区划已存在");
         }
 
     }
@@ -240,7 +240,7 @@ public class RegionServiceImpl implements IRegionService {
     public List<Region> getPath(String deviceId) {
         Region region = regionMapper.queryByDeviceId(deviceId);
         if (region == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "行政区划不存在");
+            throw new CommonException("行政区划不存在");
         }
         List<Region> allParent = getAllParent(region);
         List<Region> regionList = new LinkedList<>(allParent);
@@ -320,7 +320,7 @@ public class RegionServiceImpl implements IRegionService {
                 Region parentRegion = regionMapper.queryByDeviceId(codePo.getParentCode());
                 if (parentRegion == null){
                     log.error(String.format("行政区划%sy已存在，但查询错误", codePo.getParentCode()));
-                    throw new ControllerException(ErrorCode.ERROR100.getCode(), String.format("行政区划%sy已存在，但查询错误", codePo.getParentCode()));
+                    throw new CommonException(String.format("行政区划%sy已存在，但查询错误", codePo.getParentCode()));
                 }
                 region.setParentId(parentRegion.getId());
             }else {

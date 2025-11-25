@@ -2,7 +2,6 @@ package com.coalbot.module.camera.media.abl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.gb28181.service.IInviteStreamService;
 import com.coalbot.module.camera.gb28181.service.IPlayService;
@@ -20,8 +19,8 @@ import com.coalbot.module.camera.media.zlm.dto.hook.HookResult;
 import com.coalbot.module.camera.media.zlm.dto.hook.HookResultForOnPublish;
 import com.coalbot.module.camera.service.IMediaService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.core.exception.CommonException;
 import io.swagger.v3.oas.annotations.Hidden;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -155,7 +155,7 @@ public class ABLHttpHookListener {
                 logger.info("[ABL HOOK]推流鉴权 拒绝 响应：{}->{}", param.getMediaServerId(), param);
                 ablresTfulUtils.closeStreams(mediaServer, param.getApp(), param.getStream());
             }
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             ablresTfulUtils.closeStreams(mediaServer, param.getApp(), param.getStream());
         }
         return HookResult.SUCCESS();

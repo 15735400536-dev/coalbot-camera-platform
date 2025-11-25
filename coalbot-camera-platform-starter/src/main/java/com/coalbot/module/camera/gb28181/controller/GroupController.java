@@ -1,11 +1,10 @@
 package com.coalbot.module.camera.gb28181.controller;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Group;
 import com.coalbot.module.camera.gb28181.bean.GroupTree;
 import com.coalbot.module.camera.gb28181.service.IGroupService;
 import com.coalbot.module.camera.utils.AssertUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -81,7 +80,7 @@ public class GroupController {
         AssertUtils.notNull(id, "分组id（deviceId）不需要存在");
         boolean result = groupService.delete(id);
         if (!result) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "移除失败");
+            throw new CommonException("移除失败");
         }
         return RetResponse.makeOKRsp();
     }

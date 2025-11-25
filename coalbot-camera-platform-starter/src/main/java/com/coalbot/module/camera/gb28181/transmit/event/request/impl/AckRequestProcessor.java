@@ -2,7 +2,6 @@ package com.coalbot.module.camera.gb28181.transmit.event.request.impl;
 
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.Platform;
@@ -19,6 +18,7 @@ import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -133,7 +133,7 @@ public class AckRequestProcessor extends SIPRequestProcessorParent implements In
 					}
 
 					redisCatchStorage.sendPlatformStartPlayMsg(sendRtpItem, deviceChannel, parentPlatform);
-				}catch (ControllerException e) {
+				}catch (CommonException e) {
 					log.error("RTP推流失败: {}", e.getMessage());
 					playService.startSendRtpStreamFailHand(sendRtpItem, parentPlatform, callIdHeader);
 				}
@@ -158,7 +158,7 @@ public class AckRequestProcessor extends SIPRequestProcessorParent implements In
 				} else {
 					mediaServerService.startSendRtp(mediaServer, sendRtpItem);
 				}
-			}catch (ControllerException e) {
+			}catch (CommonException e) {
 				log.error("RTP推流失败: {}", e.getMessage());
 				playService.startSendRtpStreamFailHand(sendRtpItem, null, callIdHeader);
 			}

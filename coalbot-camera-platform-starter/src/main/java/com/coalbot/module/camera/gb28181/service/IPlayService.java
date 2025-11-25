@@ -3,7 +3,6 @@ package com.coalbot.module.camera.gb28181.service;
 import com.coalbot.module.camera.common.InviteInfo;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
-import com.coalbot.module.camera.conf.exception.ServiceException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.AudioBroadcastEvent;
 import com.coalbot.module.camera.media.bean.MediaInfo;
@@ -11,6 +10,7 @@ import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.SSRCInfo;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
+import com.coalbot.module.core.exception.CommonException;
 import gov.nist.javax.sip.message.SIPResponse;
 
 import javax.sip.InvalidArgumentException;
@@ -48,9 +48,9 @@ public interface IPlayService {
 
     void stopAudioBroadcast(Device device, DeviceChannel channel);
 
-    void playbackPause(String streamId) throws ServiceException, InvalidArgumentException, ParseException, SipException;
+    void playbackPause(String streamId) throws CommonException, InvalidArgumentException, ParseException, SipException;
 
-    void playbackResume(String streamId) throws ServiceException, InvalidArgumentException, ParseException, SipException;
+    void playbackResume(String streamId) throws CommonException, InvalidArgumentException, ParseException, SipException;
 
     void playbackSeek(String streamId, long seekTime) throws InvalidArgumentException, ParseException, SipException;
 

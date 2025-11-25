@@ -2,7 +2,6 @@ package com.coalbot.module.camera.gb28181.service.impl;
 
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
@@ -14,7 +13,7 @@ import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.utils.AssertUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class PTZServiceImpl implements IPTZService {
             cmder.frontEndCmd(device, channelId, cmdCode, horizonSpeed, verticalSpeed, zoomSpeed);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             log.error("[命令发送失败] 云台控制: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -64,7 +63,7 @@ public class PTZServiceImpl implements IPTZService {
             AssertUtils.notNull(deviceChannel, "通道不存在");
             String msg = redisRpcPlayService.frontEndCommand(device.getServerId(), deviceChannel.getId(), cmdCode, parameter1, parameter2, combindCode2);
             if (msg != null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), msg);
+                throw new CommonException(msg);
             }
             return;
         }
@@ -72,7 +71,7 @@ public class PTZServiceImpl implements IPTZService {
             cmder.frontEndCmd(device, channelId, cmdCode, parameter1, parameter2, combindCode2);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             log.error("[命令发送失败] 前端控制: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
     }
 
@@ -81,11 +80,11 @@ public class PTZServiceImpl implements IPTZService {
         if (channel.getDataType() != ChannelDataType.GB28181) {
             // 只有国标通道的支持云台控制
             log.warn("[INFO 消息] 只有国标通道的支持云台控制， 通道ID： {}", channel.getGbId());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "不支持");
+            throw new CommonException("不支持");
         }
         Device device = deviceService.getDevice(channel.getDataDeviceId());
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备ID");
+            throw new CommonException("未找到设备ID");
         }
         DeviceChannel deviceChannel = deviceChannelService.getOneById(channel.getGbId());
         frontEndCommand(device, deviceChannel.getDeviceId(), cmdCode, parameter1, parameter2, combindCode2);
@@ -96,15 +95,15 @@ public class PTZServiceImpl implements IPTZService {
         if (channel.getDataType() != ChannelDataType.GB28181) {
             // 只有国标通道的支持云台控制
             log.warn("[INFO 消息] 只有国标通道的支持云台控制， 通道ID： {}", channel.getGbId());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "不支持");
+            throw new CommonException("不支持");
         }
         Device device = deviceService.getDevice(channel.getDataDeviceId());
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备");
+            throw new CommonException("未找到设备");
         }
         DeviceChannel deviceChannel = deviceChannelService.getOneForSourceById(channel.getGbId());
         if (deviceChannel == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到通道");
+            throw new CommonException("未找到通道");
         }
         deviceService.queryPreset(device, deviceChannel.getDeviceId(), callback);
     }

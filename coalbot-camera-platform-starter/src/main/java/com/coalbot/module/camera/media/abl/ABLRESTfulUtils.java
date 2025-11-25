@@ -1,10 +1,9 @@
 package com.coalbot.module.camera.media.abl;
 
 import com.alibaba.fastjson2.JSON;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.media.abl.bean.ABLResult;
 import com.coalbot.module.camera.media.bean.MediaServer;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -433,7 +432,7 @@ public class ABLRESTfulUtils {
         try {
             url = URLEncoder.encode(url, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(),"url编码失败");
+            throw new CommonException("url编码失败");
         }
 
         Map<String, Object> param =  new HashMap<>();
@@ -456,7 +455,7 @@ public class ABLRESTfulUtils {
         try {
             url = URLEncoder.encode(url, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(),"url编码失败");
+            throw new CommonException("url编码失败");
         }
         Map<String, Object> param =  new HashMap<>();
         param.put("app", app);

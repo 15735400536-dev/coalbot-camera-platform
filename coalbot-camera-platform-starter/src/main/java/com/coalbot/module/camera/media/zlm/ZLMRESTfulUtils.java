@@ -4,10 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.zlm.dto.*;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -339,7 +338,7 @@ public class ZLMRESTfulUtils {
         try {
             src_url = URLEncoder.encode(src_url, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(),"url编码失败");
+            throw new CommonException("url编码失败");
         }
 
         Map<String, Object> param = new HashMap<>();

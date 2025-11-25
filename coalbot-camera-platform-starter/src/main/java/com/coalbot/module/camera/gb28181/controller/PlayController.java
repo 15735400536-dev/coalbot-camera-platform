@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.SsrcTransaction;
@@ -25,6 +24,7 @@ import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -151,7 +151,7 @@ public class PlayController {
         log.debug(String.format("设备预览/回放停止API调用，streamId：%s_%s", deviceId, channelId));
 
         if (deviceId == null || channelId == null) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
 
         Device device = deviceService.getDeviceByDeviceId(deviceId);
@@ -175,15 +175,15 @@ public class PlayController {
     @PostMapping("/convertStop/{key}")
     public RetResult<Void> playConvertStop(@PathVariable String key, String mediaServerId) {
         if (mediaServerId == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "流媒体：" + mediaServerId + "不存在");
+            throw new CommonException("流媒体：" + mediaServerId + "不存在");
         }
         MediaServer mediaInfo = mediaServerService.getOne(mediaServerId);
         if (mediaInfo == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "使用的流媒体已经停止运行");
+            throw new CommonException("使用的流媒体已经停止运行");
         } else {
             Boolean deleted = mediaServerService.delFFmpegSource(mediaInfo, key);
             if (!deleted) {
-                throw new ControllerException(ErrorCode.ERROR100);
+                throw new CommonException(ErrorCode.ERROR100.getMsg());
             }
         }
         return RetResponse.makeOKRsp();

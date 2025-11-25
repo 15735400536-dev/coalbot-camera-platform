@@ -2,7 +2,6 @@ package com.coalbot.module.camera.gb28181.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.SipConfig;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.GbPlatformQueryDTO;
 import com.coalbot.module.camera.dto.PlatformChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Platform;
@@ -14,6 +13,7 @@ import com.coalbot.module.camera.gb28181.service.IPlatformService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,7 +69,7 @@ public class PlatformController {
         if (parentPlatform != null) {
             return RetResponse.makeOKRsp(parentPlatform);
         } else {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未查询到此平台");
+            throw new CommonException("未查询到此平台");
         }
     }
 
@@ -138,14 +137,14 @@ public class PlatformController {
 
         Platform parentPlatformOld = platformService.queryPlatformByServerGBId(platform.getServerGBId());
         if (parentPlatformOld != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "平台 " + platform.getServerGBId() + " 已存在");
+            throw new CommonException("平台 " + platform.getServerGBId() + " 已存在");
         }
         platform.setCreateTime(new Date());
         platform.setUpdateTime(new Date());
         boolean updateResult = platformService.add(platform);
 
         if (!updateResult) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         return RetResponse.makeOKRsp();
     }
@@ -166,7 +165,7 @@ public class PlatformController {
                 || ObjectUtils.isEmpty(parentPlatform.getTransport())
                 || ObjectUtils.isEmpty(parentPlatform.getCharacterSet())
         ) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         platformService.update(parentPlatform);
         return RetResponse.makeOKRsp();
@@ -250,7 +249,7 @@ public class PlatformController {
             result = platformChannelService.addChannels(param.getPlatformId(), param.getChannelIds());
         }
         if (result <= 0) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         return RetResponse.makeOKRsp();
     }
@@ -273,7 +272,7 @@ public class PlatformController {
             result = platformChannelService.removeChannels(param.getPlatformId(), param.getChannelIds());
         }
         if (result <= 0) {
-            throw new ControllerException(ErrorCode.ERROR100);
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         return RetResponse.makeOKRsp();
     }

@@ -1,10 +1,9 @@
 package com.coalbot.module.camera.jt1078.cmd;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.jt1078.proc.entity.Cmd;
 import com.coalbot.module.camera.jt1078.proc.response.*;
 import com.coalbot.module.camera.jt1078.session.SessionManager;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
@@ -77,7 +76,7 @@ public class JT1078Template {
 
     public void checkTerminalStatus(String devId){
         if (SessionManager.INSTANCE.get(devId) == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "终端不在线");
+            throw new CommonException("终端不在线");
         }
     }
 

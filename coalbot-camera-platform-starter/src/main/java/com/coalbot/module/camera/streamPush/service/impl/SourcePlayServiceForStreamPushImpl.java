@@ -34,7 +34,7 @@ public class SourcePlayServiceForStreamPushImpl implements ISourcePlayService {
         try {
             playService.start(channel.getDataDeviceId(), callback, serverGBId, platformName);
         }catch (PlayException e) {
-            callback.run(e.getCode(), e.getMsg(), null);
+            callback.run(e.getCode(), e.getMessage(), null);
         }catch (Exception e) {
             log.error("[点播推流通道失败] 通道： {}({})", channel.getGbName(), channel.getGbDeviceId(), e);
             callback.run(Response.BUSY_HERE, "busy here", null);

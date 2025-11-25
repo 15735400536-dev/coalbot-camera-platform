@@ -2,7 +2,6 @@ package com.coalbot.module.camera.jt1078.controller;
 
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.ftpServer.FtpSetting;
 import com.coalbot.module.camera.jt1078.bean.*;
 import com.coalbot.module.camera.jt1078.controller.bean.*;
@@ -13,6 +12,7 @@ import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -320,7 +320,7 @@ public class JT1078Controller {
         log.info("[JT-录像] 下载，设备:{}， 通道： {}， 开始时间： {}， 结束时间： {}，报警标志: {}, 音视频类型： {}， 码流类型： {}，存储器类型： {}， ",
                 phoneNumber, channelId, startTime, endTime, alarmSign, mediaType, streamType, storageType);
         if (!ftpSetting.getEnable()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未启用ftp服务，无法下载录像");
+            throw new CommonException("未启用ftp服务，无法下载录像");
         }
         return RetResponse.makeOKRsp(service.getRecordTempUrl(phoneNumber, channelId, startTime, endTime, alarmSign, mediaType, streamType, storageType));
     }
@@ -330,7 +330,7 @@ public class JT1078Controller {
     @GetMapping("/playback/download")
     public RetResult<Void> download(HttpServletRequest request, HttpServletResponse response, @Parameter(required = true) String path) throws IOException {
         if (!ftpSetting.getEnable()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未启用ftp服务，无法下载录像");
+            throw new CommonException("未启用ftp服务，无法下载录像");
         }
         DeferredResult<String> result = new DeferredResult<>();
         ServletOutputStream outputStream = response.getOutputStream();
@@ -839,7 +839,7 @@ public class JT1078Controller {
             outputStream.write(data);
             outputStream.flush();
         } catch (Exception e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -871,7 +871,7 @@ public class JT1078Controller {
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             service.uploadOneMedia(phoneNumber, mediaId, outputStream, false);
         } catch (Exception e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -889,7 +889,7 @@ public class JT1078Controller {
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             service.uploadOneMedia(phoneNumber, mediaId, outputStream, true);
         } catch (Exception e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }

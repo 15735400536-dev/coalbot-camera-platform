@@ -1,10 +1,9 @@
 package com.coalbot.module.camera.web.gb28181;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -56,7 +55,7 @@ public class ApiControlController {
         if (speed == null) {speed = 0;}
         Device device = deviceService.getDeviceByDeviceId(serial);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "device[ " + serial + " ]未找到");
+            throw new CommonException("device[ " + serial + " ]未找到");
         }
         int cmdCode = -1;
         switch (command){
@@ -97,14 +96,14 @@ public class ApiControlController {
                 break;
         }
         if (cmdCode == -1) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未识别的指令：" + command);
+            throw new CommonException("未识别的指令：" + command);
         }
         // 默认值 50
         try {
             cmder.frontEndCmd(device, code, cmdCode, speed, speed, speed);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             log.error("[命令发送失败] 云台控制: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -133,7 +132,7 @@ public class ApiControlController {
         if (channel == null) {channel = 0;}
         Device device = deviceService.getDeviceByDeviceId(serial);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "device[ " + serial + " ]未找到");
+            throw new CommonException("device[ " + serial + " ]未找到");
         }
         int cmdCode = 0;
         switch (command){
@@ -153,7 +152,7 @@ public class ApiControlController {
             cmder.frontEndCmd(device, code, cmdCode, 0, preset, 0);
         } catch (SipException | InvalidArgumentException | ParseException e) {
             log.error("[命令发送失败] 预置位控制: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }

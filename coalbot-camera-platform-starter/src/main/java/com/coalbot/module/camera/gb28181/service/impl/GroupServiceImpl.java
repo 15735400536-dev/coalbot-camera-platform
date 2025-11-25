@@ -1,6 +1,5 @@
 package com.coalbot.module.camera.gb28181.service.impl;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
 import com.coalbot.module.camera.gb28181.event.subscribe.catalog.CatalogEvent;
@@ -9,7 +8,7 @@ import com.coalbot.module.camera.gb28181.service.IGroupService;
 import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
 import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
 import com.coalbot.module.camera.utils.AssertUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -58,7 +56,7 @@ public class GroupServiceImpl implements IGroupService {
         // 查询数据库中已经存在的.
         List<Group> groupListInDb = groupManager.queryInGroupListByDeviceId(Lists.newArrayList(group));
         if (!ObjectUtils.isEmpty(groupListInDb)){
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), String.format("该节点编号 %s 已存在", group.getDeviceId()));
+            throw new CommonException(String.format("该节点编号 %s 已存在", group.getDeviceId()));
         }
 
         if ("215".equals(gbCode.getTypeCode())){
@@ -118,7 +116,7 @@ public class GroupServiceImpl implements IGroupService {
         // 查询数据库中已经存在的.
         List<Group> groupListInDb = groupManager.queryInGroupListByDeviceId(Lists.newArrayList(group));
         if (!ObjectUtils.isEmpty(groupListInDb) && groupListInDb.get(0).getId() != group.getId()){
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), String.format("该该节点编号 %s 已存在", group.getDeviceId()));
+            throw new CommonException(String.format("该该节点编号 %s 已存在", group.getDeviceId()));
         }
 
         group.setName(group.getName());
@@ -267,11 +265,11 @@ public class GroupServiceImpl implements IGroupService {
     public List<Group> getPath(String deviceId, String businessGroup) {
         Group businessGroupInDb = groupManager.queryBusinessGroup(businessGroup);
         if (businessGroupInDb == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "业务分组不存在");
+            throw new CommonException("业务分组不存在");
         }
         Group group = groupManager.queryOneByDeviceId(deviceId, businessGroup);
         if (group == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "虚拟组织不存在");
+            throw new CommonException("虚拟组织不存在");
         }
         List<Group> allParent = getAllParent(group);
         List<Group> groupList = new LinkedList<>(allParent);

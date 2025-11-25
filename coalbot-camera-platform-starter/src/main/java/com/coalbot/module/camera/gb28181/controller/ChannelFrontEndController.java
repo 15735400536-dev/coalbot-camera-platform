@@ -1,12 +1,12 @@
 package com.coalbot.module.camera.gb28181.controller;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.service.IGbChannelControlService;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,17 +54,17 @@ public class ChannelFrontEndController {
         if (panSpeed == null) {
             panSpeed = 50;
         } else if (panSpeed < 0 || panSpeed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "panSpeed 为 0-100的数字");
+            throw new CommonException("panSpeed 为 0-100的数字");
         }
         if (tiltSpeed == null) {
             tiltSpeed = 50;
         } else if (tiltSpeed < 0 || tiltSpeed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "tiltSpeed 为 0-100的数字");
+            throw new CommonException("tiltSpeed 为 0-100的数字");
         }
         if (zoomSpeed == null) {
             zoomSpeed = 50;
         } else if (zoomSpeed < 0 || zoomSpeed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "zoomSpeed 为 0-100的数字");
+            throw new CommonException("zoomSpeed 为 0-100的数字");
         }
 
         FrontEndControlCodeForPTZ controlCode = new FrontEndControlCodeForPTZ();
@@ -145,7 +145,7 @@ public class ChannelFrontEndController {
         if (speed == null) {
             speed = 50;
         } else if (speed < 0 || speed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-100的数字");
+            throw new CommonException("speed 为 0-100的数字");
         }
 
         FrontEndControlCodeForFI controlCode = new FrontEndControlCodeForFI();
@@ -196,7 +196,7 @@ public class ChannelFrontEndController {
         if (speed == null) {
             speed = 50;
         } else if (speed < 0 || speed > 100) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "speed 为 0-100的数字");
+            throw new CommonException("speed 为 0-100的数字");
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);

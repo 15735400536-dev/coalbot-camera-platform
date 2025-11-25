@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.DynamicTask;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.Extent;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
@@ -23,6 +23,7 @@ import com.coalbot.module.camera.utils.Coordtransform;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.TileUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.CaseFormat;
@@ -117,7 +118,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     @Override
     public int add(CommonGBChannel commonGBChannel) {
         if (commonGBChannel.getDataType() == null || commonGBChannel.getDataDeviceId() == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "缺少通道数据类型或通道数据关联设备ID");
+            throw new CommonException("缺少通道数据类型或通道数据关联设备ID");
         }
         CommonGBChannel commonGBChannelInDb =  commonGBChannelMapper.queryByDataId(commonGBChannel.getDataType(), commonGBChannel.getDataDeviceId());
         AssertUtils.isNull(commonGBChannelInDb, "此推流已经关联通道");
@@ -193,7 +194,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
         // 确定编号是否重复
         List<CommonGBChannel> channels = commonGBChannelMapper.queryByDeviceId(commonGBChannel.getGbDeviceId());
         if (channels.size() > 1) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "国标编号重复，请修改编号后保存");
+            throw new CommonException("国标编号重复，请修改编号后保存");
         }
         CommonGBChannel oldChannel = commonGBChannelMapper.queryById(commonGBChannel.getGbId());
         commonGBChannel.setUpdateTime(new Date());
@@ -469,11 +470,11 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
         CommonGBChannel channel = getOne(id);
         if (channel == null) {
             log.warn("[重置国标通道] 未找到对应Id的通道: id: {}", id);
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         if (channel.getDataType() != ChannelDataType.GB28181) {
             log.warn("[重置国标通道] 非国标下级通道无法重置: id: {}", id);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "非国标下级通道无法重置");
+            throw new CommonException("非国标下级通道无法重置");
         }
         List<String> dbFields = new ArrayList<>();
 
@@ -532,7 +533,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void addChannelToRegion(String civilCode, List<String> channelIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByIds(channelIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         List<CommonGBChannel> channelListForOld = new ArrayList<>(channelList);
         for (CommonGBChannel channel : channelList) {
@@ -566,7 +567,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void deleteChannelToRegionByCivilCode(String civilCode) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByCivilCode(civilCode);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         int result = commonGBChannelMapper.removeCivilCodeByChannels(channelList);
         Region region = regionMapper.queryByDeviceId(civilCode);
@@ -592,7 +593,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void deleteChannelToRegionByChannelIds(List<String> channelIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByIds(channelIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         int result = commonGBChannelMapper.removeCivilCodeByChannels(channelList);
 
@@ -612,7 +613,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void addChannelToRegionByGbDevice(String civilCode, List<String> deviceIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByDataTypeAndDeviceIds(ChannelDataType.GB28181, deviceIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         List<CommonGBChannel> channelListForOld = new ArrayList<>(channelList);
         for (CommonGBChannel channel : channelList) {
@@ -634,7 +635,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void deleteChannelToRegionByGbDevice(List<String> deviceIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByDataTypeAndDeviceIds(ChannelDataType.GB28181, deviceIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         int result = commonGBChannelMapper.removeCivilCodeByChannels(channelList);
         platformChannelService.checkRegionRemove(channelList, null);
@@ -711,7 +712,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void addChannelToGroup(String parentId, String businessGroup, List<String> channelIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByIds(channelIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         List<CommonGBChannel> channelListForOld = new ArrayList<>(channelList);
         int result = commonGBChannelMapper.updateGroup(parentId, businessGroup, channelList);
@@ -736,7 +737,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void deleteChannelToGroup(String parentId, String businessGroup, List<String> channelIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByIds(channelIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         commonGBChannelMapper.removeParentIdByChannels(channelList);
 
@@ -755,7 +756,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void addChannelToGroupByGbDevice(String parentId, String businessGroup, List<String> deviceIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByDataTypeAndDeviceIds(ChannelDataType.GB28181, deviceIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         List<CommonGBChannel>  channelListForOld = new ArrayList<>(channelList);
 
@@ -785,7 +786,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     public void deleteChannelToGroupByGbDevice(List<String> deviceIds) {
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByDataTypeAndDeviceIds(ChannelDataType.GB28181, deviceIds);
         if (channelList.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "所有通道Id不存在");
+            throw new CommonException("所有通道Id不存在");
         }
         commonGBChannelMapper.removeParentIdByChannels(channelList);
         platformChannelService.checkGroupRemove(channelList, null);

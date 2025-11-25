@@ -3,7 +3,7 @@ package com.coalbot.module.camera.vmanager.cloudRecord;
 import com.alibaba.fastjson2.JSONArray;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.dto.CloudRecordItemQueryDTO;
 import com.coalbot.module.camera.dto.CloudRecordUrlQueryDTO;
 import com.coalbot.module.camera.media.bean.MediaServer;
@@ -94,7 +94,7 @@ public class CloudRecordController {
             mediaServers = new ArrayList<>();
             MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
             if (mediaServer == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+                throw new CommonException("未找到流媒体: " + mediaServerId);
             }
             mediaServers.add(mediaServer);
         } else {
@@ -139,7 +139,7 @@ public class CloudRecordController {
 //            mediaServers = new ArrayList<>();
 //            MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
 //            if (mediaServer == null) {
-//                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+//                throw new CommonException("未找到流媒体: " + mediaServerId);
 //            }
 //            mediaServers.add(mediaServer);
 //        } else {
@@ -206,7 +206,7 @@ public class CloudRecordController {
             mediaServer = mediaServerService.getOne(mediaServerId);
         }
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到可用的流媒体");
+            throw new CommonException("未找到可用的流媒体");
         } else {
             if (remoteHost == null) {
                 remoteHost = request.getScheme() + "://" + mediaServer.getIp() + ":" + mediaServer.getRecordAssistPort();
@@ -461,14 +461,14 @@ public class CloudRecordController {
             mediaServers = new ArrayList<>();
             MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
             if (mediaServer == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+                throw new CommonException("未找到流媒体: " + mediaServerId);
             }
             mediaServers.add(mediaServer);
         } else {
             mediaServers = mediaServerService.getAll();
         }
         if (mediaServers.isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "当前无流媒体");
+            throw new CommonException("当前无流媒体");
         }
         if (query != null && ObjectUtils.isEmpty(query.trim())) {
             query = null;
@@ -565,7 +565,7 @@ public class CloudRecordController {
 //            mediaServers = new ArrayList<>();
 //            MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
 //            if (mediaServer == null) {
-//                throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体: " + mediaServerId);
+//                throw new CommonException("未找到流媒体: " + mediaServerId);
 //            }
 //            mediaServers.add(mediaServer);
 //        } else {
@@ -591,7 +591,7 @@ public class CloudRecordController {
 //        }
 //        MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
 //        if (mediaServer == null) {
-//            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到流媒体节点");
+//            throw new CommonException("未找到流媒体节点");
 //        }
 //        if (remoteHost == null) {
 //            remoteHost = request.getScheme() + "://" + request.getLocalAddr() + ":" + (request.getScheme().equals("https") ? mediaServer.getHttpSSlPort() : mediaServer.getHttpPort());

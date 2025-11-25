@@ -5,7 +5,6 @@ import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.ftpServer.FtpFileSystemFactory;
 import com.coalbot.module.camera.conf.ftpServer.FtpSetting;
 import com.coalbot.module.camera.conf.ftpServer.UserManager;
@@ -28,6 +27,7 @@ import com.coalbot.module.camera.media.event.media.MediaDepartureEvent;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -254,7 +254,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
     public void addDevice(JTDevice device) {
         JTDevice deviceInDb = jtDeviceMapper.getDevice(device.getPhoneNumber());
         if (deviceInDb != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备" + device.getPhoneNumber() + "已存在");
+            throw new CommonException("设备" + device.getPhoneNumber() + "已存在");
         }
         device.setCreateTime(new Date());
         device.setUpdateTime(new Date());
@@ -710,7 +710,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
 
         JTDevice device = getDeviceById(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         PageHelper.startPage(page, count);
         List<JTChannel> all = jtChannelMapper.selectAll(deviceId, query);
@@ -744,7 +744,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
     public void addChannel(JTChannel channel) {
         JTChannel channelInDb = jtChannelMapper.selectChannelByChannelId(channel.getTerminalDbId(), channel.getChannelId());
         if (channelInDb != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道已存在");
+            throw new CommonException("通道已存在");
         }
         channel.setCreateTime(new Date());
         channel.setUpdateTime(new Date());
@@ -890,7 +890,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
         JTMediaEventInfo mediaEventInfo = (JTMediaEventInfo) jt1078Template.uploadMediaDataForSingle(phoneNumber, j8805, 600);
         if (mediaEventInfo == null) {
             log.info("[]");
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         log.info("[JT-抓图] 图片上传完成，抓图编号： {}， 设备编号： {}， 通道编号： {}", ids.get(0), phoneNumber, channelId);
         return mediaEventInfo.getMediaData();
@@ -905,7 +905,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
         log.info("[JT-单条存储多媒体数据上传] 请求上传，媒体编号： {}， 设备编号： {}", mediaId, phoneNumber);
         JTMediaEventInfo mediaEventInfo = (JTMediaEventInfo) jt1078Template.uploadMediaDataForSingle(phoneNumber, j8805, 600);
         if (mediaEventInfo == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), ErrorCode.ERROR100.getMsg());
+            throw new CommonException(ErrorCode.ERROR100.getMsg());
         }
         log.info("[JT-单条存储多媒体数据上传] 图片上传完成，媒体编号： {}， 设备编号： {}", mediaId, phoneNumber);
         try {
@@ -913,7 +913,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
             outputStream.flush();
         } catch (IOException e) {
             log.info("[JT-单条存储多媒体数据上传] 数据写入异常，抓图编号： {}， 设备编号： {}", mediaId, phoneNumber, e);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "数据写入异常");
+            throw new CommonException("数据写入异常");
         }
     }
 }

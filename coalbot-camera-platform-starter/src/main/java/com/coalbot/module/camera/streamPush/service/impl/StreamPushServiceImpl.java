@@ -3,7 +3,6 @@ package com.coalbot.module.camera.streamPush.service.impl;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.mapper.streamPush.StreamPushMapper;
@@ -23,8 +22,8 @@ import com.coalbot.module.camera.streamPush.bean.StreamPush;
 import com.coalbot.module.camera.streamPush.service.IStreamPushService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -202,7 +200,7 @@ public class StreamPushServiceImpl implements IStreamPushService {
         log.info("[添加推流] app: {}, stream: {}, 国标编号: {}", stream.getApp(), stream.getStream(), stream.getGbDeviceId());
         StreamPush streamPushInDb = streamPushMapper.selectByAppAndStream(stream.getApp(), stream.getStream());
         if (streamPushInDb != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "应用名+流ID已存在");
+            throw new CommonException("应用名+流ID已存在");
         }
         stream.setUpdateTime(new Date());
         stream.setCreateTime(new Date());
@@ -249,7 +247,7 @@ public class StreamPushServiceImpl implements IStreamPushService {
             // app或者stream变化
             StreamPush streamPushInDbForAppAndStream = streamPushMapper.selectByAppAndStream(streamPush.getApp(), streamPush.getStream());
             if (streamPushInDbForAppAndStream != null && !streamPushInDbForAppAndStream.getId().equals(streamPush.getId())) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "应用名+流ID已存在");
+                throw new CommonException("应用名+流ID已存在");
             }
         }
         streamPush.setUpdateTime(new Date());

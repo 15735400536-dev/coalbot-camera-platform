@@ -77,7 +77,7 @@ public class AssertUtils {
      * @param message    异常提示信息
      */
     public static void notEmpty(Collection<?> collection, String message) {
-        if (CollectionUtil.isNotEmpty(collection)) {
+        if (CollectionUtil.isEmpty(collection)) {
             throw new CommonException(message);
         }
     }
@@ -89,7 +89,7 @@ public class AssertUtils {
      * @param message    异常提示信息
      */
     public static void isEmpty(Collection<?> collection, String message) {
-        if (CollectionUtil.isEmpty(collection)) {
+        if (CollectionUtil.isNotEmpty(collection)) {
             throw new CommonException(message);
         }
     }
@@ -101,7 +101,7 @@ public class AssertUtils {
      * @param message 异常提示信息
      */
     public static void notEmpty(Map<?, ?> map, String message) {
-        if (CollectionUtil.isNotEmpty(map)) {
+        if (CollectionUtil.isEmpty(map)) {
             throw new CommonException(message);
         }
     }

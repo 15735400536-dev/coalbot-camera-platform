@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.CommonCallback;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.redis.RedisRpcConfig;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcRequest;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcResponse;
@@ -20,6 +19,7 @@ import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -361,7 +361,7 @@ public class RedisRpcServiceImpl implements IRedisRpcService {
         request.setToId(serverId);
         RedisRpcResponse response = redisRpcConfig.request(request, 50, TimeUnit.MILLISECONDS);
         if (response.getStatusCode() != ErrorCode.SUCCESS.getCode()) {
-            throw new ControllerException(response.getStatusCode(), response.getBody().toString());
+            throw new CommonException(response.getBody().toString());
         }
     }
 

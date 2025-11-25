@@ -3,8 +3,6 @@ package com.coalbot.module.camera.gb28181.controller;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
-import com.coalbot.module.camera.conf.exception.ServiceException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
@@ -18,6 +16,7 @@ import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -94,13 +93,13 @@ public class PlaybackController {
         Device device = deviceService.getDeviceByDeviceId(deviceId);
         if (device == null) {
             log.warn("[录像回放] 未找到设备 deviceId: {},channelId:{}", deviceId, channelId);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到设备：" + deviceId);
+            throw new CommonException("未找到设备：" + deviceId);
         }
 
         DeviceChannel channel = channelService.getOne(deviceId, channelId);
         if (channel == null) {
             log.warn("[录像回放] 未找到通道 deviceId: {},channelId:{}", deviceId, channelId);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未找到通道：" + channelId);
+            throw new CommonException("未找到通道：" + channelId);
         }
         playService.playBack(device, channel, startTime, endTime,
                 (code, msg, data) -> {
@@ -147,15 +146,15 @@ public class PlaybackController {
             @PathVariable String channelId,
             @PathVariable String stream) {
         if (ObjectUtils.isEmpty(deviceId) || ObjectUtils.isEmpty(channelId) || ObjectUtils.isEmpty(stream)) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "设备：" + deviceId + " 未找到");
+            throw new CommonException("设备：" + deviceId + " 未找到");
         }
         DeviceChannel deviceChannel = channelService.getOneForSource(deviceId, channelId);
         if (deviceChannel == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "通道：" + channelId + " 未找到");
+            throw new CommonException("通道：" + channelId + " 未找到");
         }
         playService.stop(InviteSessionType.PLAYBACK, device, deviceChannel, stream);
         return RetResponse.makeOKRsp();
@@ -169,10 +168,10 @@ public class PlaybackController {
         log.info("[回放暂停] streamId: {}", streamId);
         try {
             playService.playbackPause(streamId);
-        } catch (ServiceException e) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), e.getMessage());
+        } catch (CommonException e) {
+            throw new CommonException(e.getMessage());
         } catch (InvalidArgumentException | ParseException | SipException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -185,10 +184,10 @@ public class PlaybackController {
         log.info("playResume: " + streamId);
         try {
             playService.playbackResume(streamId);
-        } catch (ServiceException e) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), e.getMessage());
+        } catch (CommonException e) {
+            throw new CommonException(e.getMessage());
         } catch (InvalidArgumentException | ParseException | SipException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -202,7 +201,7 @@ public class PlaybackController {
         try {
             playService.playbackSeek(streamId, seekTime);
         } catch (InvalidArgumentException | ParseException | SipException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }
@@ -217,7 +216,7 @@ public class PlaybackController {
         try {
             playService.playbackSpeed(streamId, speed);
         } catch (InvalidArgumentException | ParseException | SipException e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
         return RetResponse.makeOKRsp();
     }

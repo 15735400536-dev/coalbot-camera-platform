@@ -1,7 +1,6 @@
 package com.coalbot.module.camera.service.impl;
 
 import com.coalbot.module.camera.common.StreamInfo;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IGbChannelPlayService;
 import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
@@ -13,7 +12,7 @@ import com.coalbot.module.camera.service.IRecordPlanService;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.service.bean.RecordPlan;
 import com.coalbot.module.camera.service.bean.RecordPlanItem;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Joiner;
@@ -226,7 +225,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
     public void delete(String planId) {
         RecordPlan recordPlan = recordPlanMapper.get(planId);
         if (recordPlan == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "录制计划不存在");
+            throw new CommonException("录制计划不存在");
         }
         // 清理关联的通道
         channelMapper.removeRecordPlanByPlanId(recordPlan.getId());
@@ -251,7 +250,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
     public void link(List<String> channelIds, String planId) {
         if (channelIds == null || channelIds.isEmpty()) {
             log.info("[录制计划] 关联/移除关联时, 通道编号必须存在");
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道编号必须存在");
+            throw new CommonException("通道编号必须存在");
         }
         if (planId == null) {
             channelMapper.removeRecordPlan(channelIds);

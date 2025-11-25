@@ -1,6 +1,5 @@
 package com.coalbot.module.camera.gb28181.controller;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.GbRegionQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Region;
 import com.coalbot.module.camera.gb28181.bean.RegionTree;
@@ -8,6 +7,7 @@ import com.coalbot.module.camera.gb28181.service.IRegionService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -85,7 +85,7 @@ public class RegionController {
         AssertUtils.notNull(id, "区域ID需要存在");
         boolean result = regionService.deleteByDeviceId(id);
         if (!result) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "移除失败");
+            throw new CommonException("移除失败");
         }
         return RetResponse.makeOKRsp();
     }
@@ -98,7 +98,7 @@ public class RegionController {
             @RequestParam(required = true) String regionDeviceId
     ) {
         if (ObjectUtils.isEmpty(regionDeviceId.trim())) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         return RetResponse.makeOKRsp(regionService.queryRegionByDeviceId(regionDeviceId));
     }

@@ -3,7 +3,7 @@ package com.coalbot.module.camera.jt1078.service.impl;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.bean.Platform;
 import com.coalbot.module.camera.gb28181.bean.PlayException;

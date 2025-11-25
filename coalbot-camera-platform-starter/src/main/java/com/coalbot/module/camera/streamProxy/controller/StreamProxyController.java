@@ -3,7 +3,6 @@ package com.coalbot.module.camera.streamProxy.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.StreamProxyQueryDTO;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
@@ -14,8 +13,8 @@ import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -125,7 +124,7 @@ public class StreamProxyController {
     public RetResult<StreamProxy> update(@RequestBody StreamProxy param) {
         log.info("更新代理： " + JSONObject.toJSONString(param));
         if (param.getId() == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "缺少代理信息的ID");
+            throw new CommonException("缺少代理信息的ID");
         }
         if (ObjectUtils.isEmpty(param.getRelatesMediaServerId())) {
             param.setRelatesMediaServerId(null);
@@ -146,7 +145,7 @@ public class StreamProxyController {
 
         MediaServer mediaServerItem = mediaServerService.getOne(mediaServerId);
         if (mediaServerItem == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "流媒体： " + mediaServerId + "未找到");
+            throw new CommonException("流媒体： " + mediaServerId + "未找到");
         }
         return streamProxyService.getFFmpegCMDs(mediaServerItem);
     }
@@ -159,7 +158,7 @@ public class StreamProxyController {
     public RetResult<Void> del(@RequestParam String app, @RequestParam String stream) {
         log.info("移除代理： " + app + "/" + stream);
         if (app == null || stream == null) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), app == null ? "app不能为null" : "stream不能为null");
+            throw new CommonException(app == null ? "app不能为null" : "stream不能为null");
         } else {
             streamProxyService.delteByAppAndStream(app, stream);
         }

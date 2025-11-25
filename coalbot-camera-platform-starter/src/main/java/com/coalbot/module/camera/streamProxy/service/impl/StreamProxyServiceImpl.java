@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.mapper.streamProxy.StreamProxyMapper;
@@ -22,8 +21,8 @@ import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
 import com.coalbot.module.camera.utils.AssertUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -137,7 +136,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     public void add(StreamProxy streamProxy) {
         StreamProxy streamProxyInDb = streamProxyMapper.selectOneByAppAndStream(streamProxy.getApp(), streamProxy.getStream());
         if (streamProxyInDb != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "APP+STREAM已经存在");
+            throw new CommonException("APP+STREAM已经存在");
         }
         if (streamProxy.getGbDeviceId() != null) {
             gbChannelService.add(streamProxy.buildCommonGBChannel());
@@ -153,7 +152,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     public void delete(String id) {
         StreamProxy streamProxy = getStreamProxy(id);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "代理不存在");
+            throw new CommonException("代理不存在");
         }
         delete(streamProxy);
     }
@@ -174,7 +173,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     public void delteByAppAndStream(String app, String stream) {
         StreamProxy streamProxy = streamProxyMapper.selectOneByAppAndStream(app, stream);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "代理不存在");
+            throw new CommonException("代理不存在");
         }
         delete(streamProxy);
     }
@@ -187,7 +186,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
         streamProxy.setUpdateTime(new Date());
         StreamProxy streamProxyInDb = streamProxyMapper.select(streamProxy.getId());
         if (streamProxyInDb == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "代理不存在");
+            throw new CommonException("代理不存在");
         }
         int updateResult = streamProxyMapper.update(streamProxy);
         if (updateResult > 0 && !ObjectUtils.isEmpty(streamProxy.getGbDeviceId())) {
@@ -217,7 +216,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     public void startByAppAndStream(String app, String stream, ErrorCallback<StreamInfo> callback) {
         StreamProxy streamProxy = streamProxyMapper.selectOneByAppAndStream(app, stream);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR404.getCode(), "代理信息未找到");
+            throw new CommonException("代理信息未找到");
         }
         playService.startProxy(streamProxy, callback);
     }
@@ -226,7 +225,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     public void stopByAppAndStream(String app, String stream) {
         StreamProxy streamProxy = streamProxyMapper.selectOneByAppAndStream(app, stream);
         if (streamProxy == null) {
-            throw new ControllerException(ErrorCode.ERROR404.getCode(), "代理信息未找到");
+            throw new CommonException("代理信息未找到");
         }
         playService.stopProxy(streamProxy);
     }

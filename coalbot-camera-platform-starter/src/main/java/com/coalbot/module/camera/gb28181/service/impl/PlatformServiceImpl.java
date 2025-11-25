@@ -4,7 +4,6 @@ import com.coalbot.module.camera.common.*;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.exception.SsrcTransactionNotFoundException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.event.SipSubscribe;
@@ -33,7 +32,7 @@ import com.coalbot.module.camera.service.bean.*;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.utils.AssertUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -46,7 +45,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import javax.sdp.*;
 import javax.sip.InvalidArgumentException;
@@ -907,7 +905,7 @@ public class PlatformServiceImpl implements IPlatformService, CommandLineRunner 
             subscribeHolder.removeCatalogSubscribe(platform.getServerGBId());
             subscribeHolder.removeMobilePositionSubscribe(platform.getServerGBId());
         }catch (Exception e) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+            throw new CommonException(e.getMessage());
         }
 
         return true;

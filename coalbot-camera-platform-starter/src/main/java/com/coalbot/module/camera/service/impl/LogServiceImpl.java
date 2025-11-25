@@ -2,11 +2,10 @@ package com.coalbot.module.camera.service.impl;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.rolling.RollingFileAppender;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.service.ILogService;
 import com.coalbot.module.camera.service.bean.LogFileInfo;
 import com.coalbot.module.camera.utils.DateUtil;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class LogServiceImpl implements ILogService {
     public List<LogFileInfo> queryList(String query, String startTime, String endTime) {
         File logFile = getLogDir();
         if (logFile == null || !logFile.exists()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "获取日志文件目录失败");
+            throw new CommonException("获取日志文件目录失败");
         }
         File[] files = logFile.listFiles();
         List<LogFileInfo> result = new ArrayList<>();

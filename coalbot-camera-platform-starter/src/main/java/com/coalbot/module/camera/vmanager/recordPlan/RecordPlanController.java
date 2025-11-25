@@ -1,6 +1,5 @@
 package com.coalbot.module.camera.vmanager.recordPlan;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.dto.ChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
@@ -10,6 +9,7 @@ import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.recordPlan.bean.RecordPlanParam;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -42,7 +42,7 @@ public class RecordPlanController {
     @Parameter(name = "plan", description = "计划", required = true)
     public RetResult<Void> add(@RequestBody RecordPlan plan) {
         if (plan.getPlanItemList() == null || plan.getPlanItemList().isEmpty()) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "添加录制计划时，录制计划不可为空");
+            throw new CommonException("添加录制计划时，录制计划不可为空");
         }
         recordPlanService.add(plan);
         return RetResponse.makeOKRsp();
@@ -63,7 +63,7 @@ public class RecordPlanController {
         }
 
         if (param.getChannelIds() == null && param.getDeviceDbIds() == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道ID和国标设备ID不可都为NULL");
+            throw new CommonException("通道ID和国标设备ID不可都为NULL");
         }
 
         List<String> channelIds = new ArrayList<>();
@@ -85,7 +85,7 @@ public class RecordPlanController {
     @Parameter(name = "planId", description = "计划ID", required = true)
     public RetResult<RecordPlan> get(String planId) {
         if (planId == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "计划ID不可为NULL");
+            throw new CommonException("计划ID不可为NULL");
         }
         return RetResponse.makeOKRsp(recordPlanService.get(planId));
     }
@@ -166,7 +166,7 @@ public class RecordPlanController {
     @Parameter(name = "plan", description = "计划", required = true)
     public RetResult<Void> update(@RequestBody RecordPlan plan) {
         if (plan == null || plan.getId() == null) {
-            throw new ControllerException(ErrorCode.ERROR400);
+            throw new CommonException(ErrorCode.ERROR400.getMsg());
         }
         recordPlanService.update(plan);
         return RetResponse.makeOKRsp();
@@ -178,7 +178,7 @@ public class RecordPlanController {
     @Parameter(name = "planId", description = "计划ID", required = true)
     public RetResult<Void> delete(String planId) {
         if (planId == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "计划IDID不可为NULL");
+            throw new CommonException("计划IDID不可为NULL");
         }
         recordPlanService.delete(planId);
         return RetResponse.makeOKRsp();

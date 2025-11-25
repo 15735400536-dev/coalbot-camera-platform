@@ -7,7 +7,6 @@ import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.SendRtpInfo;
 import com.coalbot.module.camera.gb28181.service.IInviteStreamService;
 import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
@@ -25,6 +24,7 @@ import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -418,11 +418,11 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
                     streamProxy.isEnableAudio(), streamProxy.isEnableMp4(), streamProxy.getRtspType(), streamProxy.getTimeout());
         }
         if (ablResult.getCode() != 0) {
-            throw new ControllerException(ablResult.getCode(), ablResult.getMemo());
+            throw new CommonException(ablResult.getMemo());
         }else {
             String key = ablResult.getKey();
             if (key == null) {
-                throw new ControllerException(ablResult.getCode(), "代理结果异常： " + ablResult);
+                throw new CommonException("代理结果异常： " + ablResult);
             }else {
                 return key;
             }
@@ -438,7 +438,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
             ablResult = ablresTfulUtils.delStreamProxy(mediaServer, streamKey);
         }
         if (ablResult.getCode() != 0) {
-            throw new ControllerException(ablResult.getCode(), ablResult.getMemo());
+            throw new CommonException(ablResult.getMemo());
         }
     }
 
@@ -477,7 +477,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
 
         ABLResult ablResult = ablresTfulUtils.queryRecordList(mediaServer, app, stream, startTime, endTime);
         if (ablResult.getCode() != 0) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), ablResult.getMemo());
+            throw new CommonException(ablResult.getMemo());
         }
         String resultApp = ablResult.getApp();
         String resultStream = ablResult.getStream();

@@ -1,11 +1,11 @@
 package com.coalbot.module.camera.conf;
 
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.bean.CloudRecordItem;
-import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,10 +34,10 @@ public class CloudRecordTimer {
      */
 //    @Scheduled(fixedRate = 10000) //每五秒执行一次，方便测试
     @Scheduled(cron = "0 0 0 * * ?")   //每天的0点执行
-    public void execute(){
+    public void execute() {
         log.info("[录像文件定时清理] 开始清理过期录像文件");
         // 获取配置了assist的流媒体节点
-        List<MediaServer> mediaServerItemList =  mediaServerService.getAllOnline();
+        List<MediaServer> mediaServerItemList = mediaServerService.getAllOnline();
         if (mediaServerItemList.isEmpty()) {
             return;
         }
@@ -66,8 +66,9 @@ public class CloudRecordTimer {
                         if (deleteResult) {
                             log.warn("[录像文件定时清理] 删除磁盘文件成功： {}", cloudRecordItem.getFilePath());
                         }
-                    }catch (ControllerException ignored) {}
-
+                    } catch (CommonException e) {
+                        log.warn("[录像文件定时清理] 删除磁盘文件错误： {}", e.getMessage());
+                    }
                 }
                 result += cloudRecordServiceMapper.deleteList(cloudRecordItemList);
             }

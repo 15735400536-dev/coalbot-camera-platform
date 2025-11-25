@@ -2,7 +2,6 @@ package com.coalbot.module.camera.service.redisMsg.control;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.redis.RedisRpcConfig;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcMessage;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcRequest;
@@ -16,7 +15,8 @@ import com.coalbot.module.camera.service.redisMsg.dto.RedisRpcMapping;
 import com.coalbot.module.camera.service.redisMsg.dto.RpcController;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
-
+import com.coalbot.module.core.exception.CommonException;
+import com.coalbot.module.core.response.RetCode;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -157,9 +157,10 @@ public class RedisRpcDeviceController extends RpcController {
         }
         try {
             deviceService.teleboot(device);
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            RetResponse.makeErrRsp();
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             return response;
         }
         response.setStatusCode(ErrorCode.SUCCESS.getCode());
@@ -189,9 +190,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -218,9 +219,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -249,9 +250,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -273,9 +274,9 @@ public class RedisRpcDeviceController extends RpcController {
         }
         try {
             deviceService.iFrame(device, channelId);
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -306,9 +307,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -341,9 +342,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -376,9 +377,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -411,9 +412,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -438,9 +439,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -465,9 +466,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;
@@ -494,9 +495,9 @@ public class RedisRpcDeviceController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
-            response.setStatusCode(e.getCode());
-            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMsg()));
+        }catch (CommonException e) {
+            response.setStatusCode(RetCode.INTERNAL_SERVER_ERROR.code);
+            response.setBody(RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), e.getMessage()));
             sendResponse(response);
         }
         return null;

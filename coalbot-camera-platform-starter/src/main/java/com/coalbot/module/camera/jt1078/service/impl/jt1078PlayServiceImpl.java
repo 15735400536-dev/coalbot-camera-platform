@@ -5,7 +5,6 @@ import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.PlayException;
 import com.coalbot.module.camera.gb28181.bean.SendRtpInfo;
 import com.coalbot.module.camera.jt1078.bean.JTChannel;
@@ -34,7 +33,7 @@ import com.coalbot.module.camera.service.bean.SSRCInfo;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.MediaServerUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -185,12 +184,12 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
     public void play(String phoneNumber, String channelId, int type, CommonCallback<RetResult<StreamInfo>> callback) {
         JTDevice device = jt1078Service.getDevice(phoneNumber);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         jt1078Template.checkTerminalStatus(phoneNumber);
         JTChannel channel = jt1078Service.getChannel(device.getId(), channelId);
         if (channel == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道不存在");
+            throw new CommonException("通道不存在");
         }
         play(device, channel, type, callback);
     }
@@ -388,12 +387,12 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
                          Integer rate, Integer playbackType, Integer playbackSpeed, CommonCallback<RetResult<StreamInfo>> callback) {
         JTDevice device = jt1078Service.getDevice(phoneNumber);
         if (device == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备不存在");
+            throw new CommonException("设备不存在");
         }
         jt1078Template.checkTerminalStatus(phoneNumber);
         JTChannel channel = jt1078Service.getChannel(device.getId(), channelId);
         if (channel == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "通道不存在");
+            throw new CommonException("通道不存在");
         }
         playback(device, channel, startTime, endTime, type, rate, playbackType, playbackSpeed, callback);
 
@@ -577,7 +576,7 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
         StreamInfo streamInfo = (StreamInfo) redisTemplate.opsForValue().get(playKey);
 
         if (streamInfo != null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "对讲进行中");
+            throw new CommonException("对讲进行中");
         }
 
         JTDevice device = jt1078Service.getDevice(phoneNumber);
@@ -602,7 +601,7 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
         // 检查待发送的流是否存在，
         MediaInfo mediaInfo = mediaServerService.getMediaInfo(mediaServer, app, stream);
         if (mediaInfo == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), app + "/" + stream + "流不存在");
+            throw new CommonException(app + "/" + stream + "流不存在");
         }
 
         String phoneNumber = device.getPhoneNumber();

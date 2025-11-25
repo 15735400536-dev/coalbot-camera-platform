@@ -3,7 +3,6 @@ package com.coalbot.module.camera.vmanager.rtp;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.SendRtpInfo;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.event.hook.Hook;
@@ -13,8 +12,8 @@ import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.SSRCInfo;
 import com.coalbot.module.camera.utils.redis.RedisUtil;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.OtherRtpSendInfo;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,27 +74,27 @@ public class RtpController {
 
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
         if (mediaServer == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "没有可用的MediaServer");
+            throw new CommonException("没有可用的MediaServer");
         }
         if (stream == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "stream参数不可为空");
+            throw new CommonException("stream参数不可为空");
         }
         if (isSend != null && isSend && callId == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "isSend为true时，CallID不能为空");
+            throw new CommonException("isSend为true时，CallID不能为空");
         }
         long ssrcInt = 0;
         if (ssrc != null) {
             try {
                 ssrcInt = Long.parseLong(ssrc);
             } catch (NumberFormatException e) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "ssrc格式错误");
+                throw new CommonException("ssrc格式错误");
             }
         }
         String receiveKey = VideoManagerConstants.WVP_OTHER_RECEIVE_RTP_INFO + userSetting.getServerId() + "_" + callId + "_" + stream;
         SSRCInfo ssrcInfoForVideo = mediaServerService.openRTPServer(mediaServer, stream, ssrcInt + "", false, false, null, false, false, false, tcpMode);
         SSRCInfo ssrcInfoForAudio = mediaServerService.openRTPServer(mediaServer, stream + "_a", ssrcInt + "", false, false, null, false, false, false, tcpMode);
         if (ssrcInfoForVideo.getPort() == 0 || ssrcInfoForAudio.getPort() == 0) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "获取端口失败");
+            throw new CommonException("获取端口失败");
         }
         // 注册回调如果rtp收流超时则通过回调发送通知
         if (callBack != null) {
@@ -213,7 +212,7 @@ public class RtpController {
                 ptForAudio,
                 ptForVideo);
         if (!((dstPortForAudio > 0 && !ObjectUtils.isEmpty(dstPortForAudio) || (dstPortForVideo > 0 && !ObjectUtils.isEmpty(dstIpForVideo))))) {
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "至少应该存在一组音频或视频发送参数");
+            throw new CommonException("至少应该存在一组音频或视频发送参数");
         }
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
         String key = VideoManagerConstants.WVP_OTHER_SEND_RTP_INFO + userSetting.getServerId() + "_" + callId;
@@ -298,7 +297,7 @@ public class RtpController {
         String key = VideoManagerConstants.WVP_OTHER_SEND_RTP_INFO + userSetting.getServerId() + "_" + callId;
         OtherRtpSendInfo sendInfo = (OtherRtpSendInfo) redisTemplate.opsForValue().get(key);
         if (sendInfo == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "未开启发流");
+            throw new CommonException("未开启发流");
         }
         MediaServer mediaServerItem = mediaServerService.getDefaultMediaServer();
         mediaServerService.stopSendRtp(mediaServerItem, sendInfo.getPushApp(), sendInfo.getPushStream(), sendInfo.getPushSSRC());

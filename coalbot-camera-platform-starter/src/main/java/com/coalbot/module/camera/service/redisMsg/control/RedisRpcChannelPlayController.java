@@ -3,7 +3,6 @@ package com.coalbot.module.camera.service.redisMsg.control;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.redis.RedisRpcConfig;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcMessage;
 import com.coalbot.module.camera.conf.redis.bean.RedisRpcRequest;
@@ -19,6 +18,7 @@ import com.coalbot.module.camera.service.redisMsg.dto.RedisRpcMapping;
 import com.coalbot.module.camera.service.redisMsg.dto.RpcController;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +130,7 @@ public class RedisRpcChannelPlayController extends RpcController {
                 // 手动发送结果
                 sendResponse(response);
             });
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             response.setStatusCode(ErrorCode.ERROR100.getCode());
             response.setBody(e.getMessage());
         }
@@ -155,7 +155,7 @@ public class RedisRpcChannelPlayController extends RpcController {
         try {
 //            channelPlayService.playbackPause(streamId);
             response.setStatusCode(ErrorCode.SUCCESS.getCode());
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             response.setStatusCode(ErrorCode.ERROR100.getCode());
             response.setBody(e.getMessage());
         }
@@ -180,7 +180,7 @@ public class RedisRpcChannelPlayController extends RpcController {
         try {
 //            channelPlayService.playbackResume(streamId);
             response.setStatusCode(ErrorCode.SUCCESS.getCode());
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             response.setStatusCode(ErrorCode.ERROR100.getCode());
             response.setBody(e.getMessage());
         }
@@ -337,7 +337,7 @@ public class RedisRpcChannelPlayController extends RpcController {
         }
         try {
             iptzService.frontEndCommand(channel, cmdCode, parameter1, parameter2, combindCode2);
-        }catch (ControllerException e) {
+        }catch (CommonException e) {
             response.setStatusCode(ErrorCode.ERROR100.getCode());
             response.setBody(e.getMessage());
             return response;

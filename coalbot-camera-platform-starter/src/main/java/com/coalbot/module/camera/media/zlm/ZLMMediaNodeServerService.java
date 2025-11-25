@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.CommonCallback;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
+
 import com.coalbot.module.camera.gb28181.bean.SendRtpInfo;
 import com.coalbot.module.camera.media.bean.MediaInfo;
 import com.coalbot.module.camera.media.bean.MediaServer;
@@ -20,6 +20,7 @@ import com.coalbot.module.camera.service.bean.DownloadFileInfo;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import lombok.extern.slf4j.Slf4j;
@@ -89,13 +90,13 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         if (mediaServerConfig != null) {
             List<JSONObject> data = mediaServerConfig.getData();
             if (data != null && !data.isEmpty()) {
-                ZLMServerConfig zlmServerConfig= JSON.parseObject(JSON.toJSONString(data.get(0)), ZLMServerConfig.class);
+                ZLMServerConfig zlmServerConfig = JSON.parseObject(JSON.toJSONString(data.get(0)), ZLMServerConfig.class);
                 return zlmServerConfig.getGeneralMediaServerId().equals(mediaServer.getId());
-            }else {
+            } else {
                 return false;
             }
 
-        }else {
+        } else {
             return false;
         }
     }
@@ -114,15 +115,15 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         mediaServer.setSecret(secret);
         ZLMResult<List<JSONObject>> mediaServerConfigResult = zlmresTfulUtils.getMediaServerConfig(mediaServer);
         if (mediaServerConfigResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "连接失败");
+            throw new CommonException("连接失败");
         }
         List<JSONObject> configList = mediaServerConfigResult.getData();
         if (configList == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "读取配置失败");
+            throw new CommonException("读取配置失败");
         }
         ZLMServerConfig zlmServerConfig = JSON.parseObject(JSON.toJSONString(configList.get(0)), ZLMServerConfig.class);
         if (zlmServerConfig == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "读取配置失败");
+            throw new CommonException("读取配置失败");
         }
         mediaServer.setId(zlmServerConfig.getGeneralMediaServerId());
         mediaServer.setHttpSSlPort(zlmServerConfig.getHttpSSLport());
@@ -152,7 +153,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         if (zlmResult.getCode() == 0) {
             log.info("[停止发流] 成功: 参数：{}", JSON.toJSONString(param));
             return true;
-        }else {
+        } else {
             log.info("停止发流结果: {}, 参数：{}", zlmResult.getMsg(), JSON.toJSONString(param));
             return false;
         }
@@ -168,7 +169,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
             param.put("ssrc", ssrc);
         }
         ZLMResult<?> zlmResult = zlmresTfulUtils.stopSendRtp(mediaInfo, param);
-        if (zlmResult.getCode() != 0 ) {
+        if (zlmResult.getCode() != 0) {
             log.error("停止发流失败: {}, 参数：{}", zlmResult.getMsg(), JSON.toJSONString(param));
             return false;
         }
@@ -182,9 +183,9 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
                 stream, date, fileName);
         if (zlmResult.getCode() == 0) {
             return true;
-        }else {
+        } else {
             log.info("[zlm-deleteRecordDirectory] 删除磁盘文件错误, server: {} {}:{}->{}/{}, 结果： {}", mediaServer.getId(), app, stream, date, fileName, zlmResult);
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "删除磁盘文件失败");
+            throw new CommonException("删除磁盘文件失败");
         }
     }
 
@@ -232,7 +233,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     @Override
     public MediaInfo getMediaInfo(MediaServer mediaServer, String app, String stream) {
         ZLMResult<JSONObject> zlmResult = zlmresTfulUtils.getMediaInfo(mediaServer, app, "rtsp", stream);
-        if (zlmResult.getCode() != 0 || zlmResult.getData() == null || zlmResult.getData().getString("app") == null ) {
+        if (zlmResult.getCode() != 0 || zlmResult.getData() == null || zlmResult.getData().getString("app") == null) {
             return null;
         }
         return MediaInfo.getInstance(zlmResult.getData(), mediaServer, userSetting.getServerId());
@@ -255,14 +256,14 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         ZLMResult<List<JSONObject>> mediaServerConfigResult = zlmresTfulUtils.getMediaServerConfig(mediaServer);
         if (mediaServerConfigResult == null || mediaServerConfigResult.getCode() != 0) {
             log.warn("[getFfmpegCmd] 获取流媒体配置失败");
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "获取流媒体配置失败");
+            throw new CommonException("获取流媒体配置失败");
         }
         List<JSONObject> data = mediaServerConfigResult.getData();
         JSONObject mediaServerConfig = data.get(0);
         if (ObjectUtils.isEmpty(cmdKey)) {
             cmdKey = "ffmpeg.cmd";
         }
-       return mediaServerConfig.getString(cmdKey);
+        return mediaServerConfig.getString(cmdKey);
     }
 
     @Override
@@ -271,11 +272,11 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         ZLMResult<StreamProxyResult> zlmResult = zlmresTfulUtils.addStreamProxy(mediaServer, app, stream, url, enableAudio, enableMp4, rtpType, timeout);
         if (zlmResult.getCode() != 0) {
             return RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "添加代理失败");
-        }else {
+        } else {
             StreamProxyResult data = zlmResult.getData();
             if (data == null) {
                 return RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "代理结果异常");
-            }else {
+            } else {
                 return RetResponse.makeOKRsp(data.getKey());
             }
         }
@@ -298,11 +299,11 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         Map<String, String> result = new HashMap<>();
         ZLMResult<List<JSONObject>> mediaServerConfigResult = zlmresTfulUtils.getMediaServerConfig(mediaServer);
         if (mediaServerConfigResult != null && mediaServerConfigResult.getCode() == 0
-                && !mediaServerConfigResult.getData().isEmpty()){
+                && !mediaServerConfigResult.getData().isEmpty()) {
             JSONObject jsonObject = mediaServerConfigResult.getData().get(0);
 
             for (String key : jsonObject.keySet()) {
-                if (key.startsWith("ffmpeg.cmd")){
+                if (key.startsWith("ffmpeg.cmd")) {
                     result.put(key, jsonObject.getString(key));
                 }
             }
@@ -313,7 +314,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     @Override
     public Integer startSendRtpPassive(MediaServer mediaServer, SendRtpInfo sendRtpItem, Integer timeout) {
         Map<String, Object> param = new HashMap<>(12);
-        param.put("vhost","__defaultVhost__");
+        param.put("vhost", "__defaultVhost__");
         param.put("app", sendRtpItem.getApp());
         param.put("stream", sendRtpItem.getStream());
         param.put("ssrc", sendRtpItem.getSsrc());
@@ -324,24 +325,24 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         param.put("is_udp", sendRtpItem.isTcp() ? "0" : "1");
         param.put("recv_stream_id", sendRtpItem.getReceiveStream());
         param.put("enable_origin_recv_limit", "1");
-        if (timeout  != null) {
+        if (timeout != null) {
             param.put("close_delay_ms", timeout);
         }
         if (!sendRtpItem.isTcp()) {
             // 开启rtcp保活
-            param.put("udp_rtcp_timeout", sendRtpItem.isRtcp()? "1":"0");
+            param.put("udp_rtcp_timeout", sendRtpItem.isRtcp() ? "1" : "0");
         }
         if (!sendRtpItem.isTcpActive()) {
-            param.put("dst_url",sendRtpItem.getIp());
+            param.put("dst_url", sendRtpItem.getIp());
             param.put("dst_port", sendRtpItem.getPort());
         }
 
         ZLMResult<?> zlmResult = zlmServerFactory.startSendRtpPassive(mediaServer, param, null);
-        if (zlmResult.getCode() != 0 ) {
+        if (zlmResult.getCode() != 0) {
             log.error("启动监听TCP被动推流失败: {}, 参数：{}", zlmResult.getMsg(), JSON.toJSONString(param));
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
-        log.info("调用ZLM-TCP被动推流接口成功： 本地端口: {}",  zlmResult.getLocal_port());
+        log.info("调用ZLM-TCP被动推流接口成功： 本地端口: {}", zlmResult.getLocal_port());
         return zlmResult.getLocal_port();
     }
 
@@ -365,10 +366,10 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         param.put("dst_url", sendRtpItem.getIp());
         param.put("dst_port", sendRtpItem.getPort());
         ZLMResult<?> zlmResult = zlmresTfulUtils.startSendRtp(mediaServer, param);
-        if (zlmResult == null ) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "连接zlm失败");
-        }else if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+        if (zlmResult == null) {
+            throw new CommonException("连接zlm失败");
+        } else if (zlmResult.getCode() != 0) {
+            throw new CommonException(zlmResult.getMsg());
         }
         log.info("[推流结果]：{} ，参数： {}", zlmResult, JSONObject.toJSONString(param));
     }
@@ -376,7 +377,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     @Override
     public Integer startSendRtpTalk(MediaServer mediaServer, SendRtpInfo sendRtpItem, Integer timeout) {
         Map<String, Object> param = new HashMap<>(12);
-        param.put("vhost","__defaultVhost__");
+        param.put("vhost", "__defaultVhost__");
         param.put("app", sendRtpItem.getApp());
         param.put("stream", sendRtpItem.getStream());
         param.put("ssrc", sendRtpItem.getSsrc());
@@ -386,11 +387,11 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         param.put("recv_stream_id", sendRtpItem.getReceiveStream());
         param.put("enable_origin_recv_limit", "1");
         ZLMResult<?> zlmResult = zlmServerFactory.startSendRtpTalk(mediaServer, param, null);
-        if (zlmResult.getCode() != 0 ) {
+        if (zlmResult.getCode() != 0) {
             log.error("启动监听TCP被动推流失败: {}, 参数：{}", zlmResult.getMsg(), JSON.toJSONString(param));
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
-        log.info("调用ZLM-TCP被动推流接口, 成功 本地端口： {}",  zlmResult.getLocal_port());
+        log.info("调用ZLM-TCP被动推流接口, 成功 本地端口： {}", zlmResult.getLocal_port());
         return zlmResult.getLocal_port();
     }
 
@@ -412,31 +413,31 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
             String ffmpegCmd = getFfmpegCmd(mediaServer, streamProxy.getFfmpegCmdKey());
 
             if (ffmpegCmd == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "ffmpeg拉流代理无法获取ffmpeg cmd");
+                throw new CommonException("ffmpeg拉流代理无法获取ffmpeg cmd");
             }
             String schema = getSchemaFromFFmpegCmd(ffmpegCmd);
             if (schema == null) {
-                throw new ControllerException(ErrorCode.ERROR100.getCode(), "ffmpeg拉流代理无法从ffmpeg cmd中获取到输出格式");
+                throw new CommonException("ffmpeg拉流代理无法从ffmpeg cmd中获取到输出格式");
             }
             int port;
             String schemaForUri;
             if (schema.equalsIgnoreCase("rtsp")) {
                 port = mediaServer.getRtspPort();
                 schemaForUri = schema;
-            }else if (schema.equalsIgnoreCase("flv")) {
+            } else if (schema.equalsIgnoreCase("flv")) {
                 if (mediaServer.getRtmpPort() == 0) {
-                    throw new ControllerException(ErrorCode.ERROR100.getCode(), "ffmpeg拉流代理播放时发现未设置rtmp端口");
+                    throw new CommonException("ffmpeg拉流代理播放时发现未设置rtmp端口");
                 }
                 port = mediaServer.getRtmpPort();
                 schemaForUri = "rtmp";
-            }else {
+            } else {
                 port = mediaServer.getRtmpPort();
                 schemaForUri = schema;
             }
 
             dstUrl = String.format("%s://%s:%s/%s/%s", schemaForUri, "127.0.0.1", port, streamProxy.getApp(),
                     streamProxy.getStream());
-        }else {
+        } else {
             dstUrl = String.format("rtsp://%s:%s/%s/%s", "127.0.0.1", mediaServer.getRtspPort(), streamProxy.getApp(),
                     streamProxy.getStream());
         }
@@ -447,24 +448,24 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         }
 
         ZLMResult<StreamProxyResult> zlmResult = null;
-        if ("ffmpeg".equalsIgnoreCase(streamProxy.getType())){
+        if ("ffmpeg".equalsIgnoreCase(streamProxy.getType())) {
             if (streamProxy.getTimeout() == 0) {
                 streamProxy.setTimeout(15);
             }
             zlmResult = zlmresTfulUtils.addFFmpegSource(mediaServer, streamProxy.getSrcUrl().trim(), dstUrl,
                     streamProxy.getTimeout(), streamProxy.isEnableAudio(), streamProxy.isEnableMp4(),
                     streamProxy.getFfmpegCmdKey());
-        }else {
+        } else {
             zlmResult = zlmresTfulUtils.addStreamProxy(mediaServer, streamProxy.getApp(), streamProxy.getStream(), streamProxy.getSrcUrl().trim(),
                     streamProxy.isEnableAudio(), streamProxy.isEnableMp4(), streamProxy.getRtspType(), streamProxy.getTimeout());
         }
         if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
-        }else {
+            throw new CommonException(zlmResult.getMsg());
+        } else {
             StreamProxyResult data = zlmResult.getData();
             if (data == null) {
-                throw new ControllerException(zlmResult.getCode(), "代理结果异常： " + zlmResult);
-            }else {
+                throw new CommonException("代理结果异常： " + zlmResult);
+            } else {
                 return data.getKey();
             }
         }
@@ -479,8 +480,8 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         for (int i = 0; i < paramArray.length; i++) {
             if (paramArray[i].equalsIgnoreCase("-f")) {
                 if (i + 1 < paramArray.length - 1) {
-                    return paramArray[i+1];
-                }else {
+                    return paramArray[i + 1];
+                } else {
                     return null;
                 }
 
@@ -493,9 +494,9 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     public void stopProxy(MediaServer mediaServer, String streamKey, String type) {
         ZLMResult<FlagData> zlmResult = zlmresTfulUtils.delStreamProxy(mediaServer, streamKey);
         if (zlmResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "请求失败");
-        }else if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException("请求失败");
+        } else if (zlmResult.getCode() != 0) {
+            throw new CommonException(zlmResult.getMsg());
         }
     }
 
@@ -532,10 +533,10 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         ZLMResult<?> zlmResult = zlmresTfulUtils.loadMP4File(mediaServer, buildApp, buildStream, filePath);
 
         if (zlmResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "请求失败");
+            throw new CommonException("请求失败");
         }
         if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
     }
 
@@ -563,10 +564,10 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         ZLMResult<?> zlmResult = zlmresTfulUtils.loadMP4File(mediaServer, buildApp, buildStream, dateDir);
 
         if (zlmResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "请求失败");
+            throw new CommonException("请求失败");
         }
         if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
     }
 
@@ -574,10 +575,10 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     public void seekRecordStamp(MediaServer mediaServer, String app, String stream, Double stamp, String schema) {
         ZLMResult<?> zlmResult = zlmresTfulUtils.seekRecordStamp(mediaServer, app, stream, stamp, schema);
         if (zlmResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "请求失败");
+            throw new CommonException("请求失败");
         }
         if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
     }
 
@@ -585,10 +586,10 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     public void setRecordSpeed(MediaServer mediaServer, String app, String stream, Integer speed, String schema) {
         ZLMResult<?> zlmResult = zlmresTfulUtils.setRecordSpeed(mediaServer, app, stream, speed, schema);
         if (zlmResult == null) {
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "请求失败");
+            throw new CommonException("请求失败");
         }
         if (zlmResult.getCode() != 0) {
-            throw new ControllerException(zlmResult.getCode(), zlmResult.getMsg());
+            throw new CommonException(zlmResult.getMsg());
         }
     }
 
@@ -630,7 +631,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         streamInfoResult.setIp(addr);
         if (mediaInfo != null) {
             streamInfoResult.setServerId(mediaInfo.getServerId());
-        }else {
+        } else {
             streamInfoResult.setServerId(userSetting.getServerId());
         }
 
@@ -639,7 +640,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
         if (!ObjectUtils.isEmpty(callId)) {
             param.put("callId", callId);
         }
-        if (mediaInfo != null && !ObjectUtils.isEmpty(mediaInfo.getOriginTypeStr()))  {
+        if (mediaInfo != null && !ObjectUtils.isEmpty(mediaInfo.getOriginTypeStr())) {
             if (!ObjectUtils.isEmpty(mediaInfo.getOriginTypeStr())) {
                 param.put("originTypeStr", mediaInfo.getOriginTypeStr());
             }
@@ -662,24 +663,24 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
 
         String callIdParam = callIdParamBuilder.toString();
 
-        streamInfoResult.setRtmp(addr, mediaServer.getRtmpPort(),mediaServer.getRtmpSSlPort(), app,  stream, callIdParam);
-        streamInfoResult.setRtsp(addr, mediaServer.getRtspPort(),mediaServer.getRtspSSLPort(), app,  stream, callIdParam);
+        streamInfoResult.setRtmp(addr, mediaServer.getRtmpPort(), mediaServer.getRtmpSSlPort(), app, stream, callIdParam);
+        streamInfoResult.setRtsp(addr, mediaServer.getRtspPort(), mediaServer.getRtspSSLPort(), app, stream, callIdParam);
 
         String flvFile = String.format("%s/%s.live.flv%s", app, stream, callIdParam);
-        streamInfoResult.setFlv(addr, mediaServer.getHttpPort(),mediaServer.getHttpSSlPort(), flvFile);
-        streamInfoResult.setWsFlv(addr, mediaServer.getHttpPort(),mediaServer.getHttpSSlPort(), flvFile);
+        streamInfoResult.setFlv(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), flvFile);
+        streamInfoResult.setWsFlv(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), flvFile);
 
         String mp4File = String.format("%s/%s.live.mp4%s", app, stream, callIdParam);
-        streamInfoResult.setFmp4(addr, mediaServer.getHttpPort(),mediaServer.getHttpSSlPort(), mp4File);
-        streamInfoResult.setWsMp4(addr, mediaServer.getHttpPort(),mediaServer.getHttpSSlPort(), mp4File);
+        streamInfoResult.setFmp4(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), mp4File);
+        streamInfoResult.setWsMp4(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), mp4File);
 
-        streamInfoResult.setHls(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app,  stream, callIdParam);
-        streamInfoResult.setWsHls(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app,  stream, callIdParam);
+        streamInfoResult.setHls(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app, stream, callIdParam);
+        streamInfoResult.setWsHls(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app, stream, callIdParam);
 
-        streamInfoResult.setTs(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app,  stream, callIdParam);
-        streamInfoResult.setWsTs(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app,  stream, callIdParam);
+        streamInfoResult.setTs(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app, stream, callIdParam);
+        streamInfoResult.setWsTs(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app, stream, callIdParam);
 
-        streamInfoResult.setRtc(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app,  stream, callIdParam, isPlay);
+        streamInfoResult.setRtc(addr, mediaServer.getHttpPort(), mediaServer.getHttpSSlPort(), app, stream, callIdParam, isPlay);
 
         streamInfoResult.setMediaInfo(mediaInfo);
 

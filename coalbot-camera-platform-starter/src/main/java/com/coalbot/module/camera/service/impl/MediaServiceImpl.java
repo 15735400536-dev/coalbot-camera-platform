@@ -5,7 +5,6 @@ import com.coalbot.module.camera.common.InviteSessionStatus;
 import com.coalbot.module.camera.common.InviteSessionType;
 import com.coalbot.module.camera.common.VideoManagerConstants;
 import com.coalbot.module.camera.conf.UserSetting;
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.SsrcTransaction;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
@@ -20,15 +19,14 @@ import com.coalbot.module.camera.media.zlm.dto.StreamAuthorityInfo;
 import com.coalbot.module.camera.service.IMediaService;
 import com.coalbot.module.camera.service.IRecordPlanService;
 import com.coalbot.module.camera.service.ISendRtpServerService;
-//import com.coalbot.module.camera.service.IUserService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.MediaServerUtils;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.OtherPsSendInfo;
 import com.coalbot.module.camera.vmanager.bean.OtherRtpSendInfo;
+import com.coalbot.module.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -127,13 +125,13 @@ public class MediaServiceImpl implements IMediaService {
                 // 推流鉴权
                 if (params == null) {
                     log.info("推流鉴权失败： 缺少必要参数：sign=md5(user表的pushKey)");
-                    throw new ControllerException(ErrorCode.ERROR401.getCode(), "Unauthorized");
+                    throw new CommonException("Unauthorized");
                 }
 
                 String sign = paramMap.get("sign");
                 if (sign == null) {
                     log.info("推流鉴权失败： 缺少必要参数：sign=md5(user表的pushKey)");
-                    throw new ControllerException(ErrorCode.ERROR401.getCode(), "Unauthorized");
+                    throw new CommonException("Unauthorized");
                 }
                 // 推流自定义播放鉴权码
                 String callId = paramMap.get("callId");
@@ -141,7 +139,7 @@ public class MediaServiceImpl implements IMediaService {
 //                boolean hasAuthority = userService.checkPushAuthority(callId, sign);
 //                if (!hasAuthority) {
 //                    log.info("推流鉴权失败： sign 无权限: callId={}. sign={}", callId, sign);
-//                    throw new ControllerException(ErrorCode.ERROR401.getCode(), "Unauthorized");
+//                    throw new CommonException("Unauthorized");
 //                }
                 StreamAuthorityInfo streamAuthorityInfo = StreamAuthorityInfo.getInstanceByHook(app, stream, mediaServer.getId());
                 streamAuthorityInfo.setCallId(callId);

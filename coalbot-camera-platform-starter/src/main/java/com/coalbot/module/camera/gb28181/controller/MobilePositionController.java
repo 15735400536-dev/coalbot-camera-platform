@@ -1,6 +1,5 @@
 package com.coalbot.module.camera.gb28181.controller;
 
-import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.MobilePosition;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
@@ -8,7 +7,7 @@ import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.callback.RequestMessage;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommander;
 import com.coalbot.module.camera.service.IMobilePositionService;
-import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.util.StringUtil;
@@ -109,7 +108,7 @@ public class MobilePositionController {
             });
         } catch (InvalidArgumentException | SipException | ParseException e) {
             log.error("[命令发送失败] 获取移动位置信息: {}", e.getMessage());
-            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+            throw new CommonException("命令发送失败: " + e.getMessage());
         }
         DeferredResult<MobilePosition> result = new DeferredResult<MobilePosition>(5*1000L);
 		result.onTimeout(()->{
