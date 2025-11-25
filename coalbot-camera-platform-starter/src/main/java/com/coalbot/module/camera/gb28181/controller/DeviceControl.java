@@ -10,6 +10,7 @@ package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -18,7 +19,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -40,7 +40,7 @@ public class DeviceControl {
             log.debug("设备远程启动API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		deviceService.teleboot(device);
 		return RetResponse.makeOKRsp();
     }
@@ -56,7 +56,7 @@ public class DeviceControl {
             log.debug("开始/停止录像API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> deferredResult = new DeferredResult<>();
 
 		deviceService.record(device, channelId, recordCmdStr, (code, msg, data) -> {
@@ -78,7 +78,7 @@ public class DeviceControl {
 			log.debug("布防/撤防API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> result = new DeferredResult<>();
 		deviceService.guard(device, guardCmd, (code, msg, data) -> {
 			result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -114,7 +114,7 @@ public class DeviceControl {
 			log.debug("报警复位API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> result = new DeferredResult<>();
 		deviceService.resetAlarm(device, channelId, alarmMethod, alarmType, (code, msg, data) -> {
 			result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -135,7 +135,7 @@ public class DeviceControl {
 			log.debug("强制关键帧API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		deviceService.iFrame(device, channelId);
 		return RetResponse.makeOKRsp();
 	}
@@ -154,7 +154,7 @@ public class DeviceControl {
 			log.debug("看守位控制API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> result = new DeferredResult<>();
 		deviceService.homePosition(device, channelId, enabled, resetTime, presetIndex, (code, msg, data) -> {
 			result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -187,7 +187,7 @@ public class DeviceControl {
 			log.debug(String.format("设备拉框放大 API调用，deviceId：%s ，channelId：%s ，length：%d ，width：%d ，midpointx：%d ，midpointy：%d ，lengthx：%d ，lengthy：%d",deviceId, channelId, length, width, midpointx, midpointy,lengthx, lengthy));
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> result = new DeferredResult<>();
 		deviceService.dragZoomIn(device, channelId, length, width, midpointx, midpointy, lengthx,lengthy, (code, msg, data) -> {
 			result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -222,7 +222,7 @@ public class DeviceControl {
 			log.debug(String.format("设备拉框缩小 API调用，deviceId：%s ，channelId：%s ，length：%d ，width：%d ，midpointx：%d ，midpointy：%d ，lengthx：%d ，lengthy：%d",deviceId, channelId, length, width, midpointx, midpointy,lengthx, lengthy));
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 		DeferredResult<RetResult<String>> result = new DeferredResult<>();
 		deviceService.dragZoomOut(device, channelId, length, width, midpointx, midpointy, lengthx,lengthy, (code, msg, data) -> {
 			result.setResult(RetResponse.makeRsp(code, msg, data));

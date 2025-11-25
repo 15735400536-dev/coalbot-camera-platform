@@ -11,6 +11,7 @@ import com.coalbot.module.camera.gb28181.service.IPlatformChannelService;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.coalbot.module.camera.mapper.gb28181.*;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
@@ -367,7 +367,7 @@ public class PlatformChannelServiceImpl implements IPlatformChannelService {
     @Transactional
     public int addAllChannel(String platformId) {
         List<CommonGBChannel> channelListNotShare = platformChannelMapper.queryNotShare(platformId, null);
-        Assert.notEmpty(channelListNotShare, "所有通道已共享");
+        AssertUtils.notEmpty(channelListNotShare, "所有通道已共享");
         return addChannelList(platformId, channelListNotShare);
     }
 
@@ -375,14 +375,14 @@ public class PlatformChannelServiceImpl implements IPlatformChannelService {
     @Transactional
     public int addChannels(String platformId, List<String> channelIds) {
         List<CommonGBChannel> channelListNotShare = platformChannelMapper.queryNotShare(platformId, channelIds);
-        Assert.notEmpty(channelListNotShare, "通道已共享");
+        AssertUtils.notEmpty(channelListNotShare, "通道已共享");
         return addChannelList(platformId, channelListNotShare);
     }
 
     @Transactional
     public int addChannelList(String platformId, List<CommonGBChannel> channelList) {
         Platform platform = platformMapper.query(platformId);
-        Assert.notNull(platform, "平台不存在");
+        AssertUtils.notNull(platform, "平台不存在");
         String channelDeviceIds = channelList.stream().map(CommonGBChannel::getGbDeviceId).collect(Collectors.joining(","));
 
         log.info("[共享通道] 平台：{}， 通道：{}", platform.getServerGBId(), channelDeviceIds);
@@ -451,7 +451,7 @@ public class PlatformChannelServiceImpl implements IPlatformChannelService {
             return result;
         }
         List<CommonGBChannel> channelListShare = platformChannelMapper.queryShare(platformId,  null);
-        Assert.notEmpty(channelListShare, "未共享任何通道");
+        AssertUtils.notEmpty(channelListShare, "未共享任何通道");
         int result = platformChannelMapper.removeChannelsWithPlatform(platformId, channelListShare);
         if (result > 0) {
             // 查询通道相关的分组信息
@@ -627,7 +627,7 @@ public class PlatformChannelServiceImpl implements IPlatformChannelService {
     @Override
     public void pushChannel(String platformId) {
         Platform platform = platformMapper.query(platformId);
-        Assert.notNull(platform, "平台不存在");
+        AssertUtils.notNull(platform, "平台不存在");
         if (!userSetting.getServerId().equals(platform.getServerId())) {
             boolean result = redisRpcService.pushPlatformChannel(platform.getServerId(), platformId);
             if (result) {
@@ -656,7 +656,7 @@ public class PlatformChannelServiceImpl implements IPlatformChannelService {
     @Override
     public void updateCustomChannel(PlatformChannel channel) {
         Platform platform = platformMapper.query(channel.getPlatformId());
-        Assert.notNull(platform, "平台不存在");
+        AssertUtils.notNull(platform, "平台不存在");
         log.info("[国标级联-自定义共享通道] 平台：{}， 通道：{}", platform.getServerGBId(), channel);
         if (!userSetting.getServerId().equals(platform.getServerId())) {
             boolean result = redisRpcService.updateCustomPlatformChannel(platform.getServerId(), channel);

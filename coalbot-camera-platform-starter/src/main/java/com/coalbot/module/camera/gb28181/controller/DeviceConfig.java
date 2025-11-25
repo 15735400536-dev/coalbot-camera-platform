@@ -11,6 +11,7 @@ package com.coalbot.module.camera.gb28181.controller;
 import com.coalbot.module.camera.gb28181.bean.BasicParam;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -19,7 +20,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,10 +42,10 @@ public class DeviceConfig {
         if (log.isDebugEnabled()) {
 			log.debug("基本配置设置命令API调用");
 		}
-		Assert.notNull(basicParam.getDeviceId(), "设备ID必须存在");
+		AssertUtils.notNull(basicParam.getDeviceId(), "设备ID必须存在");
 
 		Device device = deviceService.getDeviceByDeviceId(basicParam.getDeviceId());
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 
 		DeferredResult<RetResult<String>> deferredResult = new DeferredResult<>();
 		deviceService.deviceBasicConfig(device, basicParam, (code, msg, data) -> {
@@ -76,7 +76,7 @@ public class DeviceConfig {
 			log.debug("设备配置查询请求API调用");
 		}
 		Device device = deviceService.getDeviceByDeviceId(deviceId);
-		Assert.notNull(device, "设备不存在");
+		AssertUtils.notNull(device, "设备不存在");
 
 		DeferredResult<RetResult<Object>> deferredResult = new DeferredResult<>();
 

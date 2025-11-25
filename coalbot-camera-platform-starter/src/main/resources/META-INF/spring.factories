@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.coalbot.module.camera.autoconfigure.CameraAutoConfigure

@@ -20,6 +20,7 @@ import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
@@ -31,7 +32,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -84,13 +84,13 @@ public class PlayController {
                                                          @PathVariable String channelId) {
 
         log.info("[开始点播] deviceId：{}, channelId：{}, ", deviceId, channelId);
-        Assert.notNull(deviceId, "设备国标编号不可为NULL");
-        Assert.notNull(channelId, "通道国标编号不可为NULL");
+        AssertUtils.notNull(deviceId, "设备国标编号不可为NULL");
+        AssertUtils.notNull(channelId, "通道国标编号不可为NULL");
         // 获取可用的zlm
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeviceChannel channel = deviceChannelService.getOne(deviceId, channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
@@ -156,8 +156,8 @@ public class PlayController {
 
         Device device = deviceService.getDeviceByDeviceId(deviceId);
         DeviceChannel channel = deviceChannelService.getOneForSource(deviceId, channelId);
-        Assert.notNull(device, "设备不存在");
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(device, "设备不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         String streamId = String.format("%s_%s", device.getDeviceId(), channel.getDeviceId());
         playService.stop(InviteSessionType.PLAY, device, channel, streamId);
         JSONObject json = new JSONObject();
@@ -213,9 +213,9 @@ public class PlayController {
             log.debug("停止语音广播API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeviceChannel channel = deviceChannelService.getOne(deviceId, channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         playService.stopAudioBroadcast(device, channel);
         return RetResponse.makeOKRsp();
     }

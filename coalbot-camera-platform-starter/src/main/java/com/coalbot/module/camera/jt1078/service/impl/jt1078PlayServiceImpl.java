@@ -31,6 +31,7 @@ import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.service.bean.SSRCInfo;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.MediaServerUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
@@ -43,7 +44,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.sip.message.Response;
 import java.util.ArrayList;
@@ -581,7 +581,7 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
         }
 
         JTDevice device = jt1078Service.getDevice(phoneNumber);
-        Assert.notNull(device, "部标设备不存在");
+        AssertUtils.notNull(device, "部标设备不存在");
 
         String stream = "jt_" + phoneNumber + "_" + channelId + "_talk";
 
@@ -594,7 +594,7 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
 
         // 检查待发送的流是否存在，
         MediaInfo mediaInfo = mediaServerService.getMediaInfo(mediaServer, talkApp, stream);
-        Assert.isNull(mediaInfo, "对讲已经存在");
+        AssertUtils.isNull(mediaInfo, "对讲已经存在");
         return mediaServerService.getStreamInfoByAppAndStream(mediaServer, talkApp, stream, null, null, null, false);
 
     }
@@ -678,9 +678,9 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
     @Override
     public void start(String channelId, Boolean record, ErrorCallback<StreamInfo> callback) {
         JTChannel channel = jt1078Service.getChannelByDbId(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jt1078Service.getDeviceById(channel.getTerminalDbId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
         play(device, channel, 0,
                 result -> callback.run(result.getCode(), result.getMsg(), result.getData()));
@@ -689,9 +689,9 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
     @Override
     public void stop(String channelId) {
         JTChannel channel = jt1078Service.getChannelByDbId(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jt1078Service.getDeviceById(channel.getTerminalDbId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         stopPlay(device.getPhoneNumber(), channel.getChannelId());
     }
 
@@ -701,9 +701,9 @@ public class jt1078PlayServiceImpl implements Ijt1078PlayService {
             throw new PlayException(Response.BAD_REQUEST, "bad request");
         }
         JTChannel channel = jt1078Service.getChannelByDbId(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jt1078Service.getDeviceById(channel.getTerminalDbId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
         String startTimeStr = DateUtil.timestampTo_yyyy_MM_dd_HH_mm_ss(startTime);
         String stopTimeStr = DateUtil.timestampTo_yyyy_MM_dd_HH_mm_ss(stopTime);

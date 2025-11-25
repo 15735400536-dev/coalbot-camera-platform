@@ -22,6 +22,7 @@ import com.coalbot.module.camera.mapper.gb28181.PlatformChannelMapper;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.Coordtransform;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -253,7 +253,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
 
     @Override
     public void updateChannelStreamIdentification(DeviceChannel channel) {
-        Assert.hasLength(channel.getStreamIdentification(), "码流标识必须存在");
+        AssertUtils.notBlank(channel.getStreamIdentification(), "码流标识必须存在");
         if (ObjectUtils.isEmpty(channel.getStreamIdentification())) {
             log.info("[重置通道码流类型] 设备: {}, 码流： {}", channel.getDeviceId(), channel.getStreamIdentification());
         }else {
@@ -446,7 +446,7 @@ public class DeviceChannelServiceImpl implements IDeviceChannelService {
                     Integer count = subContMap.get(channel.getDeviceId());
                     if (count > 0) {
                         channel.setSubCount(count);
-                        channel.setParental(String.valueOf(1));
+                        channel.setParental(1);
                     }
                 }
             }

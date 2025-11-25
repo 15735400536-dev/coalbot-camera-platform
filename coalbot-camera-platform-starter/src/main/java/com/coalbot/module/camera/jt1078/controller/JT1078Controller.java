@@ -10,9 +10,9 @@ import com.coalbot.module.camera.jt1078.proc.request.J1205;
 import com.coalbot.module.camera.jt1078.service.Ijt1078PlayService;
 import com.coalbot.module.camera.jt1078.service.Ijt1078Service;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -831,7 +830,7 @@ public class JT1078Controller {
     public RetResult<Void> snap(HttpServletResponse response, String phoneNumber, String channelId) {
 
         log.info("[JT-抓图] 设备编号: {}, 通道编号: {}", phoneNumber, channelId);
-        Assert.notNull(channelId, "缺少通道编号");
+        AssertUtils.notNull(channelId, "缺少通道编号");
         try {
             ServletOutputStream outputStream = response.getOutputStream();
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
@@ -866,7 +865,7 @@ public class JT1078Controller {
     public RetResult<Void> uploadOneMedia(HttpServletResponse response, String phoneNumber, Long mediaId) {
 
         log.info("[JT-单条存储多媒体数据上传] 设备编号: {}, 多媒体ID: {}", phoneNumber, mediaId);
-        Assert.notNull(mediaId, "缺少通道编号");
+        AssertUtils.notNull(mediaId, "缺少通道编号");
         try {
             ServletOutputStream outputStream = response.getOutputStream();
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
@@ -884,7 +883,7 @@ public class JT1078Controller {
     public RetResult<Void> deleteOneMedia(HttpServletResponse response, String phoneNumber, Long mediaId) {
 
         log.info("[JT-单条存储多媒体数据上传] 设备编号: {}, 多媒体ID: {}", phoneNumber, mediaId);
-        Assert.notNull(mediaId, "缺少通道编号");
+        AssertUtils.notNull(mediaId, "缺少通道编号");
         try {
             ServletOutputStream outputStream = response.getOutputStream();
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);

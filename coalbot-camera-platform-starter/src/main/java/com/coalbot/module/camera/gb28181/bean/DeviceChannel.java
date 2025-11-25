@@ -62,7 +62,7 @@ public class DeviceChannel extends CommonGBChannel {
 
 	@MessageElementForCatalog("Parental")
 	@Schema(description = "是否有子设备(必选)1有,0没有")
-	private String parental;
+	private Integer parental;
 
 
 	@MessageElementForCatalog("ParentID")

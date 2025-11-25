@@ -2,13 +2,13 @@ package com.coalbot.module.camera.gb28181.service.impl;
 
 import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
-import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
-import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
 import com.coalbot.module.camera.gb28181.event.subscribe.catalog.CatalogEvent;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.gb28181.service.IGroupService;
-import com.coalbot.module.camera.utils.DateUtil;
+import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
+import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -47,13 +47,13 @@ public class GroupServiceImpl implements IGroupService {
 
     @Override
     public void add(Group group) {
-        Assert.notNull(group, "参数不可为NULL");
-        Assert.notNull(group.getDeviceId(), "分组编号不可为NULL");
-        Assert.isTrue(group.getDeviceId().trim().length() == 20, "分组编号必须为20位");
-        Assert.notNull(group.getName(), "分组名称不可为NULL");
+        AssertUtils.notNull(group, "参数不可为NULL");
+        AssertUtils.notNull(group.getDeviceId(), "分组编号不可为NULL");
+        AssertUtils.isTrue(group.getDeviceId().trim().length() == 20, "分组编号必须为20位");
+        AssertUtils.notNull(group.getName(), "分组名称不可为NULL");
 
         GbCode gbCode = GbCode.decode(group.getDeviceId());
-        Assert.notNull(gbCode, "分组编号不满足国标定义");
+        AssertUtils.notNull(gbCode, "分组编号不满足国标定义");
 
         // 查询数据库中已经存在的.
         List<Group> groupListInDb = groupManager.queryInGroupListByDeviceId(Lists.newArrayList(group));
@@ -65,7 +65,7 @@ public class GroupServiceImpl implements IGroupService {
             // 添加业务分组
             addBusinessGroup(group);
         }else {
-            Assert.isTrue("216".equals(gbCode.getTypeCode()), "创建虚拟组织时设备编号11-13位应使用216");
+            AssertUtils.isTrue("216".equals(gbCode.getTypeCode()), "创建虚拟组织时设备编号11-13位应使用216");
             // 添加虚拟组织
             addGroup(group);
         }
@@ -73,12 +73,12 @@ public class GroupServiceImpl implements IGroupService {
 
     private void addGroup(Group group) {
         // 建立虚拟组织
-        Assert.notNull(group.getBusinessGroup(), "所属的业务分组分组不存在");
+        AssertUtils.notNull(group.getBusinessGroup(), "所属的业务分组分组不存在");
         Group businessGroup = groupManager.queryBusinessGroup(group.getBusinessGroup());
-        Assert.notNull(businessGroup, "所属的业务分组分组不存在");
+        AssertUtils.notNull(businessGroup, "所属的业务分组分组不存在");
         if (!ObjectUtils.isEmpty(group.getParentDeviceId())) {
             Group parentGroup = groupManager.queryOneByDeviceId(group.getParentDeviceId(), group.getBusinessGroup());
-            Assert.notNull(parentGroup, "所属的上级分组分组不存在");
+            AssertUtils.notNull(parentGroup, "所属的上级分组分组不存在");
         }else {
             group.setParentDeviceId(null);
         }
@@ -109,11 +109,11 @@ public class GroupServiceImpl implements IGroupService {
     @Override
     @Transactional
     public void update(Group group) {
-        Assert.isTrue(group.getId() != null, "更新必须携带分组ID");
-        Assert.notNull(group.getDeviceId(), "编号不可为NULL");
-        Assert.notNull(group.getBusinessGroup(), "业务分组不可为NULL");
+        AssertUtils.isTrue(group.getId() != null, "更新必须携带分组ID");
+        AssertUtils.notNull(group.getDeviceId(), "编号不可为NULL");
+        AssertUtils.notNull(group.getBusinessGroup(), "业务分组不可为NULL");
         Group groupInDb = groupManager.queryOne(group.getId());
-        Assert.notNull(groupInDb, "分组不存在");
+        AssertUtils.notNull(groupInDb, "分组不存在");
 
         // 查询数据库中已经存在的.
         List<Group> groupListInDb = groupManager.queryInGroupListByDeviceId(Lists.newArrayList(group));
@@ -195,7 +195,7 @@ public class GroupServiceImpl implements IGroupService {
     @Transactional
     public boolean delete(String id) {
         Group group = groupManager.queryOne(id);
-        Assert.notNull(group, "分组不存在");
+        AssertUtils.notNull(group, "分组不存在");
         List<Group> groupListForDelete = new ArrayList<>();
         GbCode gbCode = GbCode.decode(group.getDeviceId());
         if (gbCode.getTypeCode().equals("215")) {

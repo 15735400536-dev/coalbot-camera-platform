@@ -7,8 +7,6 @@ import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.conf.exception.SsrcTransactionNotFoundException;
 import com.coalbot.module.camera.gb28181.bean.*;
-import com.coalbot.module.camera.mapper.gb28181.PlatformChannelMapper;
-import com.coalbot.module.camera.mapper.gb28181.PlatformMapper;
 import com.coalbot.module.camera.gb28181.event.SipSubscribe;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.gb28181.service.IInviteStreamService;
@@ -21,6 +19,8 @@ import com.coalbot.module.camera.gb28181.task.platformStatus.PlatformRegisterTas
 import com.coalbot.module.camera.gb28181.task.platformStatus.PlatformStatusTaskRunner;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.coalbot.module.camera.gb28181.utils.SipUtils;
+import com.coalbot.module.camera.mapper.gb28181.PlatformChannelMapper;
+import com.coalbot.module.camera.mapper.gb28181.PlatformMapper;
 import com.coalbot.module.camera.media.bean.MediaInfo;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.event.hook.HookData;
@@ -32,6 +32,7 @@ import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.*;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -385,11 +386,11 @@ public class PlatformServiceImpl implements IPlatformService, CommandLineRunner 
 
     @Override
     public boolean update(Platform platform) {
-        Assert.isTrue(platform.getId() != null, "ID必须存在");
+        AssertUtils.isTrue(platform.getId() != null, "ID必须存在");
         log.info("[国标级联] 更新平台 {}({})", platform.getName(), platform.getDeviceGBId());
         platform.setCharacterSet(platform.getCharacterSet().toUpperCase());
         Platform platformInDb = platformMapper.query(platform.getId());
-        Assert.notNull(platformInDb, "平台不存在");
+        AssertUtils.notNull(platformInDb, "平台不存在");
         if (!userSetting.getServerId().equals(platformInDb.getServerId())) {
             return redisRpcService.updatePlatform(platformInDb.getServerId(), platform);
         }
@@ -880,7 +881,7 @@ public class PlatformServiceImpl implements IPlatformService, CommandLineRunner 
     @Transactional
     public boolean delete(String platformId) {
         Platform platform = platformMapper.query(platformId);
-        Assert.notNull(platform, "平台不存在");
+        AssertUtils.notNull(platform, "平台不存在");
         log.info("[删除平台] {}/{} {}:{}", platform.getName(), platform.getServerGBId(), platform.getServerIp(), platform.getServerPort());
         if (!userSetting.getServerId().equals(platform.getServerId())) {
             boolean result = redisRpcService.deletePlatform(platform.getServerId(), platformId);

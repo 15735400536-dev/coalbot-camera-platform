@@ -8,6 +8,7 @@ import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
 import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.web.gb28181.dto.DeviceChannelExtend;
 import com.coalbot.module.core.response.RetResponse;
@@ -16,7 +17,6 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -196,7 +196,7 @@ public class ApiDeviceController {
         }
 
         Device device = deviceService.getDeviceByDeviceId(serial);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeferredResult<RetResult<Object>> deferredResult = new DeferredResult<> (timeout * 1000L);
         deviceService.queryPreset(device, code, (resultCode, msg, data) -> {
             if (resultCode == ErrorCode.SUCCESS.getCode()) {

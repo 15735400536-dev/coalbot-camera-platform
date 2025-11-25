@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.bean.RecordInfo;
 import com.coalbot.module.camera.media.event.media.MediaRecordMp4Event;
@@ -17,7 +18,7 @@ import com.coalbot.module.camera.service.bean.DownloadFileInfo;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
-import com.coalbot.module.camera.mapper.storager.CloudRecordServiceMapper;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.cloudRecord.bean.CloudRecordUrl;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -135,8 +135,8 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
     public String addTask(String app, String stream, MediaServer mediaServerItem, String startTime, String endTime,
                           String callId, String remoteHost, boolean filterMediaServer) {
         // 参数校验
-        Assert.notNull(app,"应用名为NULL");
-        Assert.notNull(stream,"流ID为NULL");
+        AssertUtils.notNull(app,"应用名为NULL");
+        AssertUtils.notNull(stream,"流ID为NULL");
         if (mediaServerItem.getRecordAssistPort() == 0) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "为配置Assist服务");
         }

@@ -7,6 +7,7 @@ import com.alibaba.excel.read.metadata.ReadSheet;
 import com.coalbot.module.camera.common.enums.ChannelDataType;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.StreamPushQueryDTO;
 import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.callback.RequestMessage;
 import com.coalbot.module.camera.media.service.IMediaServerService;
@@ -17,9 +18,11 @@ import com.coalbot.module.camera.streamPush.bean.StreamPushExcelDto;
 import com.coalbot.module.camera.streamPush.enent.StreamPushUploadFileHandler;
 import com.coalbot.module.camera.streamPush.service.IStreamPushPlayService;
 import com.coalbot.module.camera.streamPush.service.IStreamPushService;
+import com.coalbot.module.camera.utils.AssertUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -30,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -70,30 +72,38 @@ public class StreamPushController {
     @Autowired
     private UserSetting userSetting;
 
-    @GetMapping(value = "/list")
+//    @GetMapping(value = "/list")
+//    @ResponseBody
+//    @Operation(summary = "推流列表查询")
+//    @Parameter(name = "page", description = "当前页")
+//    @Parameter(name = "count", description = "每页查询数量")
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "pushing", description = "是否正在推流")
+//    @Parameter(name = "mediaServerId", description = "流媒体ID")
+//    public RetResult<PageInfo<StreamPush>> list(@RequestParam(required = false) Integer page,
+//                                                @RequestParam(required = false) Integer count,
+//                                                @RequestParam(required = false) String query,
+//                                                @RequestParam(required = false) Boolean pushing,
+//                                                @RequestParam(required = false) String mediaServerId) {
+//
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        if (ObjectUtils.isEmpty(mediaServerId)) {
+//            mediaServerId = null;
+//        }
+//        PageInfo<StreamPush> pushList = streamPushService.getPushList(page, count, query, pushing, mediaServerId);
+//        return RetResponse.makeOKRsp(pushList);
+//    }
+
+    @PostMapping(value = "/list")
     @ResponseBody
     @Operation(summary = "推流列表查询")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "pushing", description = "是否正在推流")
-    @Parameter(name = "mediaServerId", description = "流媒体ID")
-    public RetResult<PageInfo<StreamPush>> list(@RequestParam(required = false) Integer page,
-                                                @RequestParam(required = false) Integer count,
-                                                @RequestParam(required = false) String query,
-                                                @RequestParam(required = false) Boolean pushing,
-                                                @RequestParam(required = false) String mediaServerId) {
-
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        if (ObjectUtils.isEmpty(mediaServerId)) {
-            mediaServerId = null;
-        }
-        PageInfo<StreamPush> pushList = streamPushService.getPushList(page, count, query, pushing, mediaServerId);
-        return RetResponse.makeOKRsp(pushList);
+    public RetResult<PageList<StreamPush>> list(@RequestBody StreamPushQueryDTO dto) {
+        PageInfo<StreamPush> pageResult = streamPushService.getPushList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getPushing(), dto.getMediaServerId());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
-
 
     @PostMapping(value = "/remove")
     @ResponseBody
@@ -262,7 +272,7 @@ public class StreamPushController {
     @ResponseBody
     @Operation(summary = "开始播放")
     public DeferredResult<RetResult<StreamContent>> start(HttpServletRequest request, String id) {
-        Assert.notNull(id, "推流ID不可为NULL");
+        AssertUtils.notNull(id, "推流ID不可为NULL");
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
         result.onTimeout(() -> {
             RetResult<StreamContent> fail = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "等待推流超时");

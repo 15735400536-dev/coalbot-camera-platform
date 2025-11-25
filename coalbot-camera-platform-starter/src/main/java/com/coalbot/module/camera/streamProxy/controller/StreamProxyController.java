@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.StreamProxyQueryDTO;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
@@ -11,9 +12,10 @@ import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
+import com.coalbot.module.camera.utils.AssertUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -22,7 +24,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -55,27 +56,35 @@ public class StreamProxyController {
     private UserSetting userSetting;
 
 
-    @Operation(summary = "分页查询流代理")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "pulling", description = "是否正在拉流")
-    @Parameter(name = "mediaServerId", description = "流媒体ID")
-    @GetMapping(value = "/list")
-    @ResponseBody
-    public PageInfo<StreamProxy> list(@RequestParam(required = false) Integer page,
-                                      @RequestParam(required = false) Integer count,
-                                      @RequestParam(required = false) String query,
-                                      @RequestParam(required = false) Boolean pulling,
-                                      @RequestParam(required = false) String mediaServerId) {
+//    @Operation(summary = "分页查询流代理")
+//    @Parameter(name = "page", description = "当前页")
+//    @Parameter(name = "count", description = "每页查询数量")
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "pulling", description = "是否正在拉流")
+//    @Parameter(name = "mediaServerId", description = "流媒体ID")
+//    @GetMapping(value = "/list")
+//    @ResponseBody
+//    public PageInfo<StreamProxy> list(@RequestParam(required = false) Integer page,
+//                                      @RequestParam(required = false) Integer count,
+//                                      @RequestParam(required = false) String query,
+//                                      @RequestParam(required = false) Boolean pulling,
+//                                      @RequestParam(required = false) String mediaServerId) {
+//
+//        if (ObjectUtils.isEmpty(mediaServerId)) {
+//            mediaServerId = null;
+//        }
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        return streamProxyService.getAll(page, count, query, pulling, mediaServerId);
+//    }
 
-        if (ObjectUtils.isEmpty(mediaServerId)) {
-            mediaServerId = null;
-        }
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return streamProxyService.getAll(page, count, query, pulling, mediaServerId);
+    @Operation(summary = "分页查询流代理")
+    @PostMapping(value = "/list")
+    @ResponseBody
+    public PageInfo<StreamProxy> list(@RequestBody StreamProxyQueryDTO dto) {
+        return streamProxyService.getAll(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getPulling(), dto.getMediaServerId());
     }
 
     @Operation(summary = "查询流代理")
@@ -174,7 +183,7 @@ public class StreamProxyController {
     public DeferredResult<RetResult<StreamContent>> start(HttpServletRequest request, String id) {
         log.info("播放代理： {}", id);
         StreamProxy streamProxy = streamProxyService.getStreamProxy(id);
-        Assert.notNull(streamProxy, "代理信息不存在");
+        AssertUtils.notNull(streamProxy, "代理信息不存在");
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 

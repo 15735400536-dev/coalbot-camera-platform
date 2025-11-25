@@ -3,14 +3,18 @@ package com.coalbot.module.camera.gb28181.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.SipConfig;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.GbPlatformQueryDTO;
+import com.coalbot.module.camera.dto.PlatformChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Platform;
 import com.coalbot.module.camera.gb28181.bean.PlatformChannel;
 import com.coalbot.module.camera.gb28181.bean.SubscribeHolder;
 import com.coalbot.module.camera.gb28181.controller.bean.UpdateChannelParam;
 import com.coalbot.module.camera.gb28181.service.IPlatformChannelService;
 import com.coalbot.module.camera.gb28181.service.IPlatformService;
+import com.coalbot.module.camera.utils.AssertUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
-
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -70,22 +74,35 @@ public class PlatformController {
         }
     }
 
-    @GetMapping("/query")
-    @Operation(summary = "分页查询级联平台")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "query", description = "查询内容")
-    public RetResult<PageInfo<Platform>> platforms(int page, int count,
-                                        @RequestParam(required = false) String query) {
+//    @GetMapping("/query")
+//    @Operation(summary = "分页查询级联平台")
+//    @Parameter(name = "page", description = "当前页")
+//    @Parameter(name = "count", description = "每页查询数量")
+//    @Parameter(name = "query", description = "查询内容")
+//    public RetResult<PageInfo<Platform>> platforms(int page, int count,
+//                                        @RequestParam(required = false) String query) {
+//
+//        PageInfo<Platform> parentPlatformPageInfo = platformService.queryPlatformList(page, count, query);
+//        if (parentPlatformPageInfo != null && !parentPlatformPageInfo.getList().isEmpty()) {
+//            for (Platform platform : parentPlatformPageInfo.getList()) {
+//                platform.setMobilePositionSubscribe(subscribeHolder.getMobilePositionSubscribe(platform.getServerGBId()) != null);
+//                platform.setCatalogSubscribe(subscribeHolder.getCatalogSubscribe(platform.getServerGBId()) != null);
+//            }
+//        }
+//        return RetResponse.makeOKRsp(parentPlatformPageInfo);
+//    }
 
-        PageInfo<Platform> parentPlatformPageInfo = platformService.queryPlatformList(page, count, query);
-        if (parentPlatformPageInfo != null && !parentPlatformPageInfo.getList().isEmpty()) {
-            for (Platform platform : parentPlatformPageInfo.getList()) {
+    @PostMapping("/query")
+    @Operation(summary = "分页查询级联平台")
+    public RetResult<PageList<Platform>> platforms(@RequestBody GbPlatformQueryDTO dto) {
+        PageInfo<Platform> pageResult = platformService.queryPlatformList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()), dto.getQuery());
+        if (pageResult != null && !pageResult.getList().isEmpty()) {
+            for (Platform platform : pageResult.getList()) {
                 platform.setMobilePositionSubscribe(subscribeHolder.getMobilePositionSubscribe(platform.getServerGBId()) != null);
                 platform.setCatalogSubscribe(subscribeHolder.getCatalogSubscribe(platform.getServerGBId()) != null);
             }
         }
-        return RetResponse.makeOKRsp(parentPlatformPageInfo);
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @Operation(summary = "添加上级平台信息")
@@ -93,11 +110,11 @@ public class PlatformController {
     @ResponseBody
     public RetResult<Void> add(@RequestBody Platform platform) {
 
-        Assert.notNull(platform.getName(), "平台名称不可为空");
-        Assert.notNull(platform.getServerGBId(), "上级平台国标编号不可为空");
-        Assert.notNull(platform.getServerIp(), "上级平台IP不可为空");
-        Assert.isTrue(platform.getServerPort() > 0 && platform.getServerPort() < 65535, "上级平台端口异常");
-        Assert.notNull(platform.getDeviceGBId(), "本平台国标编号不可为空");
+        AssertUtils.notNull(platform.getName(), "平台名称不可为空");
+        AssertUtils.notNull(platform.getServerGBId(), "上级平台国标编号不可为空");
+        AssertUtils.notNull(platform.getServerIp(), "上级平台IP不可为空");
+        AssertUtils.isTrue(platform.getServerPort() > 0 && platform.getServerPort() < 65535, "上级平台端口异常");
+        AssertUtils.notNull(platform.getDeviceGBId(), "本平台国标编号不可为空");
 
         if (ObjectUtils.isEmpty(platform.getServerGBDomain())) {
             platform.setServerGBDomain(platform.getServerGBId().substring(0, 6));
@@ -181,29 +198,38 @@ public class PlatformController {
         return platform != null;
     }
 
+//    @Operation(summary = "分页查询级联平台的所有所有通道")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页条数", required = true)
+//    @Parameter(name = "platformId", description = "上级平台的数据ID")
+//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "hasShare", description = "是否已经共享")
+//    @GetMapping("/channel/list")
+//    @ResponseBody
+//    public RetResult<PageInfo<PlatformChannel>> queryChannelList(int page, int count,
+//                                                      @RequestParam(required = false) String platformId,
+//                                                      @RequestParam(required = false) String query,
+//                                                      @RequestParam(required = false) Integer channelType,
+//                                                      @RequestParam(required = false) Boolean online,
+//                                                      @RequestParam(required = false) Boolean hasShare) {
+//
+//        AssertUtils.notNull(platformId, "上级平台的数据ID不可为NULL");
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//
+//        return RetResponse.makeOKRsp(platformChannelService.queryChannelList(page, count, query, channelType, online, platformId, hasShare));
+//    }
+
     @Operation(summary = "分页查询级联平台的所有所有通道")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页条数", required = true)
-    @Parameter(name = "platformId", description = "上级平台的数据ID")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "hasShare", description = "是否已经共享")
-    @GetMapping("/channel/list")
+    @PostMapping("/channel/list")
     @ResponseBody
-    public RetResult<PageInfo<PlatformChannel>> queryChannelList(int page, int count,
-                                                      @RequestParam(required = false) String platformId,
-                                                      @RequestParam(required = false) String query,
-                                                      @RequestParam(required = false) Integer channelType,
-                                                      @RequestParam(required = false) Boolean online,
-                                                      @RequestParam(required = false) Boolean hasShare) {
-
-        Assert.notNull(platformId, "上级平台的数据ID不可为NULL");
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-
-        return RetResponse.makeOKRsp(platformChannelService.queryChannelList(page, count, query, channelType, online, platformId, hasShare));
+    public PageInfo<PlatformChannel> queryChannelList(@RequestBody PlatformChannelQueryDTO dto) {
+        AssertUtils.notNull(dto.getPlatformId(), "上级平台的数据ID不可为NULL");
+        return platformChannelService.queryChannelList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getChannelType(), dto.getOnline(), dto.getPlatformId(), dto.getHasShare());
     }
 
     @Operation(summary = "向上级平台添加国标通道")
@@ -257,7 +283,7 @@ public class PlatformController {
     @GetMapping("/channel/push")
     @ResponseBody
     public RetResult<Void> pushChannel(String id) {
-        Assert.notNull(id, "平台ID不可为空");
+        AssertUtils.notNull(id, "平台ID不可为空");
         platformChannelService.pushChannel(id);
         return RetResponse.makeOKRsp();
     }
@@ -266,9 +292,9 @@ public class PlatformController {
     @PostMapping("/channel/device/add")
     @ResponseBody
     public RetResult<Void> addChannelByDevice(@RequestBody UpdateChannelParam param) {
-        Assert.notNull(param.getPlatformId(), "平台ID不可为空");
-        Assert.notNull(param.getDeviceIds(), "设备ID不可为空");
-        Assert.notEmpty(param.getDeviceIds(), "设备ID不可为空");
+        AssertUtils.notNull(param.getPlatformId(), "平台ID不可为空");
+        AssertUtils.notNull(param.getDeviceIds(), "设备ID不可为空");
+        AssertUtils.notEmpty(param.getDeviceIds(), "设备ID不可为空");
         platformChannelService.addChannelByDevice(param.getPlatformId(), param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -277,9 +303,9 @@ public class PlatformController {
     @PostMapping("/channel/device/remove")
     @ResponseBody
     public RetResult<Void> removeChannelByDevice(@RequestBody UpdateChannelParam param) {
-        Assert.notNull(param.getPlatformId(), "平台ID不可为空");
-        Assert.notNull(param.getDeviceIds(), "设备ID不可为空");
-        Assert.notEmpty(param.getDeviceIds(), "设备ID不可为空");
+        AssertUtils.notNull(param.getPlatformId(), "平台ID不可为空");
+        AssertUtils.notNull(param.getDeviceIds(), "设备ID不可为空");
+        AssertUtils.notEmpty(param.getDeviceIds(), "设备ID不可为空");
         platformChannelService.removeChannelByDevice(param.getPlatformId(), param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -288,7 +314,7 @@ public class PlatformController {
     @PostMapping("/channel/custom/update")
     @ResponseBody
     public RetResult<Void> updateCustomChannel(@RequestBody PlatformChannel channel) {
-        Assert.isTrue(channel.getId() != null, "共享通道ID必须存在");
+        AssertUtils.isTrue(channel.getId() != null, "共享通道ID必须存在");
         platformChannelService.updateCustomChannel(channel);
         return RetResponse.makeOKRsp();
     }

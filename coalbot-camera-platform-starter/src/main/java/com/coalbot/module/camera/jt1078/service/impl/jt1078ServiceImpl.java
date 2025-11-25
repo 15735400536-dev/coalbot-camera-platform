@@ -25,6 +25,7 @@ import com.coalbot.module.camera.mapper.jt1078.JTChannelMapper;
 import com.coalbot.module.camera.mapper.jt1078.JTTerminalMapper;
 import com.coalbot.module.camera.media.event.media.MediaArrivalEvent;
 import com.coalbot.module.camera.media.event.media.MediaDepartureEvent;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.core.response.RetResult;
@@ -40,7 +41,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
@@ -281,7 +281,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
             fileSystemFactory.removeOutputStream(filePath);
         }, 2 * 60 * 60 * 1000);
         Session session = SessionManager.INSTANCE.get(phoneNumber);
-        Assert.notNull(session, "连接不存在");
+        AssertUtils.notNull(session, "连接不存在");
         InetSocketAddress socketAddress = session.getLoadAddress();
         String hostName = socketAddress.getHostName();
 
@@ -810,7 +810,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
         String filePath = UUID.randomUUID().toString();
 
         Session session = SessionManager.INSTANCE.get(phoneNumber);
-        Assert.notNull(session, "连接不存在");
+        AssertUtils.notNull(session, "连接不存在");
         InetSocketAddress socketAddress = session.getLoadAddress();
         String hostName = socketAddress.getHostName();
 
@@ -849,7 +849,7 @@ public class jt1078ServiceImpl implements Ijt1078Service {
     @Override
     public void recordDownload(String filePath, ServletOutputStream outputStream) {
         JTRecordDownloadCatch downloadCatch = downloadManager.getCatch(filePath);
-        Assert.notNull(downloadCatch, "地址不存在");
+        AssertUtils.notNull(downloadCatch, "地址不存在");
         fileSystemFactory.addOutputStream(filePath, outputStream);
         jt1078Template.fileUpload(downloadCatch.getPhoneNumber(), downloadCatch.getJ9206(), 7200);
         downloadManager.runDownload(filePath, 2 * 60 * 60);

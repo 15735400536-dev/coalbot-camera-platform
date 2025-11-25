@@ -10,8 +10,10 @@ import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.gb28181.service.IRegionService;
 import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
 import com.coalbot.module.camera.mapper.gb28181.RegionMapper;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.CivilCodeUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.exception.CommonException;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -20,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -47,8 +48,8 @@ public class RegionServiceImpl implements IRegionService {
 
     @Override
     public void add(Region region) {
-        Assert.hasLength(region.getName(), "名称必须存在");
-        Assert.hasLength(region.getDeviceId(), "国标编号必须存在");
+        AssertUtils.notBlank(region.getName(), "名称必须存在");
+        AssertUtils.notBlank(region.getDeviceId(), "国标编号必须存在");
         if (ObjectUtils.isEmpty(region.getParentDeviceId()) || ObjectUtils.isEmpty(region.getParentDeviceId().trim())) {
             region.setParentDeviceId(null);
         }
@@ -107,13 +108,20 @@ public class RegionServiceImpl implements IRegionService {
     @Override
     @Transactional
     public void update(Region region) {
-        Assert.notNull(region.getDeviceId(), "编号不可为NULL");
-        Assert.notNull(region.getName(), "名称不可为NULL");
+        AssertUtils.notNull(region.getDeviceId(), "编号不可为NULL");
+        AssertUtils.notNull(region.getName(), "名称不可为NULL");
         Region regionInDb = regionMapper.queryOne(region.getId());
-        Assert.notNull(regionInDb, "待更新行政区划在数据库中不存在");
+        AssertUtils.notNull(regionInDb, "待更新行政区划在数据库中不存在");
+        if(Objects.isNull(regionInDb)) {
+            throw new CommonException("待更新行政区划在数据库中不存在");
+        }
         if (!regionInDb.getDeviceId().equals(region.getDeviceId())) {
             Region regionNewInDb = regionMapper.queryByDeviceId(region.getDeviceId());
-            Assert.isNull(regionNewInDb, "此行政区划已存在");
+            AssertUtils.isNull(regionNewInDb, "此行政区划已存在");
+            if(Objects.nonNull(regionNewInDb)) {
+                throw new CommonException("此行政区划已存在");
+            }
+
             // 编号发生变化，把分配了这个行政区划的通道全部更新，并发送数据
             gbChannelService.updateCivilCode(regionInDb.getDeviceId(), region.getDeviceId());
             // 子节点信息更新
@@ -259,7 +267,10 @@ public class RegionServiceImpl implements IRegionService {
     public String getDescription(String civilCode) {
 
         CivilCodePo civilCodePo = CivilCodeUtil.INSTANCE.getCivilCodePo(civilCode);
-        Assert.notNull(civilCodePo, String.format("节点%s未查询到", civilCode));
+//        AssertUtils.notNull(civilCodePo, String.format("节点%s未查询到", civilCode));
+        if(Objects.isNull(civilCodePo)) {
+            throw new CommonException(String.format("节点%s未查询到", civilCode));
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(civilCodePo.getName());
         List<CivilCodePo> civilCodePoList = CivilCodeUtil.INSTANCE.getAllParentCode(civilCode);
@@ -281,7 +292,10 @@ public class RegionServiceImpl implements IRegionService {
     public void addByCivilCode(String civilCode) {
         CivilCodePo civilCodePo = CivilCodeUtil.INSTANCE.getCivilCodePo(civilCode);
         // 查询是否已经存在此节点
-        Assert.notNull(civilCodePo, String.format("节点%s未查询到", civilCode));
+//        AssertUtils.notNull(civilCodePo, String.format("节点%s未查询到", civilCode));
+        if(Objects.isNull(civilCodePo)) {
+            throw new CommonException(String.format("节点%s未查询到", civilCode));
+        }
         List<CivilCodePo> civilCodePoList = CivilCodeUtil.INSTANCE.getAllParentCode(civilCode);
         civilCodePoList.add(civilCodePo);
 

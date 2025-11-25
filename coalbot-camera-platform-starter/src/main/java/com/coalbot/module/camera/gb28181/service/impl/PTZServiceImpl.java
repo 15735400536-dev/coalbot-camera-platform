@@ -13,11 +13,11 @@ import com.coalbot.module.camera.gb28181.service.IPTZService;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
@@ -61,7 +61,7 @@ public class PTZServiceImpl implements IPTZService {
         if (!userSetting.getServerId().equals(device.getServerId())) {
             // 通道ID
             DeviceChannel deviceChannel = deviceChannelService.getOneForSource(device.getDeviceId(), channelId);
-            Assert.notNull(deviceChannel, "通道不存在");
+            AssertUtils.notNull(deviceChannel, "通道不存在");
             String msg = redisRpcPlayService.frontEndCommand(device.getServerId(), deviceChannel.getId(), cmdCode, parameter1, parameter2, combindCode2);
             if (msg != null) {
                 throw new ControllerException(ErrorCode.ERROR100.getCode(), msg);

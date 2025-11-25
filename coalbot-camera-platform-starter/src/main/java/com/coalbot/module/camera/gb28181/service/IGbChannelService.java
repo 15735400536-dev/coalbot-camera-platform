@@ -86,7 +86,8 @@ public interface IGbChannelService {
 
     List<CommonGBChannel> queryListByStreamPushList(List<StreamPush> streamPushList);
 
-    PageInfo<CommonGBChannel> queryList(int page, int count, String query, Boolean online, Boolean hasRecordPlan, Integer channelType, String civilCode, String parentDeviceId);
+    PageInfo<CommonGBChannel> queryList(int page, int count,
+                                        String query, Boolean online, Boolean hasRecordPlan, Integer channelType, String civilCode, String parentDeviceId);
 
     PageInfo<CommonGBChannel> queryListByCivilCodeForUnusual(int page, int count, String query, Boolean online, Integer channelType);
 

@@ -8,11 +8,11 @@ import java.util.List;
 @Mapper
 public interface JTTerminalMapper {
 
-    @Select("SELECT * FROM wvp_jt_terminal where phone_number=#{phoneNumber}")
+    @Select("SELECT * FROM wcp_jt_terminal where phone_number=#{phoneNumber}")
     JTDevice getDevice(@Param("phoneNumber") String phoneNumber);
 
     @Update(value = {" <script>" +
-            "UPDATE wvp_jt_terminal " +
+            "UPDATE wcp_jt_terminal " +
             "SET update_time=#{updateTime}" +
             "<if test=\"provinceId != null\">, province_id=#{provinceId}</if>" +
             "<if test=\"terminalId != null\">, terminal_id=#{terminalId}</if>" +
@@ -33,7 +33,7 @@ public interface JTTerminalMapper {
     @Select(value = {" <script>" +
             "SELECT * " +
             "from " +
-            "wvp_jt_terminal jd " +
+            "wcp_jt_terminal jd " +
             "WHERE " +
             "1=1" +
             " <if test='query != null'> AND (" +
@@ -52,7 +52,7 @@ public interface JTTerminalMapper {
             " </script>"})
     List<JTDevice> getDeviceList(@Param("query") String query, @Param("online") Boolean online);
 
-    @Insert("INSERT INTO wvp_jt_terminal (" +
+    @Insert("INSERT INTO wcp_jt_terminal (" +
             "terminal_id,"+
             "province_id,"+
             "province_text,"+
@@ -87,23 +87,23 @@ public interface JTTerminalMapper {
             ")")
     void addDevice(JTDevice device);
 
-    @Delete("delete from wvp_jt_terminal where phone_number = #{phoneNumber}")
+    @Delete("delete from wcp_jt_terminal where phone_number = #{phoneNumber}")
     void deleteDeviceByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
     @Update(value = {" <script>" +
-            "UPDATE wvp_jt_terminal " +
+            "UPDATE wcp_jt_terminal " +
             "SET status=#{connected} " +
             "WHERE phone_number=#{phoneNumber}"+
             " </script>"})
     void updateDeviceStatus(@Param("connected") boolean connected, @Param("phoneNumber") String phoneNumber);
 
-    @Select("SELECT * FROM wvp_jt_terminal where id=#{deviceId}")
+    @Select("SELECT * FROM wcp_jt_terminal where id=#{deviceId}")
     JTDevice getDeviceById(@Param("deviceId") String deviceId);
 
     @Update({"<script>" +
             "<foreach collection='devices' item='item' separator=';'>" +
             " UPDATE" +
-            " wvp_jt_terminal" +
+            " wcp_jt_terminal" +
             " SET update_time=#{item.updateTime}" +
             "<if test='item.longitude != null'>, longitude=#{item.longitude}</if>" +
             "<if test='item.latitude != null'>, latitude=#{item.latitude}</if>" +

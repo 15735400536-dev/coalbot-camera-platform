@@ -21,6 +21,7 @@ import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
 import com.github.pagehelper.PageHelper;
@@ -33,7 +34,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -159,7 +159,7 @@ public class StreamProxyServiceImpl implements IStreamProxyService {
     }
 
     private void delete(StreamProxy streamProxy) {
-        Assert.notNull(streamProxy, "代理不可为NULL");
+        AssertUtils.notNull(streamProxy, "代理不可为NULL");
         if (streamProxy.getPulling() != null && streamProxy.getPulling()) {
             playService.stopProxy(streamProxy);
         }

@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@Order(value=12)
+@Order(value = 12)
 public class MediaServerConfig implements CommandLineRunner {
 
     @Autowired
@@ -44,14 +44,14 @@ public class MediaServerConfig implements CommandLineRunner {
         mediaSerItemInConfig.setServerId(userSetting.getServerId());
         if (defaultMediaServer != null && mediaSerItemInConfig.getId().equals(defaultMediaServer.getId())) {
             mediaServerService.update(mediaSerItemInConfig);
-        }else {
+        } else {
             if (defaultMediaServer != null) {
                 mediaServerService.delete(defaultMediaServer);
             }
             MediaServer mediaServerItem = mediaServerService.getOneFromDatabase(mediaSerItemInConfig.getId());
             if (mediaServerItem == null) {
                 mediaServerService.add(mediaSerItemInConfig);
-            }else {
+            } else {
                 mediaServerService.update(mediaSerItemInConfig);
             }
         }

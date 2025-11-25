@@ -33,6 +33,7 @@ import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.*;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.AudioBroadcastResult;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
@@ -43,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import javax.sdp.*;
@@ -1267,8 +1267,8 @@ public class PlayServiceImpl implements IPlayService {
 
     @Override
     public boolean audioBroadcastCmd(Device device, DeviceChannel deviceChannel, MediaServer mediaServerItem, String app, String stream, int timeout, boolean isFromPlatform, AudioBroadcastEvent event) throws InvalidArgumentException, ParseException, SipException {
-        Assert.notNull(device, "设备不存在");
-        Assert.notNull(deviceChannel, "通道不存在");
+        AssertUtils.notNull(device, "设备不存在");
+        AssertUtils.notNull(deviceChannel, "通道不存在");
         log.info("[语音喊话] device： {}, channel: {}", device.getDeviceId(), deviceChannel.getDeviceId());
         // 查询通道使用状态
         if (audioBroadcastManager.exit(deviceChannel.getId())) {
@@ -1623,9 +1623,9 @@ public class PlayServiceImpl implements IPlayService {
     @Override
     public void getSnap(String deviceId, String channelId, String fileName, ErrorCallback errorCallback) {
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeviceChannel channel = deviceChannelService.getOne(deviceId, channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         InviteInfo inviteInfo = inviteStreamService.getInviteInfoByDeviceAndChannel(InviteSessionType.PLAY, channel.getId());
         if (inviteInfo != null) {
             if (inviteInfo.getStreamInfo() != null) {
@@ -1694,7 +1694,7 @@ public class PlayServiceImpl implements IPlayService {
 
     @Override
     public void stop(InviteInfo inviteInfo) {
-        Assert.notNull(inviteInfo, "参数异常");
+        AssertUtils.notNull(inviteInfo, "参数异常");
         DeviceChannel channel = deviceChannelService.getOneForSourceById(inviteInfo.getChannelId());
         if (channel == null) {
             log.warn("[停止点播] 发现通道不存在");

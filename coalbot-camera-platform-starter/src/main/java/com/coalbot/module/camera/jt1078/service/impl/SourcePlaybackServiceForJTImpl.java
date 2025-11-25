@@ -8,17 +8,17 @@ import com.coalbot.module.camera.gb28181.service.ISourcePlaybackService;
 import com.coalbot.module.camera.jt1078.bean.JTChannel;
 import com.coalbot.module.camera.jt1078.bean.JTDevice;
 import com.coalbot.module.camera.jt1078.cmd.JT1078Template;
-import com.coalbot.module.camera.mapper.jt1078.JTChannelMapper;
-import com.coalbot.module.camera.mapper.jt1078.JTTerminalMapper;
 import com.coalbot.module.camera.jt1078.proc.request.J1205;
 import com.coalbot.module.camera.jt1078.service.Ijt1078PlayService;
+import com.coalbot.module.camera.mapper.jt1078.JTChannelMapper;
+import com.coalbot.module.camera.mapper.jt1078.JTTerminalMapper;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +43,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void playback(CommonGBChannel channel, Long startTime, Long stopTime, ErrorCallback<StreamInfo> callback) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
 
         playService.playback(device.getPhoneNumber(), jtChannel.getChannelId(), DateUtil.timestampTo_yyyy_MM_dd_HH_mm_ss(startTime),
@@ -57,9 +57,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void stopPlayback(CommonGBChannel channel, String stream) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
 
         playService.stopPlayback(device.getPhoneNumber(), jtChannel.getChannelId());
@@ -68,9 +68,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void playbackPause(CommonGBChannel channel, String stream) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
 
         playService.playbackControl(device.getPhoneNumber(), jtChannel.getChannelId(), 1, 0, null);
@@ -79,9 +79,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void playbackResume(CommonGBChannel channel, String stream) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
 
         playService.playbackControl(device.getPhoneNumber(), jtChannel.getChannelId(), 0, 0, null);
@@ -96,9 +96,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void playbackSpeed(CommonGBChannel channel, String stream, Double speed) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
 
         playService.playbackControl(device.getPhoneNumber(), jtChannel.getChannelId(), 0, (int)Math.floor(speed), null);
@@ -107,9 +107,9 @@ public class SourcePlaybackServiceForJTImpl implements ISourcePlaybackService {
     @Override
     public void queryRecord(CommonGBChannel channel, String startTime, String endTime, ErrorCallback<List<CommonRecordInfo>> callback) {
         JTChannel jtChannel = jtChannelMapper.selectChannelById(channel.getDataDeviceId());
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         JTDevice device = jtDeviceMapper.getDeviceById(jtChannel.getDataDeviceId());
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         jt1078Template.checkTerminalStatus(device.getPhoneNumber());
         List<J1205.JRecordItem> recordList = playService.getRecordList(device.getPhoneNumber(), jtChannel.getChannelId(), startTime, endTime);
         if (recordList.isEmpty()) {

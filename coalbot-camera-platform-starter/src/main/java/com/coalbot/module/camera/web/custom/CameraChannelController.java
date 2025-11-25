@@ -16,6 +16,7 @@ import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamPush.bean.StreamPush;
 import com.coalbot.module.camera.streamPush.service.IStreamPushPlayService;
 import com.coalbot.module.camera.streamPush.service.IStreamPushService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.HttpUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -356,7 +356,7 @@ public class CameraChannelController {
                                                                                 String stream,
                                                                                 String callId){
         StreamPush streamPush = streamPushService.getPush(app, stream);
-        Assert.notNull(streamPush, "地址不存在");
+        AssertUtils.notNull(streamPush, "地址不存在");
 
         // 权限校验
         StreamAuthorityInfo streamAuthorityInfo = redisCatchStorage.getStreamAuthorityInfo(app, stream);
@@ -402,7 +402,7 @@ public class CameraChannelController {
                                                                                 String callId){
 
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
-        Assert.notNull(mediaServer, "流媒体服务器不存在");
+        AssertUtils.notNull(mediaServer, "流媒体服务器不存在");
         StreamInfo streamInfo = mediaServerService.getStreamInfoByAppAndStream(mediaServer, app, stream, null, callId);
         streamInfo=streamInfo.clone();//深拷贝
         String host;

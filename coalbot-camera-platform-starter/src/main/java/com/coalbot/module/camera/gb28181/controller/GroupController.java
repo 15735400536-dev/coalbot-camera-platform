@@ -4,6 +4,7 @@ import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.Group;
 import com.coalbot.module.camera.gb28181.bean.GroupTree;
 import com.coalbot.module.camera.gb28181.service.IGroupService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,7 +78,7 @@ public class GroupController {
     @ResponseBody
     @DeleteMapping("/delete")
     public RetResult<Void> delete(String id){
-        Assert.notNull(id, "分组id（deviceId）不需要存在");
+        AssertUtils.notNull(id, "分组id（deviceId）不需要存在");
         boolean result = groupService.delete(id);
         if (!result) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "移除失败");
@@ -101,7 +101,7 @@ public class GroupController {
 //    public Group queryGroupByDeviceId(
 //            @RequestParam(required = true) String deviceId
 //    ){
-//        Assert.hasLength(deviceId, "");
+//        AssertUtils.notBlank(deviceId, "");
 //        return groupService.queryGroupByDeviceId(deviceId);
 //    }
 

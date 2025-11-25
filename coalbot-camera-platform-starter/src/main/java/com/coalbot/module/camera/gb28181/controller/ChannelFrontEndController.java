@@ -5,8 +5,8 @@ import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.service.IGbChannelControlService;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,7 +49,7 @@ public class ChannelFrontEndController {
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         if (panSpeed == null) {
             panSpeed = 50;
@@ -141,7 +140,7 @@ public class ChannelFrontEndController {
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         if (speed == null) {
             speed = 50;
@@ -201,7 +200,7 @@ public class ChannelFrontEndController {
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         FrontEndControlCodeForFI controlCode = new FrontEndControlCodeForFI();
         controlCode.setFocusSpeed(speed);
@@ -244,7 +243,7 @@ public class ChannelFrontEndController {
         }
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         DeferredResult<RetResult<List<Preset>>> result = new DeferredResult<>();
 
@@ -268,7 +267,7 @@ public class ChannelFrontEndController {
 
     private DeferredResult<RetResult<String>> controlPreset(String channelId, FrontEndControlCodeForPreset controlCode) {
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
@@ -331,7 +330,7 @@ public class ChannelFrontEndController {
 
     private DeferredResult<RetResult<String>> tourControl(String channelId, FrontEndControlCodeForTour controlCode) {
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
@@ -436,7 +435,7 @@ public class ChannelFrontEndController {
     private DeferredResult<RetResult<String>> scanControl(String channelId, FrontEndControlCodeForScan controlCode) {
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
         result.onTimeout(() -> {
@@ -523,7 +522,7 @@ public class ChannelFrontEndController {
     public DeferredResult<RetResult<String>> wiper(String channelId, String command) {
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         FrontEndControlCodeForWiper controlCode = new FrontEndControlCodeForWiper();
 
@@ -566,7 +565,7 @@ public class ChannelFrontEndController {
     public DeferredResult<com.coalbot.module.core.response.RetResult<String>> auxiliarySwitch(String channelId, String command, Integer auxiliaryId) {
 
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         FrontEndControlCodeForAuxiliary controlCode = new FrontEndControlCodeForAuxiliary();
         controlCode.setAuxiliaryId(auxiliaryId);

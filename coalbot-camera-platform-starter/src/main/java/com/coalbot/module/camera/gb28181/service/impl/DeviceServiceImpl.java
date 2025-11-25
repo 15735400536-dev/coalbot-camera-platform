@@ -32,6 +32,7 @@ import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
@@ -813,7 +814,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
     @Transactional
     public boolean delete(String deviceId) {
         Device device = getDeviceByDeviceIdFromDb(deviceId);
-        Assert.notNull(device, "未找到设备");
+        AssertUtils.notNull(device, "未找到设备");
         if (subscribeTaskRunner.containsKey(SubscribeTaskForCatalog.getKey(device))) {
             removeCatalogSubscribe(device, null);
         }
@@ -882,8 +883,8 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
     @Override
     public void subscribeCatalog(String id, int cycle) {
         Device device = deviceMapper.query(id);
-        Assert.notNull(device, "未找到设备");
-        Assert.isTrue(device.isOnLine(), "设备已离线");
+        AssertUtils.notNull(device, "未找到设备");
+        AssertUtils.isTrue(device.isOnLine(), "设备已离线");
         if (device.getSubscribeCycleForCatalog() == cycle) {
             return;
         }
@@ -913,7 +914,7 @@ public class DeviceServiceImpl implements IDeviceService, CommandLineRunner {
     @Override
     public void subscribeMobilePosition(String id, int cycle, int interval) {
         Device device = deviceMapper.query(id);
-        Assert.notNull(device, "未找到设备");
+        AssertUtils.notNull(device, "未找到设备");
         if (!device.isOnLine()) {
             // 开启订阅
             device.setSubscribeCycleForMobilePosition(cycle);

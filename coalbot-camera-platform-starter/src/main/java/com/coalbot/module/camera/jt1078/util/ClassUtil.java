@@ -15,7 +15,7 @@ public class ClassUtil {
 
     public static ConfigurableApplicationContext context;
 
-    public static <T>  T  getBean(String beanName, Class<T> clazz) {
+    public static <T> T getBean(String beanName, Class<T> clazz) {
         return context.getBean(beanName, clazz);
     }
 

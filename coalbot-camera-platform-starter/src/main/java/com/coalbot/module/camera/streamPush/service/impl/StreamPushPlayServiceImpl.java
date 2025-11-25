@@ -3,6 +3,7 @@ package com.coalbot.module.camera.streamPush.service.impl;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
+import com.coalbot.module.camera.mapper.streamPush.StreamPushMapper;
 import com.coalbot.module.camera.media.bean.MediaInfo;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
@@ -14,8 +15,8 @@ import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
 import com.coalbot.module.camera.service.redisMsg.RedisPushStreamResponseListener;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamPush.bean.StreamPush;
-import com.coalbot.module.camera.mapper.streamPush.StreamPushMapper;
 import com.coalbot.module.camera.streamPush.service.IStreamPushPlayService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class StreamPushPlayServiceImpl implements IStreamPushPlayService {
     @Override
     public void start(String id, ErrorCallback<StreamInfo> callback, String platformDeviceId, String platformName ) {
         StreamPush streamPush = streamPushMapper.queryOne(id);
-        Assert.notNull(streamPush, "推流信息未找到");
+        AssertUtils.notNull(streamPush, "推流信息未找到");
 
         if (streamPush.isPushing() && !userSetting.getServerId().equals(streamPush.getServerId())) {
             redisRpcPlayService.playPush(streamPush.getServerId(), id, callback);
@@ -80,7 +81,7 @@ public class StreamPushPlayServiceImpl implements IStreamPushPlayService {
                 return;
             }
         }
-        Assert.isTrue(streamPush.isStartOfflinePush(), "通道未推流");
+        AssertUtils.isTrue(streamPush.isStartOfflinePush(), "通道未推流");
         // 发送redis消息以使设备上线，流上线后被
         log.info("[ app={}, stream={} ]通道未推流，发送redis信息控制设备开始推流", streamPush.getApp(), streamPush.getStream());
         MessageForPushChannel messageForPushChannel = MessageForPushChannel.getInstance(1,
@@ -125,7 +126,7 @@ public class StreamPushPlayServiceImpl implements IStreamPushPlayService {
         }
         String mediaServerId = streamPush.getMediaServerId();
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
-        Assert.notNull(mediaServer, "未找到使用的节点");
+        AssertUtils.notNull(mediaServer, "未找到使用的节点");
         mediaServerService.closeStreams(mediaServer, app, stream);
     }
 
@@ -137,7 +138,7 @@ public class StreamPushPlayServiceImpl implements IStreamPushPlayService {
         }
         String mediaServerId = streamPush.getMediaServerId();
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
-        Assert.notNull(mediaServer, "未找到使用的节点");
+        AssertUtils.notNull(mediaServer, "未找到使用的节点");
         mediaServerService.closeStreams(mediaServer, streamPush.getApp(), streamPush.getStream());
     }
 }

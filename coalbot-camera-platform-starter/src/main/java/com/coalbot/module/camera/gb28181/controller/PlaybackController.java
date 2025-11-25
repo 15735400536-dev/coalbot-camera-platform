@@ -15,9 +15,9 @@ import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.callback.RequestMessage;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -213,7 +212,7 @@ public class PlaybackController {
     @Parameter(name = "speed", description = "倍速0.25 0.5 1、2、4、8", required = true)
     @GetMapping("/speed/{streamId}/{speed}")
     public RetResult<Void> playSpeed(@PathVariable String streamId, @PathVariable Double speed) {
-        Assert.notNull(speed, "倍速不存在");
+        AssertUtils.notNull(speed, "倍速不存在");
         log.info("playSpeed: " + streamId + ", " + speed);
         try {
             playService.playbackSpeed(streamId, speed);

@@ -16,14 +16,14 @@ public interface StreamPushMapper {
 
     Integer dataType = ChannelDataType.GB28181;
 
-    @Insert("INSERT INTO wvp_stream_push (app, stream, media_server_id, server_id, push_time,  update_time, create_time, pushing, start_offline_push) VALUES" +
+    @Insert("INSERT INTO wcp_stream_push (app, stream, media_server_id, server_id, push_time,  update_time, create_time, pushing, start_offline_push) VALUES" +
             "(#{app}, #{stream}, #{mediaServerId} , #{serverId} , #{pushTime} ,#{updateTime}, #{createTime}, #{pushing}, #{startOfflinePush})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int add(StreamPush streamPushItem);
 
 
     @Update(value = {" <script>" +
-            "UPDATE wvp_stream_push " +
+            "UPDATE wcp_stream_push " +
             "SET update_time=#{updateTime}" +
             "<if test=\"app != null\">, app=#{app}</if>" +
             "<if test=\"stream != null\">, stream=#{stream}</if>" +
@@ -32,11 +32,11 @@ public interface StreamPushMapper {
             "<if test=\"pushTime != null\">, push_time=#{pushTime}</if>" +
             "<if test=\"pushing != null\">, pushing=#{pushing}</if>" +
             "<if test=\"startOfflinePush != null\">, start_offline_push=#{startOfflinePush}</if>" +
-            "WHERE id = #{id}"+
+            "WHERE id = #{id}" +
             " </script>"})
     int update(StreamPush streamPushItem);
 
-    @Delete("DELETE FROM wvp_stream_push WHERE id=#{id}")
+    @Delete("DELETE FROM wcp_stream_push WHERE id=#{id}")
     int del(@Param("id") String id);
 
     @Select(value = {" <script>" +
@@ -46,8 +46,8 @@ public interface StreamPushMapper {
             " wdc.*, " +
             " wdc.id as gb_id" +
             " from " +
-            " wvp_stream_push st " +
-            " LEFT join wvp_device_channel wdc " +
+            " wcp_stream_push st " +
+            " LEFT join wcp_device_channel wdc " +
             " on wdc.data_type = 2 and st.id = wdc.data_device_id " +
             " WHERE " +
             " 1=1 " +
@@ -60,91 +60,91 @@ public interface StreamPushMapper {
             " </script>"})
     List<StreamPush> selectAll(@Param("query") String query, @Param("pushing") Boolean pushing, @Param("mediaServerId") String mediaServerId);
 
-    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on  wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.app=#{app} AND st.stream=#{stream}")
+    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on  wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.app=#{app} AND st.stream=#{stream}")
     StreamPush selectByAppAndStream(@Param("app") String app, @Param("stream") String stream);
 
-    @Insert("<script>"  +
-            "Insert INTO wvp_stream_push ( " +
+    @Insert("<script>" +
+            "Insert INTO wcp_stream_push ( " +
             " app, stream, media_server_id, server_id, push_time,  update_time, create_time, pushing, start_offline_push) " +
             " VALUES <foreach collection='streamPushItems' item='item' index='index' separator=','>" +
             " ( #{item.app}, #{item.stream}, #{item.mediaServerId},#{item.serverId} ,#{item.pushTime}, #{item.updateTime}, #{item.createTime}, #{item.pushing}, #{item.startOfflinePush} )" +
             " </foreach>" +
             " </script>")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
-    int addAll(List<StreamPush> streamPushItems);
+    int addAll(@Param("streamPushItems") List<StreamPush> streamPushItems);
 
-    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId}")
+    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId}")
     List<StreamPush> selectAllByMediaServerId(String mediaServerId);
 
-    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId} and wdc.gb_device_id is null")
+    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId} and wdc.gb_device_id is null")
     List<StreamPush> selectAllByMediaServerIdWithOutGbID(String mediaServerId);
 
-    @Update("UPDATE wvp_stream_push " +
+    @Update("UPDATE wcp_stream_push " +
             "SET pushing=#{pushing}, server_id=#{serverId}, media_server_id=#{mediaServerId} " +
             "WHERE id=#{id}")
     int updatePushStatus(StreamPush streamPush);
 
-    @Select("<script> "+
-            "SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id " +
+    @Select("<script> " +
+            "SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id " +
             "where (st.app, st.stream) in (" +
             "<foreach collection='offlineStreams' item='item' separator=','>" +
             "(#{item.app}, #{item.stream}) " +
             "</foreach>" +
             ")</script>")
-    List<StreamPush> getListInList(List<StreamPushItemFromRedis> offlineStreams);
+    List<StreamPush> getListInList(@Param("offlineStreams") List<StreamPushItemFromRedis> offlineStreams);
 
 
-    @Select("SELECT CONCAT(app,stream) from wvp_stream_push")
+    @Select("SELECT CONCAT(app,stream) from wcp_stream_push")
     List<String> getAllAppAndStream();
 
-    @Select("select count(1) from wvp_stream_push ")
+    @Select("select count(1) from wcp_stream_push ")
     int getAllCount();
 
     @Select(value = {" <script>" +
-            " select count(1) from wvp_stream_push where pushing = true" +
+            " select count(1) from wcp_stream_push where pushing = true" +
             " </script>"})
     int getAllPushing(Boolean usePushingAsStatus);
 
     @MapKey("uniqueKey")
     @Select("SELECT CONCAT(wsp.app, wsp.stream) as unique_key, wsp.*, wdc.* , " +
             " wdc.id as gb_id " +
-            " from wvp_stream_push wsp " +
-            " LEFT join wvp_device_channel wdc on wdc.data_type = 2 and wsp.id = wdc.data_device_id")
+            " from wcp_stream_push wsp " +
+            " LEFT join wcp_device_channel wdc on wdc.data_type = 2 and wsp.id = wdc.data_device_id")
     Map<String, StreamPush> getAllAppAndStreamMap();
 
 
     @MapKey("gbDeviceId")
     @Select("SELECT wdc.gb_device_id, wsp.id as data_device_id, wsp.*, wsp.* , wdc.id as gb_id " +
-            " from wvp_stream_push wsp " +
-            " LEFT join wvp_device_channel wdc on wdc.data_type = 2 and wsp.id = wdc.data_device_id")
+            " from wcp_stream_push wsp " +
+            " LEFT join wcp_device_channel wdc on wdc.data_type = 2 and wsp.id = wdc.data_device_id")
     Map<String, StreamPush> getAllGBId();
 
-    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.id=#{id}")
+    @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.id=#{id}")
     StreamPush queryOne(@Param("id") String id);
 
-    @Select("<script> "+
-            "SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wvp_stream_push st LEFT join wvp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id " +
+    @Select("<script> " +
+            "SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id " +
             " where st.id in (" +
             " <foreach collection='ids' item='item' separator=','>" +
             " #{item} " +
             " </foreach>" +
             " )</script>")
-    List<StreamPush> selectInSet(Set<String> ids);
+    List<StreamPush> selectInSet(@Param("ids") Set<String> ids);
 
-    @Delete("<script> "+
-            "DELETE FROM wvp_stream_push WHERE" +
+    @Delete("<script> " +
+            "DELETE FROM wcp_stream_push WHERE" +
             " id in (" +
             "<foreach collection='streamPushList' item='item' separator=','>" +
             " #{item.id} " +
             "</foreach>" +
             ")</script>")
-    void batchDel(List<StreamPush> streamPushList);
+    void batchDel(@Param("streamPushList") List<StreamPush> streamPushList);
 
 
     @Update({"<script>" +
             "<foreach collection='streamPushItemForUpdate' item='item' separator=';'>" +
             " UPDATE" +
-            " wvp_stream_push" +
+            " wcp_stream_push" +
             " SET update_time=#{item.updateTime}" +
             ", app=#{item.app}" +
             ", stream=#{item.stream}" +
@@ -156,15 +156,15 @@ public interface StreamPushMapper {
             " WHERE id=#{item.id}" +
             "</foreach>" +
             "</script>"})
-    int batchUpdate(List<StreamPush> streamPushItemForUpdate);
+    int batchUpdate(@Param("streamPushItemForUpdate") List<StreamPush> streamPushItemForUpdate);
 
-    @Delete(" DELETE FROM wvp_stream_push" +
+    @Delete(" DELETE FROM wcp_stream_push" +
             " WHERE server_id = #{serverId}" +
             "  AND NOT EXISTS (" +
             "    SELECT 1 " +
-            "    FROM wvp_device_channel wdc " +
+            "    FROM wcp_device_channel wdc " +
             "    WHERE wdc.data_type = 2 " +
-            "      AND wvp_stream_push.id = wdc.data_device_id" +
+            "      AND wcp_stream_push.id = wdc.data_device_id" +
             "  );")
     void deleteWithoutGBId(@Param("serverId") String serverId);
 }

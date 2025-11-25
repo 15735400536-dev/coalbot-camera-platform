@@ -13,7 +13,7 @@ public interface JTChannelMapper {
     List<JTChannel> selectAll(@Param("terminalDbId") String terminalDbId, @Param("query") String query);
 
     @Update(value = {" <script>" +
-            "UPDATE wvp_jt_channel " +
+            "UPDATE wcp_jt_channel " +
             "SET update_time=#{updateTime}, terminal_db_id=#{terminalDbId}, has_audio=#{hasAudio}, name=#{name}" +
             ", channel_id=#{channelId}" +
             " WHERE id=#{id}"+
@@ -21,7 +21,7 @@ public interface JTChannelMapper {
     void update(JTChannel channel);
 
     @Insert(value = {" <script>" +
-            "INSERT INTO wvp_jt_channel (" +
+            "INSERT INTO wcp_jt_channel (" +
             "terminal_db_id,"+
             "channel_id,"+
             "name,"+
@@ -39,7 +39,7 @@ public interface JTChannelMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     void add(JTChannel channel);
 
-    @Delete("delete from wvp_jt_channel where id = #{id}")
+    @Delete("delete from wcp_jt_channel where id = #{id}")
     void delete(@Param("id") String id);
 
     @SelectProvider(type = JTChannelProvider.class, method = "selectChannelByChannelId")

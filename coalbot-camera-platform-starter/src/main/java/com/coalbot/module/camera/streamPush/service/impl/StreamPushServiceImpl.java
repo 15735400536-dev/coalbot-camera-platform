@@ -6,6 +6,7 @@ import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
+import com.coalbot.module.camera.mapper.streamPush.StreamPushMapper;
 import com.coalbot.module.camera.media.bean.MediaInfo;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.event.media.MediaArrivalEvent;
@@ -19,8 +20,8 @@ import com.coalbot.module.camera.service.ISendRtpServerService;
 import com.coalbot.module.camera.service.bean.StreamPushItemFromRedis;
 import com.coalbot.module.camera.storager.IRedisCatchStorage;
 import com.coalbot.module.camera.streamPush.bean.StreamPush;
-import com.coalbot.module.camera.mapper.streamPush.StreamPushMapper;
 import com.coalbot.module.camera.streamPush.service.IStreamPushService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.ResourceBaseInfo;
@@ -240,8 +241,8 @@ public class StreamPushServiceImpl implements IStreamPushService {
     @Override
     @Transactional
     public boolean update(StreamPush streamPush) {
-        Assert.notNull(streamPush, "推流信息不可为NULL");
-        Assert.isTrue(streamPush.getId() != null, "推流信息ID必须存在");
+        AssertUtils.notNull(streamPush, "推流信息不可为NULL");
+        AssertUtils.isTrue(streamPush.getId() != null, "推流信息ID必须存在");
         log.info("[更新推流]：id: {}, app: {}, stream: {}, ", streamPush.getId(), streamPush.getApp(), streamPush.getStream());
         StreamPush streamPushInDb = streamPushMapper.queryOne(streamPush.getId());
         if (!streamPushInDb.getApp().equals(streamPush.getApp()) || !streamPushInDb.getStream().equals(streamPush.getStream())) {

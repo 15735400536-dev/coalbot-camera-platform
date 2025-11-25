@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONObject;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.GbDeviceChannelQueryDTO;
+import com.coalbot.module.camera.dto.GbDeviceQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceChannel;
 import com.coalbot.module.camera.gb28181.bean.SyncStatus;
@@ -13,7 +15,10 @@ import com.coalbot.module.camera.gb28181.service.IInviteStreamService;
 import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommander;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcService;
+import com.coalbot.module.camera.utils.AssertUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -26,7 +31,6 @@ import org.apache.ibatis.annotations.Options;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -77,53 +81,79 @@ public class DeviceQuery {
     }
 
 
-    @Operation(summary = "分页查询国标设备")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "搜索", required = false)
-    @Parameter(name = "status", description = "状态", required = false)
-    @GetMapping("/devices")
+//    @Operation(summary = "分页查询国标设备")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "搜索", required = false)
+//    @Parameter(name = "status", description = "状态", required = false)
+//    @GetMapping("/devices")
+//    @Options()
+//    public RetResult<PageInfo<Device>> devices(int page, int count, String query, Boolean status) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        return RetResponse.makeOKRsp(deviceService.getAll(page, count, query, status));
+//    }
+
+    @Operation(summary = "分页查询国标设备", method = "POST")
+    @PostMapping("/devices")
     @Options()
-    public RetResult<PageInfo<Device>> devices(int page, int count, String query, Boolean status) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return RetResponse.makeOKRsp(deviceService.getAll(page, count, query, status));
+    public RetResult<PageList<Device>> devices(@RequestBody GbDeviceQueryDTO dto) {
+        PageInfo<Device> pageResult = deviceService.getAll(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getStatus());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
+//    @GetMapping("/devices/{deviceId}/channels")
+//    @Operation(summary = "分页查询通道")
+//    @Parameter(name = "deviceId", description = "设备国标编号", required = true)
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "channelType", description = "设备/子目录-> false/true")
+//    public RetResult<PageInfo<DeviceChannel>> channels(@PathVariable String deviceId,
+//                                                       int page, int count,
+//                                                       @RequestParam(required = false) String query,
+//                                                       @RequestParam(required = false) Boolean online,
+//                                                       @RequestParam(required = false) Boolean channelType) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//
+//        return RetResponse.makeOKRsp(deviceChannelService.queryChannelsByDeviceId(deviceId, query, channelType, online, page, count));
+//    }
 
-    @GetMapping("/devices/{deviceId}/channels")
-    @Operation(summary = "分页查询通道")
-    @Parameter(name = "deviceId", description = "设备国标编号", required = true)
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "channelType", description = "设备/子目录-> false/true")
-    public RetResult<PageInfo<DeviceChannel>> channels(@PathVariable String deviceId,
-                                                       int page, int count,
-                                                       @RequestParam(required = false) String query,
-                                                       @RequestParam(required = false) Boolean online,
-                                                       @RequestParam(required = false) Boolean channelType) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-
-        return RetResponse.makeOKRsp(deviceChannelService.queryChannelsByDeviceId(deviceId, query, channelType, online, page, count));
+    @PostMapping("/devices/{deviceId}/channels")
+    @Operation(summary = "分页查询通道", method = "POST")
+    public RetResult<PageList<DeviceChannel>> channels(@RequestBody GbDeviceChannelQueryDTO dto) {
+        PageInfo<DeviceChannel> pageResult = deviceChannelService.queryChannelsByDeviceId(dto.getDeviceId(), dto.getQuery(),
+                dto.getChannelType(), dto.getOnline(), TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()));
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
-    @GetMapping("/streams")
+//    @GetMapping("/streams")
+//    @Operation(summary = "分页查询存在流的通道")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    public RetResult<PageInfo<DeviceChannel>> streamChannels(int page, int count,
+//                                                             @RequestParam(required = false) String query) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//
+//        return RetResponse.makeOKRsp(deviceChannelService.queryChannels(query, true, null, null, true, page, count));
+//    }
+
+    @PostMapping("/streams")
     @Operation(summary = "分页查询存在流的通道")
     @Parameter(name = "page", description = "当前页", required = true)
     @Parameter(name = "count", description = "每页查询数量", required = true)
     @Parameter(name = "query", description = "查询内容")
-    public RetResult<PageInfo<DeviceChannel>> streamChannels(int page, int count,
-                                                             @RequestParam(required = false) String query) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-
-        return RetResponse.makeOKRsp(deviceChannelService.queryChannels(query, true, null, null, true, page, count));
+    public RetResult<PageInfo<DeviceChannel>> streamChannels(@RequestBody GbDeviceChannelQueryDTO dto) {
+        return RetResponse.makeOKRsp(deviceChannelService.queryChannels(dto.getQuery(), true, null, null, true,
+                TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize())));
     }
 
     @Operation(summary = "同步设备通道")
@@ -191,8 +221,8 @@ public class DeviceQuery {
     @Parameter(name = "audio", description = "开启/关闭音频", required = true)
     @PostMapping("/channel/audio")
     public RetResult<Void> changeAudio(String channelId, Boolean audio) {
-        Assert.notNull(channelId, "通道的数据库ID不可为NULL");
-        Assert.notNull(audio, "开启/关闭音频不可为NULL");
+        AssertUtils.notNull(channelId, "通道的数据库ID不可为NULL");
+        AssertUtils.notNull(audio, "开启/关闭音频不可为NULL");
         deviceChannelService.changeAudio(channelId, audio);
         return RetResponse.makeOKRsp();
     }
@@ -219,7 +249,7 @@ public class DeviceQuery {
             "UDP（udp传输），TCP-ACTIVE（tcp主动模式），TCP-PASSIVE（tcp被动模式）", required = true)
     @PostMapping("/transport/{deviceId}/{streamMode}")
     public RetResult<Void> updateTransport(@PathVariable String deviceId, @PathVariable String streamMode) {
-        Assert.isTrue(streamMode.equalsIgnoreCase("UDP")
+        AssertUtils.isTrue(streamMode.equalsIgnoreCase("UDP")
                 || streamMode.equalsIgnoreCase("TCP-ACTIVE")
                 || streamMode.equalsIgnoreCase("TCP-PASSIVE"), "数据流传输模式, 取值：UDP/TCP-ACTIVE/TCP-PASSIVE");
         Device device = deviceService.getDeviceByDeviceId(deviceId);
@@ -267,7 +297,7 @@ public class DeviceQuery {
             log.debug("设备状态查询API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
         deviceService.deviceStatus(device, (code, msg, data) -> {
             result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -300,7 +330,7 @@ public class DeviceQuery {
             log.debug("设备报警查询API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeferredResult<RetResult<Object>> result = new DeferredResult<>();
         deviceService.alarm(device, startPriority, endPriority, alarmMethod, alarmType, startTime, endTime, (code, msg, data) -> {
             result.setResult(RetResponse.makeRsp(code, msg, data));
@@ -320,7 +350,7 @@ public class DeviceQuery {
             log.debug("设备信息查询API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeferredResult<RetResult<Object>> result = new DeferredResult<>();
         deviceService.deviceInfo(device, (code, msg, data) -> {
             result.setResult(RetResponse.makeRsp(code, msg, data));

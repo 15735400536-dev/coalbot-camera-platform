@@ -9,13 +9,14 @@ import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.bean.FrontEndControlCodeForPTZ;
 import com.coalbot.module.camera.gb28181.bean.Group;
 import com.coalbot.module.camera.gb28181.bean.MobilePosition;
-import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
-import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
 import com.coalbot.module.camera.gb28181.event.channel.ChannelEvent;
 import com.coalbot.module.camera.gb28181.event.subscribe.mobilePosition.MobilePositionEvent;
 import com.coalbot.module.camera.gb28181.service.IGbChannelControlService;
 import com.coalbot.module.camera.gb28181.service.IGbChannelPlayService;
+import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
+import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.Coordtransform;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.web.custom.bean.*;
@@ -365,7 +366,7 @@ public class CameraChannelService implements CommandLineRunner {
     public PageInfo<CameraChannel> queryList(Integer page, Integer count, String groupAlias, Boolean status, String geoCoordSys) {
         // 构建组织结构信息
         Group group = groupMapper.queryGroupByAlias(groupAlias);
-        Assert.notNull(group, "组织结构不存在");
+        AssertUtils.notNull(group, "组织结构不存在");
         String groupDeviceId = group.getDeviceId();
 
         // 构建分页
@@ -384,7 +385,7 @@ public class CameraChannelService implements CommandLineRunner {
         // 构建组织结构信息
         if (groupAlias != null) {
             CameraGroup group = groupMapper.queryGroupByAlias(groupAlias);
-            Assert.notNull(group, "组织结构不存在");
+            AssertUtils.notNull(group, "组织结构不存在");
             String groupDeviceId = group.getDeviceId();
             // 获取所有子节点
             groupList = queryAllGroupChildren(group.getId(), group.getBusinessGroup());
@@ -425,7 +426,7 @@ public class CameraChannelService implements CommandLineRunner {
     public List<CameraCount> queryCountWithChild(String groupAlias) {
         // 构建组织结构信息
         CameraGroup group = groupMapper.queryGroupByAlias(groupAlias);
-        Assert.notNull(group, "组织结构不存在");
+        AssertUtils.notNull(group, "组织结构不存在");
         // 获取所有子节点
         List<CameraGroup> groupList = queryAllGroupChildren(group.getId(), group.getBusinessGroup());
         groupList.add(group);
@@ -506,7 +507,7 @@ public class CameraChannelService implements CommandLineRunner {
 
     public CameraChannel queryOne(String deviceId, String deviceCode, String geoCoordSys) {
         List<CameraChannel> cameraChannels = channelMapper.queryGbChannelByChannelDeviceIdAndGbDeviceId(deviceId, deviceCode);
-        Assert.isTrue(cameraChannels.isEmpty(), "通道不存在");
+        AssertUtils.isTrue(cameraChannels.isEmpty(), "通道不存在");
         List<CameraChannel> channels = addIconPathAndPositionForCameraChannelList(cameraChannels, geoCoordSys);
         CameraChannel channel = channels.get(0);
         if (deviceCode != null) {
@@ -524,7 +525,7 @@ public class CameraChannelService implements CommandLineRunner {
      */
     public void play(String deviceId, String deviceCode, ErrorCallback<CameraStreamInfo> callback) {
         List<CameraChannel> cameraChannels = channelMapper.queryGbChannelByChannelDeviceIdAndGbDeviceId(deviceId, deviceCode);
-        Assert.isTrue(cameraChannels.isEmpty(), "通道不存在");
+        AssertUtils.isTrue(cameraChannels.isEmpty(), "通道不存在");
         CameraChannel channel = cameraChannels.get(0);
         channelPlayService.play(channel, null, userSetting.getRecordSip(), (code, msg, data) -> {
             callback.run(code, msg, new CameraStreamInfo(channel, data));
@@ -538,14 +539,14 @@ public class CameraChannelService implements CommandLineRunner {
      */
     public void stopPlay(String deviceId, String deviceCode) {
         List<CameraChannel> cameraChannels = channelMapper.queryGbChannelByChannelDeviceIdAndGbDeviceId(deviceId, deviceCode);
-        Assert.isTrue(cameraChannels.isEmpty(), "通道不存在");
+        AssertUtils.isTrue(cameraChannels.isEmpty(), "通道不存在");
         CameraChannel channel = cameraChannels.get(0);
         channelPlayService.stopPlay(channel);
     }
 
     public void ptz(String deviceId, String deviceCode, String command, Integer speed, ErrorCallback<String> callback) {
         List<CameraChannel> cameraChannels = channelMapper.queryGbChannelByChannelDeviceIdAndGbDeviceId(deviceId, deviceCode);
-        Assert.isTrue(cameraChannels.isEmpty(), "通道不存在");
+        AssertUtils.isTrue(cameraChannels.isEmpty(), "通道不存在");
         CameraChannel channel = cameraChannels.get(0);
 
         if (speed == null) {
@@ -602,7 +603,7 @@ public class CameraChannelService implements CommandLineRunner {
 
     public void updateCamera(String deviceId, String deviceCode, String name, Double longitude, Double latitude, String geoCoordSys) {
         List<CameraChannel> cameraChannels = channelMapper.queryGbChannelByChannelDeviceIdAndGbDeviceId(deviceId, deviceCode);
-        Assert.isTrue(cameraChannels.isEmpty(), "通道不存在");
+        AssertUtils.isTrue(cameraChannels.isEmpty(), "通道不存在");
         CameraChannel commonGBChannel = cameraChannels.get(0);
         commonGBChannel.setGbName(name);
         if (geoCoordSys != null && longitude != null && latitude != null
@@ -641,7 +642,7 @@ public class CameraChannelService implements CommandLineRunner {
     public List<CameraChannel> queryListInBox(Double minLongitude, Double maxLongitude, Double minLatitude, Double maxLatitude, Integer level, String groupAlias, String geoCoordSys) {
         // 构建组织结构信息
         CameraGroup group = groupMapper.queryGroupByAlias(groupAlias);
-        Assert.notNull(group, "组织结构不存在");
+        AssertUtils.notNull(group, "组织结构不存在");
         // 获取所有子节点
         List<CameraGroup> groupList = queryAllGroupChildren(group.getId(), group.getBusinessGroup());
         groupList.add(group);
@@ -675,7 +676,7 @@ public class CameraChannelService implements CommandLineRunner {
     public List<CameraChannel> queryListInCircle(Double centerLongitude, Double centerLatitude, Double radius, Integer level, String groupAlias, String geoCoordSys) {
         // 构建组织结构信息
         CameraGroup group = groupMapper.queryGroupByAlias(groupAlias);
-        Assert.notNull(group, "组织结构不存在");
+        AssertUtils.notNull(group, "组织结构不存在");
         // 获取所有子节点
         List<CameraGroup> groupList = queryAllGroupChildren(group.getId(), group.getBusinessGroup());
         groupList.add(group);
@@ -702,7 +703,7 @@ public class CameraChannelService implements CommandLineRunner {
     public List<CameraChannel> queryListInPolygon(List<Point> pointList, String groupAlias, Integer level, String geoCoordSys) {
         // 构建组织结构信息
         CameraGroup group = groupMapper.queryGroupByAlias(groupAlias);
-        Assert.notNull(group, "组织结构不存在");
+        AssertUtils.notNull(group, "组织结构不存在");
         // 获取所有子节点
         List<CameraGroup> groupList = queryAllGroupChildren(group.getId(), group.getBusinessGroup());
         groupList.add(group);
@@ -748,9 +749,9 @@ public class CameraChannelService implements CommandLineRunner {
 
     public List<CameraChannel> queryMeetingChannelList(String topGroupAlias) {
         CameraGroup cameraGroup = groupMapper.queryGroupByAlias(topGroupAlias);
-        Assert.notNull(cameraGroup, "域不存在");
+        AssertUtils.notNull(cameraGroup, "域不存在");
         String business = cameraGroup.getDeviceId();
-        Assert.notNull(business, "域不存在");
+        AssertUtils.notNull(business, "域不存在");
 
         return channelMapper.queryMeetingChannelList(business);
     }

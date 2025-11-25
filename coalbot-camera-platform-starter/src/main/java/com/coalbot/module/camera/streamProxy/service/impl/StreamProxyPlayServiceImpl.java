@@ -4,6 +4,7 @@ import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.mapper.streamProxy.StreamProxyMapper;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.event.hook.Hook;
 import com.coalbot.module.camera.media.event.hook.HookSubscribe;
@@ -13,16 +14,15 @@ import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
 import com.coalbot.module.camera.service.redisMsg.IRedisRpcPlayService;
 import com.coalbot.module.camera.streamProxy.bean.StreamProxy;
-import com.coalbot.module.camera.mapper.streamProxy.StreamProxyMapper;
 import com.coalbot.module.camera.streamProxy.service.IStreamProxyPlayService;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
-import javax.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 /**
@@ -144,7 +144,7 @@ public class StreamProxyPlayServiceImpl implements IStreamProxyPlayService {
     public void stopProxy(StreamProxy streamProxy){
 
         String mediaServerId = streamProxy.getMediaServerId();
-        Assert.notNull(mediaServerId, "代理节点不存在");
+        AssertUtils.notNull(mediaServerId, "代理节点不存在");
 
         MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
         if (mediaServer == null) {

@@ -7,17 +7,18 @@ import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.exception.ControllerException;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.Extent;
-import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
-import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
-import com.coalbot.module.camera.mapper.gb28181.PlatformChannelMapper;
-import com.coalbot.module.camera.mapper.gb28181.RegionMapper;
 import com.coalbot.module.camera.gb28181.event.EventPublisher;
 import com.coalbot.module.camera.gb28181.event.channel.ChannelEvent;
 import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.gb28181.service.IPlatformChannelService;
 import com.coalbot.module.camera.gb28181.utils.VectorTileCatch;
+import com.coalbot.module.camera.mapper.gb28181.CommonGBChannelMapper;
+import com.coalbot.module.camera.mapper.gb28181.GroupMapper;
+import com.coalbot.module.camera.mapper.gb28181.PlatformChannelMapper;
+import com.coalbot.module.camera.mapper.gb28181.RegionMapper;
 import com.coalbot.module.camera.service.bean.GPSMsgInfo;
 import com.coalbot.module.camera.streamPush.bean.StreamPush;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.Coordtransform;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.TileUtils;
@@ -26,7 +27,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.CaseFormat;
 import lombok.extern.slf4j.Slf4j;
-//import no.ecc.vectortile.VectorTileEncoder;
 import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.BeanWrapper;
@@ -36,7 +36,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.beans.PropertyDescriptor;
@@ -121,11 +120,11 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "缺少通道数据类型或通道数据关联设备ID");
         }
         CommonGBChannel commonGBChannelInDb =  commonGBChannelMapper.queryByDataId(commonGBChannel.getDataType(), commonGBChannel.getDataDeviceId());
-        Assert.isNull(commonGBChannelInDb, "此推流已经关联通道");
+        AssertUtils.isNull(commonGBChannelInDb, "此推流已经关联通道");
 
         // 检验国标编号是否重复
         List<CommonGBChannel> channelList = commonGBChannelMapper.queryByDeviceId(commonGBChannel.getGbDeviceId());
-        Assert.isTrue(channelList.isEmpty(), "国标编号已经存在");
+        AssertUtils.isTrue(channelList.isEmpty(), "国标编号已经存在");
 
         commonGBChannel.setCreateTime(new Date());
         commonGBChannel.setUpdateTime(new Date());
@@ -466,7 +465,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
     @Override
     public void reset(String id, List<String> chanelFields) {
         log.info("[重置国标通道] id: {}", id);
-        Assert.notEmpty(chanelFields, "待重置字段为空");
+        AssertUtils.notEmpty(chanelFields, "待重置字段为空");
         CommonGBChannel channel = getOne(id);
         if (channel == null) {
             log.warn("[重置国标通道] 未找到对应Id的通道: id: {}", id);
@@ -484,7 +483,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
                 dbFields.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, chanelField));
             }
         }
-        Assert.notEmpty(dbFields, "待重置字段为空");
+        AssertUtils.notEmpty(dbFields, "待重置字段为空");
 
         // 这个多加一个参数,为了防止将非国标的通道通过此方法清空内容,导致意外发生
         commonGBChannelMapper.reset(id, dbFields, DateUtil.getNow());
@@ -1042,7 +1041,7 @@ public class GbChannelServiceImpl implements IGbChannelService, CommandLineRunne
             // 获取数据源
             channelListInExtent = commonGBChannelMapper.queryListInExtent(extent.getMinLng(), extent.getMaxLng(), extent.getMinLat(), extent.getMaxLat());
         }
-        Assert.isTrue(!channelListInExtent.isEmpty(), "通道数据为空");
+        AssertUtils.isTrue(!channelListInExtent.isEmpty(), "通道数据为空");
 
         log.info("[开始抽稀] ID： {}， 范围，[{}, {}, {}, {}]", id, extent.getMinLng(), extent.getMinLat(), extent.getMaxLng(), extent.getMaxLat());
 

@@ -3,6 +3,7 @@ package com.coalbot.module.camera.gb28181.controller;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.UserSetting;
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.CommonGBChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.*;
 import com.coalbot.module.camera.gb28181.controller.bean.*;
 import com.coalbot.module.camera.gb28181.service.IGbChannelPlayService;
@@ -10,10 +11,12 @@ import com.coalbot.module.camera.gb28181.service.IGbChannelService;
 import com.coalbot.module.camera.gb28181.utils.VectorTileCatch;
 import com.coalbot.module.camera.service.bean.ErrorCallback;
 import com.coalbot.module.camera.service.bean.InviteErrorCode;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
-
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -28,7 +31,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -100,7 +102,7 @@ public class ChannelController {
             Object val = wrapper.getPropertyValue(name);
             if (val != null) count++;
         }
-        Assert.isTrue(count > 1, "未进行任何修改");
+        AssertUtils.isTrue(count > 1, "未进行任何修改");
         channelService.update(channel);
         return RetResponse.makeOKRsp();
     }
@@ -109,8 +111,8 @@ public class ChannelController {
     @Operation(summary = "重置国标通道")
     @PostMapping("/reset")
     public RetResult<Void> reset(@RequestBody ResetParam param) {
-        Assert.notNull(param.getId(), "通道ID不能为空");
-        Assert.notEmpty(param.getChanelFields(), "待重置字段不可以空");
+        AssertUtils.notNull(param.getId(), "通道ID不能为空");
+        AssertUtils.notEmpty(param.getChanelFields(), "待重置字段不可以空");
         channelService.reset(param.getId(), param.getChanelFields());
         return RetResponse.makeOKRsp();
     }
@@ -122,88 +124,120 @@ public class ChannelController {
         return RetResponse.makeOKRsp(channel);
     }
 
-    @Operation(summary = "获取通道列表")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "hasRecordPlan", description = "是否已设置录制计划")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @Parameter(name = "civilCode", description = "行政区划")
-    @Parameter(name = "parentDeviceId", description = "父节点编码")
-    @GetMapping("/list")
-    public RetResult<PageInfo<CommonGBChannel>> queryList(int page, int count,
-                                                          @RequestParam(required = false) String query,
-                                                          @RequestParam(required = false) Boolean online,
-                                                          @RequestParam(required = false) Boolean hasRecordPlan,
-                                                          @RequestParam(required = false) Integer channelType,
-                                                          @RequestParam(required = false) String civilCode,
-                                                          @RequestParam(required = false) String parentDeviceId) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        if (ObjectUtils.isEmpty(civilCode)) {
-            civilCode = null;
-        }
-        if (ObjectUtils.isEmpty(parentDeviceId)) {
-            parentDeviceId = null;
-        }
-        return RetResponse.makeOKRsp(channelService.queryList(page, count, query, online, hasRecordPlan, channelType, civilCode, parentDeviceId));
+//    @Operation(summary = "获取通道列表")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "hasRecordPlan", description = "是否已设置录制计划")
+//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
+//    @Parameter(name = "civilCode", description = "行政区划")
+//    @Parameter(name = "parentDeviceId", description = "父节点编码")
+//    @GetMapping("/list")
+//    public RetResult<PageInfo<CommonGBChannel>> queryList(int page, int count,
+//                                                          @RequestParam(required = false) String query,
+//                                                          @RequestParam(required = false) Boolean online,
+//                                                          @RequestParam(required = false) Boolean hasRecordPlan,
+//                                                          @RequestParam(required = false) Integer channelType,
+//                                                          @RequestParam(required = false) String civilCode,
+//                                                          @RequestParam(required = false) String parentDeviceId) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        if (ObjectUtils.isEmpty(civilCode)) {
+//            civilCode = null;
+//        }
+//        if (ObjectUtils.isEmpty(parentDeviceId)) {
+//            parentDeviceId = null;
+//        }
+//        return RetResponse.makeOKRsp(channelService.queryList(page, count, query, online, hasRecordPlan, channelType, civilCode, parentDeviceId));
+//    }
+//
+//    @Operation(summary = "获取关联行政区划通道列表")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
+//    @Parameter(name = "civilCode", description = "行政区划")
+//    @GetMapping("/civilcode/list")
+//    public RetResult<PageInfo<CommonGBChannel>> queryListByCivilCode(int page, int count,
+//                                                                     @RequestParam(required = false) String query,
+//                                                                     @RequestParam(required = false) Boolean online,
+//                                                                     @RequestParam(required = false) Integer channelType,
+//                                                                     @RequestParam(required = false) String civilCode) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        return RetResponse.makeOKRsp(channelService.queryListByCivilCode(page, count, query, online, channelType, civilCode));
+//    }
+//
+//
+//    @Operation(summary = "存在行政区划但无法挂载的通道列表")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
+//    @GetMapping("/civilCode/unusual/list")
+//    public RetResult<PageInfo<CommonGBChannel>> queryListByCivilCodeForUnusual(int page, int count,
+//                                                                               @RequestParam(required = false) String query,
+//                                                                               @RequestParam(required = false) Boolean online,
+//                                                                               @RequestParam(required = false) Integer channelType) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        return RetResponse.makeOKRsp(channelService.queryListByCivilCodeForUnusual(page, count, query, online, channelType));
+//    }
+//
+//
+//    @Operation(summary = "存在父节点编号但无法挂载的通道列表")
+//    @Parameter(name = "page", description = "当前页", required = true)
+//    @Parameter(name = "count", description = "每页查询数量", required = true)
+//    @Parameter(name = "query", description = "查询内容")
+//    @Parameter(name = "online", description = "是否在线")
+//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
+//    @GetMapping("/parent/unusual/list")
+//    public RetResult<PageInfo<CommonGBChannel>> queryListByParentForUnusual(int page, int count,
+//                                                                            @RequestParam(required = false) String query,
+//                                                                            @RequestParam(required = false) Boolean online,
+//                                                                            @RequestParam(required = false) Integer channelType) {
+//        if (ObjectUtils.isEmpty(query)) {
+//            query = null;
+//        }
+//        return RetResponse.makeOKRsp(channelService.queryListByParentForUnusual(page, count, query, online, channelType));
+//    }
+
+    @Operation(summary = "获取通道列表", method = "POST")
+    @PostMapping("/list")
+    public RetResult<PageList<CommonGBChannel>> queryList(@RequestBody CommonGBChannelQueryDTO dto) {
+        PageInfo<CommonGBChannel> pageResult = channelService.queryList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getOnline(), dto.getHasRecordPlan(), dto.getChannelType(), dto.getCivilCode(), dto.getParentDeviceId());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
-    @Operation(summary = "获取关联行政区划通道列表")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @Parameter(name = "civilCode", description = "行政区划")
-    @GetMapping("/civilcode/list")
-    public RetResult<PageInfo<CommonGBChannel>> queryListByCivilCode(int page, int count,
-                                                                     @RequestParam(required = false) String query,
-                                                                     @RequestParam(required = false) Boolean online,
-                                                                     @RequestParam(required = false) Integer channelType,
-                                                                     @RequestParam(required = false) String civilCode) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return RetResponse.makeOKRsp(channelService.queryListByCivilCode(page, count, query, online, channelType, civilCode));
+    @Operation(summary = "获取关联行政区划通道列表", method = "POST")
+    @PostMapping("/civilcode/list")
+    public RetResult<PageList<CommonGBChannel>> queryListByCivilCode(@RequestBody CommonGBChannelQueryDTO dto) {
+        PageInfo<CommonGBChannel> pageResult = channelService.queryListByCivilCode(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getOnline(), dto.getChannelType(), dto.getCivilCode());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
-
 
     @Operation(summary = "存在行政区划但无法挂载的通道列表")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @GetMapping("/civilCode/unusual/list")
-    public RetResult<PageInfo<CommonGBChannel>> queryListByCivilCodeForUnusual(int page, int count,
-                                                                               @RequestParam(required = false) String query,
-                                                                               @RequestParam(required = false) Boolean online,
-                                                                               @RequestParam(required = false) Integer channelType) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return RetResponse.makeOKRsp(channelService.queryListByCivilCodeForUnusual(page, count, query, online, channelType));
+    @PostMapping("/civilCode/unusual/list")
+    public RetResult<PageList<CommonGBChannel>> queryListByCivilCodeForUnusual(@RequestBody CommonGBChannelQueryDTO dto) {
+        PageInfo<CommonGBChannel> pageResult = channelService.queryListByCivilCodeForUnusual(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getOnline(), dto.getChannelType());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
-
     @Operation(summary = "存在父节点编号但无法挂载的通道列表")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @GetMapping("/parent/unusual/list")
-    public RetResult<PageInfo<CommonGBChannel>> queryListByParentForUnusual(int page, int count,
-                                                                            @RequestParam(required = false) String query,
-                                                                            @RequestParam(required = false) Boolean online,
-                                                                            @RequestParam(required = false) Integer channelType) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return RetResponse.makeOKRsp(channelService.queryListByParentForUnusual(page, count, query, online, channelType));
+    @PostMapping("/parent/unusual/list")
+    public RetResult<PageList<CommonGBChannel>> queryListByParentForUnusual(@RequestBody CommonGBChannelQueryDTO dto) {
+        PageInfo<CommonGBChannel> pageResult = channelService.queryListByParentForUnusual(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getOnline(), dto.getChannelType());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @Operation(summary = "清除存在行政区划但无法挂载的通道列表")
@@ -244,8 +278,8 @@ public class ChannelController {
     @Operation(summary = "通道设置行政区划")
     @PostMapping("/region/add")
     public RetResult<Void> addChannelToRegion(@RequestBody ChannelToRegionParam param) {
-        Assert.notEmpty(param.getChannelIds(), "通道ID不可为空");
-        Assert.hasLength(param.getCivilCode(), "未添加行政区划");
+        AssertUtils.notEmpty(param.getChannelIds(), "通道ID不可为空");
+        AssertUtils.notBlank(param.getCivilCode(), "未添加行政区划");
         channelService.addChannelToRegion(param.getCivilCode(), param.getChannelIds());
         return RetResponse.makeOKRsp();
     }
@@ -253,7 +287,7 @@ public class ChannelController {
     @Operation(summary = "通道删除行政区划")
     @PostMapping("/region/delete")
     public RetResult<Void> deleteChannelToRegion(@RequestBody ChannelToRegionParam param) {
-        Assert.isTrue(!param.getChannelIds().isEmpty() || !ObjectUtils.isEmpty(param.getCivilCode()), "参数异常");
+        AssertUtils.isTrue(!param.getChannelIds().isEmpty() || !ObjectUtils.isEmpty(param.getCivilCode()), "参数异常");
         channelService.deleteChannelToRegion(param.getCivilCode(), param.getChannelIds());
         return RetResponse.makeOKRsp();
     }
@@ -261,8 +295,8 @@ public class ChannelController {
     @Operation(summary = "通道设置行政区划-根据国标设备")
     @PostMapping("/region/device/add")
     public RetResult<Void> addChannelToRegionByGbDevice(@RequestBody ChannelToRegionByGbDeviceParam param) {
-        Assert.notEmpty(param.getDeviceIds(), "参数异常");
-        Assert.hasLength(param.getCivilCode(), "未添加行政区划");
+        AssertUtils.notEmpty(param.getDeviceIds(), "参数异常");
+        AssertUtils.notBlank(param.getCivilCode(), "未添加行政区划");
         channelService.addChannelToRegionByGbDevice(param.getCivilCode(), param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -270,7 +304,7 @@ public class ChannelController {
     @Operation(summary = "通道删除行政区划-根据国标设备")
     @PostMapping("/region/device/delete")
     public RetResult<Void> deleteChannelToRegionByGbDevice(@RequestBody ChannelToRegionByGbDeviceParam param) {
-        Assert.notEmpty(param.getDeviceIds(), "参数异常");
+        AssertUtils.notEmpty(param.getDeviceIds(), "参数异常");
         channelService.deleteChannelToRegionByGbDevice(param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -278,9 +312,9 @@ public class ChannelController {
     @Operation(summary = "通道设置业务分组")
     @PostMapping("/group/add")
     public RetResult<Void> addChannelToGroup(@RequestBody ChannelToGroupParam param) {
-        Assert.notEmpty(param.getChannelIds(), "通道ID不可为空");
-        Assert.hasLength(param.getParentId(), "未添加上级分组编号");
-        Assert.hasLength(param.getBusinessGroup(), "未添加业务分组");
+        AssertUtils.notEmpty(param.getChannelIds(), "通道ID不可为空");
+        AssertUtils.notBlank(param.getParentId(), "未添加上级分组编号");
+        AssertUtils.notBlank(param.getBusinessGroup(), "未添加业务分组");
         channelService.addChannelToGroup(param.getParentId(), param.getBusinessGroup(), param.getChannelIds());
         return RetResponse.makeOKRsp();
     }
@@ -288,7 +322,7 @@ public class ChannelController {
     @Operation(summary = "通道删除业务分组")
     @PostMapping("/group/delete")
     public RetResult<Void> deleteChannelToGroup(@RequestBody ChannelToGroupParam param) {
-        Assert.isTrue(!param.getChannelIds().isEmpty()
+        AssertUtils.isTrue(!param.getChannelIds().isEmpty()
                         || (!ObjectUtils.isEmpty(param.getParentId()) && !ObjectUtils.isEmpty(param.getBusinessGroup())),
                 "参数异常");
         channelService.deleteChannelToGroup(param.getParentId(), param.getBusinessGroup(), param.getChannelIds());
@@ -298,9 +332,9 @@ public class ChannelController {
     @Operation(summary = "通道设置业务分组-根据国标设备")
     @PostMapping("/group/device/add")
     public RetResult<Void> addChannelToGroupByGbDevice(@RequestBody ChannelToGroupByGbDeviceParam param) {
-        Assert.notEmpty(param.getDeviceIds(), "参数异常");
-        Assert.hasLength(param.getParentId(), "未添加上级分组编号");
-        Assert.hasLength(param.getBusinessGroup(), "未添加业务分组");
+        AssertUtils.notEmpty(param.getDeviceIds(), "参数异常");
+        AssertUtils.notBlank(param.getParentId(), "未添加上级分组编号");
+        AssertUtils.notBlank(param.getBusinessGroup(), "未添加业务分组");
         channelService.addChannelToGroupByGbDevice(param.getParentId(), param.getBusinessGroup(), param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -308,7 +342,7 @@ public class ChannelController {
     @Operation(summary = "通道删除业务分组-根据国标设备")
     @PostMapping("/group/device/delete")
     public RetResult<Void> deleteChannelToGroupByGbDevice(@RequestBody ChannelToGroupByGbDeviceParam param) {
-        Assert.notEmpty(param.getDeviceIds(), "参数异常");
+        AssertUtils.notEmpty(param.getDeviceIds(), "参数异常");
         channelService.deleteChannelToGroupByGbDevice(param.getDeviceIds());
         return RetResponse.makeOKRsp();
     }
@@ -316,9 +350,9 @@ public class ChannelController {
     @Operation(summary = "播放通道")
     @GetMapping("/play")
     public DeferredResult<RetResult<StreamContent>> play(HttpServletRequest request, String channelId) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
@@ -358,9 +392,9 @@ public class ChannelController {
     @Operation(summary = "停止播放通道")
     @GetMapping("/play/stop")
     public RetResult<Void> stopPlay(String channelId) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.stopPlay(channel);
         return RetResponse.makeOKRsp();
     }
@@ -380,7 +414,7 @@ public class ChannelController {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "endTime格式为" + DateUtil.PATTERN);
         }
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         channelPlayService.queryRecord(channel, startTime, endTime, (code, msg, data) -> {
             RetResult<List<CommonRecordInfo>> RetResult = new RetResult<>();
@@ -404,9 +438,9 @@ public class ChannelController {
     @Parameter(name = "endTime", description = "结束时间", required = true)
     @GetMapping("/playback")
     public DeferredResult<RetResult<StreamContent>> playback(HttpServletRequest request, String channelId, String startTime, String endTime) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
@@ -450,9 +484,9 @@ public class ChannelController {
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/stop")
     public RetResult<Void> stopPlayback(String channelId, String stream) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.stopPlayback(channel, stream);
         return RetResponse.makeOKRsp();
     }
@@ -462,9 +496,9 @@ public class ChannelController {
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/pause")
     public RetResult<Void> pausePlayback(String channelId, String stream) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.playbackPause(channel, stream);
         return RetResponse.makeOKRsp();
     }
@@ -474,9 +508,9 @@ public class ChannelController {
     @Parameter(name = "stream", description = "流ID", required = true)
     @GetMapping("/playback/resume")
     public RetResult<Void> resumePlayback(String channelId, String stream) {
-        Assert.notNull(channelId, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.playbackResume(channel, stream);
         return RetResponse.makeOKRsp();
     }
@@ -487,10 +521,10 @@ public class ChannelController {
     @Parameter(name = "seekTime", description = "将要播放的时间", required = true)
     @GetMapping("/playback/seek")
     public RetResult<Void> seekPlayback(String channelId, String stream, Long seekTime) {
-        Assert.notNull(channelId, "参数异常");
-        Assert.notNull(seekTime, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
+        AssertUtils.notNull(seekTime, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.playbackSeek(channel, stream, seekTime);
         return RetResponse.makeOKRsp();
     }
@@ -501,10 +535,10 @@ public class ChannelController {
     @Parameter(name = "speed", description = "倍速", required = true)
     @GetMapping("/playback/speed")
     public RetResult<Void> seekPlayback(String channelId, String stream, Double speed) {
-        Assert.notNull(channelId, "参数异常");
-        Assert.notNull(speed, "参数异常");
+        AssertUtils.notNull(channelId, "参数异常");
+        AssertUtils.notNull(speed, "参数异常");
         CommonGBChannel channel = channelService.getOne(channelId);
-        Assert.notNull(channel, "通道不存在");
+        AssertUtils.notNull(channel, "通道不存在");
         channelPlayService.playbackSpeed(channel, stream, speed);
         return RetResponse.makeOKRsp();
     }

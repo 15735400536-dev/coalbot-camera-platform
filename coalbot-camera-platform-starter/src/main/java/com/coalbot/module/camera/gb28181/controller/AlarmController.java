@@ -1,6 +1,7 @@
 package com.coalbot.module.camera.gb28181.controller;
 
 import com.coalbot.module.camera.conf.exception.ControllerException;
+import com.coalbot.module.camera.dto.DeviceAlarmQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Device;
 import com.coalbot.module.camera.gb28181.bean.DeviceAlarm;
 import com.coalbot.module.camera.gb28181.bean.Platform;
@@ -10,7 +11,9 @@ import com.coalbot.module.camera.gb28181.service.IPlatformService;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommander;
 import com.coalbot.module.camera.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.coalbot.module.camera.utils.DateUtil;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -131,64 +134,73 @@ public class AlarmController {
         return RetResponse.makeOKRsp();
     }
 
-    /**
-     *  分页查询报警
-     *
-     * @param deviceId 设备id
-     * @param page 当前页
-     * @param count 每页查询数量
-     * @param alarmPriority  报警级别
-     * @param alarmMethod 报警方式
-     * @param alarmType  报警类型
-     * @param startTime  开始时间
-     * @param endTime 结束时间
-     * @return
-     */
-    @Operation(summary = "分页查询报警")
-    @Parameter(name = "page",description = "当前页",required = true)
-    @Parameter(name = "count",description = "每页查询数量",required = true)
-    @Parameter(name = "deviceId",description = "设备id")
-    @Parameter(name = "channelId",description = "通道id")
-    @Parameter(name = "alarmPriority",description = "查询内容")
-    @Parameter(name = "alarmMethod",description = "查询内容")
-    @Parameter(name = "alarmType",description = "每页查询数量")
-    @Parameter(name = "startTime",description = "开始时间")
-    @Parameter(name = "endTime",description = "结束时间")
-    @GetMapping("/all")
-    public RetResult<PageInfo<DeviceAlarm>> getAll(
-            @RequestParam int page,
-            @RequestParam int count,
-            @RequestParam(required = false) String deviceId,
-            @RequestParam(required = false) String channelId,
-            @RequestParam(required = false) String alarmPriority,
-            @RequestParam(required = false) String alarmMethod,
-            @RequestParam(required = false) String alarmType,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime
-    ) {
-        if (ObjectUtils.isEmpty(alarmPriority)) {
-            alarmPriority = null;
-        }
-        if (ObjectUtils.isEmpty(alarmMethod)) {
-            alarmMethod = null;
-        }
-        if (ObjectUtils.isEmpty(alarmType)) {
-            alarmType = null;
-        }
+//    /**
+//     *  分页查询报警
+//     *
+//     * @param deviceId 设备id
+//     * @param page 当前页
+//     * @param count 每页查询数量
+//     * @param alarmPriority  报警级别
+//     * @param alarmMethod 报警方式
+//     * @param alarmType  报警类型
+//     * @param startTime  开始时间
+//     * @param endTime 结束时间
+//     * @return
+//     */
+//    @Operation(summary = "分页查询报警")
+//    @Parameter(name = "page",description = "当前页",required = true)
+//    @Parameter(name = "count",description = "每页查询数量",required = true)
+//    @Parameter(name = "deviceId",description = "设备id")
+//    @Parameter(name = "channelId",description = "通道id")
+//    @Parameter(name = "alarmPriority",description = "查询内容")
+//    @Parameter(name = "alarmMethod",description = "查询内容")
+//    @Parameter(name = "alarmType",description = "每页查询数量")
+//    @Parameter(name = "startTime",description = "开始时间")
+//    @Parameter(name = "endTime",description = "结束时间")
+//    @GetMapping("/all")
+//    public RetResult<PageInfo<DeviceAlarm>> getAll(
+//            @RequestParam int page,
+//            @RequestParam int count,
+//            @RequestParam(required = false) String deviceId,
+//            @RequestParam(required = false) String channelId,
+//            @RequestParam(required = false) String alarmPriority,
+//            @RequestParam(required = false) String alarmMethod,
+//            @RequestParam(required = false) String alarmType,
+//            @RequestParam(required = false) String startTime,
+//            @RequestParam(required = false) String endTime
+//    ) {
+//        if (ObjectUtils.isEmpty(alarmPriority)) {
+//            alarmPriority = null;
+//        }
+//        if (ObjectUtils.isEmpty(alarmMethod)) {
+//            alarmMethod = null;
+//        }
+//        if (ObjectUtils.isEmpty(alarmType)) {
+//            alarmType = null;
+//        }
+//
+//        if (ObjectUtils.isEmpty(startTime)) {
+//            startTime = null;
+//        }else if (!DateUtil.verification(startTime, DateUtil.formatter) ){
+//            throw new ControllerException(ErrorCode.ERROR400.getCode(), "startTime格式为" + DateUtil.PATTERN);
+//        }
+//
+//        if (ObjectUtils.isEmpty(endTime)) {
+//            endTime = null;
+//        }else if (!DateUtil.verification(endTime, DateUtil.formatter) ){
+//            throw new ControllerException(ErrorCode.ERROR400.getCode(), "endTime格式为" + DateUtil.PATTERN);
+//        }
+//
+//        return RetResponse.makeOKRsp(deviceAlarmService.getAllAlarm(page, count, deviceId, channelId, alarmPriority, alarmMethod,
+//                alarmType, startTime, endTime));
+//    }
 
-        if (ObjectUtils.isEmpty(startTime)) {
-            startTime = null;
-        }else if (!DateUtil.verification(startTime, DateUtil.formatter) ){
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "startTime格式为" + DateUtil.PATTERN);
-        }
-
-        if (ObjectUtils.isEmpty(endTime)) {
-            endTime = null;
-        }else if (!DateUtil.verification(endTime, DateUtil.formatter) ){
-            throw new ControllerException(ErrorCode.ERROR400.getCode(), "endTime格式为" + DateUtil.PATTERN);
-        }
-
-        return RetResponse.makeOKRsp(deviceAlarmService.getAllAlarm(page, count, deviceId, channelId, alarmPriority, alarmMethod,
-                alarmType, startTime, endTime));
+    @Operation(summary = "分页查询报警", method = "POST")
+    @PostMapping("/all")
+    public RetResult<PageList<DeviceAlarm>> getAll(@RequestBody DeviceAlarmQueryDTO dto) {
+        PageInfo<DeviceAlarm> pageResult = deviceAlarmService.getAllAlarm(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getDeviceId(), dto.getChannelId(),
+                dto.getAlarmPriority(), dto.getAlarmMethod(), dto.getAlarmType(), dto.getStartTime(), dto.getEndTime());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 }

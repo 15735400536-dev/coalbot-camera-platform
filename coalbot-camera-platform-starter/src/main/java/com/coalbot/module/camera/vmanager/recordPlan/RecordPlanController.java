@@ -6,6 +6,7 @@ import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
 import com.coalbot.module.camera.service.IRecordPlanService;
 import com.coalbot.module.camera.service.bean.RecordPlan;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.recordPlan.bean.RecordPlanParam;
@@ -17,7 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -127,7 +127,7 @@ public class RecordPlanController {
 //                                                                 @RequestParam(required = false) Boolean online,
 //                                                                 @RequestParam(required = false) Boolean hasLink) {
 //
-//        Assert.notNull(planId, "录制计划ID不可为NULL");
+//        AssertUtils.notNull(planId, "录制计划ID不可为NULL");
 //        if (org.springframework.util.ObjectUtils.isEmpty(query)) {
 //            query = null;
 //        }
@@ -152,7 +152,7 @@ public class RecordPlanController {
                                                                  @RequestParam(required = false) Boolean online,
                                                                  @RequestParam(required = false) Boolean hasLink) {
 
-        Assert.notNull(planId, "录制计划ID不可为NULL");
+        AssertUtils.notNull(planId, "录制计划ID不可为NULL");
         if (org.springframework.util.ObjectUtils.isEmpty(query)) {
             query = null;
         }

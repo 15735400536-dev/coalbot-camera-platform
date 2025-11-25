@@ -7,8 +7,8 @@ import com.coalbot.module.camera.gb28181.service.IDeviceService;
 import com.coalbot.module.camera.gb28181.service.IPTZService;
 import com.coalbot.module.camera.gb28181.transmit.callback.DeferredResultHolder;
 import com.coalbot.module.camera.gb28181.transmit.cmd.impl.SIPCommander;
+import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
-
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,7 +66,7 @@ public class PtzController {
 
         Device device = deviceService.getDeviceByDeviceId(deviceId);
 
-        Assert.notNull(device, "设备[" + deviceId + "]不存在");
+        AssertUtils.notNull(device, "设备[" + deviceId + "]不存在");
 
         ptzService.frontEndCommand(device, channelId, cmdCode, parameter1, parameter2, combindCode2);
         return RetResponse.makeOKRsp();
@@ -228,7 +227,7 @@ public class PtzController {
             log.debug("设备预置位查询API调用");
         }
         Device device = deviceService.getDeviceByDeviceId(deviceId);
-        Assert.notNull(device, "设备不存在");
+        AssertUtils.notNull(device, "设备不存在");
         DeferredResult<RetResult<Object>> deferredResult = new DeferredResult<>(3 * 1000L);
         deviceService.queryPreset(device, channelId, (code, msg, data) -> {
             deferredResult.setResult(RetResponse.makeRsp(code, msg, data));
