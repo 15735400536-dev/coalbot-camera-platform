@@ -84,7 +84,7 @@ public interface PlatformMapper {
     List<Platform> queryEnablePlatformListWithAsMessageChannel();
 
     @Select("SELECT * FROM wcp_platform WHERE server_gb_id=#{platformGbId}")
-    Platform getParentPlatByServerGBId(String platformGbId);
+    Platform getParentPlatByServerGBId(@Param("platformGbId") String platformGbId);
 
     @Select("SELECT * FROM wcp_platform WHERE id=#{id}")
     Platform query(String id);

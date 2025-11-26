@@ -190,7 +190,7 @@ public interface DeviceMapper {
     List<Device> getDevices(@Param("dataType") Integer dataType, @Param("online") Boolean online);
 
     @Delete("DELETE FROM wcp_device WHERE device_id=#{deviceId}")
-    int del(String deviceId);
+    int del(@Param("deviceId") String deviceId);
 
     @Select("SELECT " +
             "id, " +

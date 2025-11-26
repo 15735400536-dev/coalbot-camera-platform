@@ -74,10 +74,10 @@ public interface StreamPushMapper {
     int addAll(@Param("streamPushItems") List<StreamPush> streamPushItems);
 
     @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId}")
-    List<StreamPush> selectAllByMediaServerId(String mediaServerId);
+    List<StreamPush> selectAllByMediaServerId(@Param("mediaServerId") String mediaServerId);
 
     @Select("SELECT st.*, st.id as data_device_id, wdc.*, wdc.id as gb_id FROM wcp_stream_push st LEFT join wcp_device_channel wdc on wdc.data_type = 2 and st.id = wdc.data_device_id WHERE st.media_server_id=#{mediaServerId} and wdc.gb_device_id is null")
-    List<StreamPush> selectAllByMediaServerIdWithOutGbID(String mediaServerId);
+    List<StreamPush> selectAllByMediaServerIdWithOutGbID(@Param("mediaServerId") String mediaServerId);
 
     @Update("UPDATE wcp_stream_push " +
             "SET pushing=#{pushing}, server_id=#{serverId}, media_server_id=#{mediaServerId} " +
@@ -103,7 +103,7 @@ public interface StreamPushMapper {
     @Select(value = {" <script>" +
             " select count(1) from wcp_stream_push where pushing = true" +
             " </script>"})
-    int getAllPushing(Boolean usePushingAsStatus);
+    int getAllPushing(@Param("usePushingAsStatus") Boolean usePushingAsStatus);
 
     @MapKey("uniqueKey")
     @Select("SELECT CONCAT(wsp.app, wsp.stream) as unique_key, wsp.*, wdc.* , " +

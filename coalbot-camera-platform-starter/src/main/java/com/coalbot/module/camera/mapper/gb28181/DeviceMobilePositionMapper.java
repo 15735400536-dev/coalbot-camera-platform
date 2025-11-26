@@ -28,10 +28,10 @@ public interface DeviceMobilePositionMapper {
 
     @Select("SELECT * FROM wcp_device_mobile_position WHERE device_id = #{deviceId}" +
             " ORDER BY time DESC LIMIT 1")
-    MobilePosition queryLatestPositionByDevice(String deviceId);
+    MobilePosition queryLatestPositionByDevice(@Param("deviceId") String deviceId);
 
     @Delete("DELETE FROM wcp_device_mobile_position WHERE device_id = #{deviceId}")
-    int clearMobilePositionsByDeviceId(String deviceId);
+    int clearMobilePositionsByDeviceId(@Param("deviceId") String deviceId);
 
     @Insert("<script> " +
             "<foreach collection='mobilePositions' index='index' item='item' separator=';'> " +

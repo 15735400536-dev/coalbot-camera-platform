@@ -38,7 +38,7 @@ public interface StreamProxyMapper {
     int update(StreamProxy streamProxyDto);
 
     @Delete("DELETE FROM wcp_stream_proxy WHERE app=#{app} AND stream=#{stream}")
-    int delByAppAndStream(String app, String stream);
+    int delByAppAndStream(@Param("app") String app, @Param("stream") String stream);
 
     @SelectProvider(type = StreamProxyProvider.class, method = "selectAll")
     List<StreamProxy> selectAll(@Param("query") String query, @Param("pulling") Boolean pulling, @Param("mediaServerId") String mediaServerId);

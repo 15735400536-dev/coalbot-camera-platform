@@ -28,7 +28,7 @@ public interface PlatformChannelMapper {
             "left join wcp_device_channel dc on dc.id = pgc.device_channel_id where dc.channel_type = 0 and dc.device_id  =#{deviceId} " +
             ") temp)" +
             "</script>")
-    int delChannelForDeviceId(String deviceId);
+    int delChannelForDeviceId(@Param("deviceId") String deviceId);
 
     @Select("select d.*\n" +
             "from wcp_platform_channel pgc\n" +
@@ -547,5 +547,5 @@ public interface PlatformChannelMapper {
             " where wpr.platform_id = #{platformId}" +
             " order by wcr.id DESC" +
             " </script>")
-    Set<Region> queryShareRegion(String id);
+    Set<Region> queryShareRegion(@Param("id")  String id);
 }
