@@ -37,7 +37,8 @@ build/
 ### Mac OS ###
 .DS_Store
 
-.idea/.gitignore
-.idea/encodings.xml
-.idea/misc.xml
-.idea/vcs.xml
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
