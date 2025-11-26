@@ -52,7 +52,7 @@ public class JT1078TerminalController {
     @Operation(summary = "更新设备")
     @Parameter(name = "device", description = "设备", required = true)
     @PostMapping("/update")
-    public RetResult<Void> updateDevice(JTDevice device) {
+    public RetResult<Void> updateDevice(@RequestBody JTDevice device) {
         assert device.getId() != null;
         assert device.getPhoneNumber() != null;
         service.updateDevice(device);
@@ -62,7 +62,7 @@ public class JT1078TerminalController {
     @Operation(summary = "JT-新增设备")
     @Parameter(name = "device", description = "设备", required = true)
     @PostMapping("/add")
-    public RetResult<Void> addDevice(JTDevice device) {
+    public RetResult<Void> addDevice(@RequestBody JTDevice device) {
         assert device.getPhoneNumber() != null;
         String phoneNumber = device.getPhoneNumber().replaceFirst("^0*", "");
         device.setPhoneNumber(phoneNumber);

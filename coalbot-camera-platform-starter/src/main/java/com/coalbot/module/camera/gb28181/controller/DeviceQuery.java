@@ -79,21 +79,6 @@ public class DeviceQuery {
         return RetResponse.makeOKRsp(deviceService.getDeviceByDeviceId(deviceId));
     }
 
-
-//    @Operation(summary = "分页查询国标设备")
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "query", description = "搜索", required = false)
-//    @Parameter(name = "status", description = "状态", required = false)
-//    @GetMapping("/devices")
-//    @Options()
-//    public RetResult<PageInfo<Device>> devices(int page, int count, String query, Boolean status) {
-//        if (ObjectUtils.isEmpty(query)) {
-//            query = null;
-//        }
-//        return RetResponse.makeOKRsp(deviceService.getAll(page, count, query, status));
-//    }
-
     @Operation(summary = "分页查询国标设备", method = "POST")
     @PostMapping("/devices")
     @Options()
@@ -103,47 +88,13 @@ public class DeviceQuery {
         return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
-//    @GetMapping("/devices/{deviceId}/channels")
-//    @Operation(summary = "分页查询通道")
-//    @Parameter(name = "deviceId", description = "设备国标编号", required = true)
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "query", description = "查询内容")
-//    @Parameter(name = "online", description = "是否在线")
-//    @Parameter(name = "channelType", description = "设备/子目录-> false/true")
-//    public RetResult<PageInfo<DeviceChannel>> channels(@PathVariable String deviceId,
-//                                                       int page, int count,
-//                                                       @RequestParam(required = false) String query,
-//                                                       @RequestParam(required = false) Boolean online,
-//                                                       @RequestParam(required = false) Boolean channelType) {
-//        if (ObjectUtils.isEmpty(query)) {
-//            query = null;
-//        }
-//
-//        return RetResponse.makeOKRsp(deviceChannelService.queryChannelsByDeviceId(deviceId, query, channelType, online, page, count));
-//    }
-
-    @PostMapping("/devices/{deviceId}/channels")
+    @PostMapping("/devices/channels")
     @Operation(summary = "分页查询通道", method = "POST")
     public RetResult<PageList<DeviceChannel>> channels(@RequestBody GbDeviceChannelQueryDTO dto) {
         PageInfo<DeviceChannel> pageResult = deviceChannelService.queryChannelsByDeviceId(dto.getDeviceId(), dto.getQuery(),
                 dto.getChannelType(), dto.getOnline(), TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()));
         return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
-
-//    @GetMapping("/streams")
-//    @Operation(summary = "分页查询存在流的通道")
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "query", description = "查询内容")
-//    public RetResult<PageInfo<DeviceChannel>> streamChannels(int page, int count,
-//                                                             @RequestParam(required = false) String query) {
-//        if (ObjectUtils.isEmpty(query)) {
-//            query = null;
-//        }
-//
-//        return RetResponse.makeOKRsp(deviceChannelService.queryChannels(query, true, null, null, true, page, count));
-//    }
 
     @PostMapping("/streams")
     @Operation(summary = "分页查询存在流的通道")
@@ -228,7 +179,7 @@ public class DeviceQuery {
 
     @Operation(summary = "修改通道的码流类型")
     @PostMapping("/channel/stream/identification/update/")
-    public RetResult<Void> updateChannelStreamIdentification(DeviceChannel channel) {
+    public RetResult<Void> updateChannelStreamIdentification(@RequestBody DeviceChannel channel) {
         deviceChannelService.updateChannelStreamIdentification(channel);
         return RetResponse.makeOKRsp();
     }
