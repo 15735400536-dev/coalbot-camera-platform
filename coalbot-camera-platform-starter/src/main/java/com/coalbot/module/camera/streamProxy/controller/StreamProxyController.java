@@ -54,36 +54,13 @@ public class StreamProxyController {
     @Autowired
     private UserSetting userSetting;
 
-
-//    @Operation(summary = "分页查询流代理")
-//    @Parameter(name = "page", description = "当前页")
-//    @Parameter(name = "count", description = "每页查询数量")
-//    @Parameter(name = "query", description = "查询内容")
-//    @Parameter(name = "pulling", description = "是否正在拉流")
-//    @Parameter(name = "mediaServerId", description = "流媒体ID")
-//    @GetMapping(value = "/list")
-//    @ResponseBody
-//    public PageInfo<StreamProxy> list(@RequestParam(required = false) Integer page,
-//                                      @RequestParam(required = false) Integer count,
-//                                      @RequestParam(required = false) String query,
-//                                      @RequestParam(required = false) Boolean pulling,
-//                                      @RequestParam(required = false) String mediaServerId) {
-//
-//        if (ObjectUtils.isEmpty(mediaServerId)) {
-//            mediaServerId = null;
-//        }
-//        if (ObjectUtils.isEmpty(query)) {
-//            query = null;
-//        }
-//        return streamProxyService.getAll(page, count, query, pulling, mediaServerId);
-//    }
-
     @Operation(summary = "分页查询流代理")
     @PostMapping(value = "/list")
     @ResponseBody
-    public PageInfo<StreamProxy> list(@RequestBody StreamProxyQueryDTO dto) {
-        return streamProxyService.getAll(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+    public RetResult<PageInfo<StreamProxy>> list(@RequestBody StreamProxyQueryDTO dto) {
+        PageInfo<StreamProxy> pageResult = streamProxyService.getAll(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
                 dto.getQuery(), dto.getPulling(), dto.getMediaServerId());
+        return RetResponse.makeOKRsp(pageResult);
     }
 
     @Operation(summary = "查询流代理")

@@ -1,10 +1,13 @@
 package com.coalbot.module.camera.gb28181.controller;
 
+import com.coalbot.module.camera.dto.gb28181.GroupQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.Group;
 import com.coalbot.module.camera.gb28181.bean.GroupTree;
 import com.coalbot.module.camera.gb28181.service.IGroupService;
 import com.coalbot.module.camera.utils.AssertUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.core.exception.CommonException;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -56,11 +59,10 @@ public class GroupController {
     @Parameter(name = "query", description = "要搜索的内容", required = true)
     @Parameter(name = "channel", description = "true为查询通道，false为查询节点", required = true)
     @ResponseBody
-    @GetMapping("/tree/query")
-    public RetResult<PageInfo<Group>> queryTree(Integer page, Integer count,
-                                      @RequestParam(required = true) String query
-    ){
-        return RetResponse.makeOKRsp(groupService.queryList(page, count, query));
+    @PostMapping("/tree/query")
+    public RetResult<PageList<Group>> queryTree(@RequestBody GroupQueryDTO param){
+        PageInfo<Group> pageResult = groupService.queryList(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()), param.getQuery());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @Operation(summary = "更新分组")

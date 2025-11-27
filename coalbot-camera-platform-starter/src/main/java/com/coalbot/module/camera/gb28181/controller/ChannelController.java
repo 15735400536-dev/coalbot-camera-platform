@@ -173,22 +173,11 @@ public class ChannelController {
     }
 
     @Operation(summary = "获取关联业务分组通道列表")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @Parameter(name = "groupDeviceId", description = "业务分组下的父节点ID")
-    @GetMapping("/parent/list")
-    public RetResult<PageInfo<CommonGBChannel>> queryListByParentId(int page, int count,
-                                                                    @RequestParam(required = false) String query,
-                                                                    @RequestParam(required = false) Boolean online,
-                                                                    @RequestParam(required = false) Integer channelType,
-                                                                    @RequestParam(required = false) String groupDeviceId) {
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        return RetResponse.makeOKRsp(channelService.queryListByParentId(page, count, query, online, channelType, groupDeviceId));
+    @PostMapping("/parent/list")
+    public RetResult<PageList<CommonGBChannel>> queryListByParentId(@RequestBody CommonGBChannelQueryDTO param) {
+        PageInfo<CommonGBChannel> pageResult = channelService.queryListByParentId(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()),
+                param.getQuery(), param.getOnline(), param.getChannelType(), param.getGroupDeviceId());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @Operation(summary = "通道设置行政区划")
@@ -559,6 +548,5 @@ public class ChannelController {
         headers.setContentLength(mvt.length);
         return new ResponseEntity<>(mvt, headers, HttpStatus.OK);
     }
-
 
 }

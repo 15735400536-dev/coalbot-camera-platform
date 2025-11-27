@@ -3,6 +3,8 @@ package com.coalbot.module.camera.web.custom;
 import com.coalbot.module.camera.common.StreamInfo;
 import com.coalbot.module.camera.conf.DynamicTask;
 import com.coalbot.module.camera.conf.UserSetting;
+import com.coalbot.module.camera.dto.CameraChannelQueryDTO;
+import com.coalbot.module.camera.dto.CloudRecordUrlQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.media.bean.MediaServer;
 import com.coalbot.module.camera.media.service.IMediaServerService;
@@ -18,12 +20,14 @@ import com.coalbot.module.camera.streamPush.service.IStreamPushService;
 import com.coalbot.module.camera.utils.AssertUtils;
 import com.coalbot.module.camera.utils.DateUtil;
 import com.coalbot.module.camera.utils.HttpUtils;
+import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.bean.StreamContent;
 import com.coalbot.module.camera.vmanager.cloudRecord.bean.CloudRecordUrl;
 import com.coalbot.module.camera.web.custom.bean.*;
 import com.coalbot.module.camera.web.custom.service.CameraChannelService;
 import com.coalbot.module.core.exception.CommonException;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -50,7 +54,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Tag(name  = "第三方接口")
+@Tag(name = "第三方接口")
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/sy")
@@ -85,65 +89,29 @@ public class CameraChannelController {
     @Value("${sy.ptz-control-time-interval}")
     private int ptzControlTimeInterval = 300;
 
-    @GetMapping(value = "/camera/list")
+    @PostMapping(value = "/camera/list")
     @ResponseBody
     @Operation(summary = "查询摄像机列表, 只查询当前虚拟组织下的")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "groupAlias", description = "分组别名")
-    @Parameter(name = "geoCoordSys", description = "坐标系类型：WGS84,GCJ02、BD09")
-    @Parameter(name = "status", description = "摄像头状态")
-    public PageInfo<CameraChannel> queryList(@RequestParam(required = false, value = "page", defaultValue = "1" )Integer page,
-                                        @RequestParam(required = false, value = "count", defaultValue = "100")Integer count,
-                                        String groupAlias,
-                                        @RequestParam(required = false) String geoCoordSys,
-                                        @RequestParam(required = false) Boolean status){
-
-
-        return channelService.queryList(page, count, groupAlias, status, geoCoordSys);
+    public RetResult<PageList<CameraChannel>> queryList(@RequestBody CameraChannelQueryDTO param) {
+        PageInfo<CameraChannel> pageResult = channelService.queryList(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()),
+                param.getGroupAlias(), param.getStatus(), param.getGeoCoordSys());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
-    @GetMapping(value = "/camera/list-with-child")
+    @PostMapping(value = "/camera/list-with-child")
     @ResponseBody
     @Operation(summary = "查询摄像机列表, 查询当前虚拟组织下以及全部子节点")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "sortName", description = "排序字段名")
-    @Parameter(name = "order", description = "排序方式（true: 升序 或 false: 降序 ）")
-    @Parameter(name = "groupAlias", description = "分组别名")
-    @Parameter(name = "geoCoordSys", description = "坐标系类型：WGS84,GCJ02、BD09")
-    @Parameter(name = "status", description = "摄像头状态")
-    public PageInfo<CameraChannel> queryListWithChild(@RequestParam(required = false, value = "page", defaultValue = "1" )Integer page,
-
-                                        @RequestParam(required = false, value = "count", defaultValue = "100")Integer count,
-                                        @RequestParam(required = false) String query,
-                                        @RequestParam(required = false) String sortName,
-                                        @RequestParam(required = false) Boolean order,
-                                        @RequestParam(required = false) String groupAlias,
-                                        @RequestParam(required = false) String geoCoordSys,
-                                        @RequestParam(required = false) Boolean status){
-        if (ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-        if (ObjectUtils.isEmpty(sortName)) {
-            sortName = null;
-        }
-        if (ObjectUtils.isEmpty(order)) {
-            order = null;
-        }
-        if (ObjectUtils.isEmpty(groupAlias)) {
-            groupAlias = null;
-        }
-
-        return channelService.queryListWithChild(page, count, query, sortName, order, groupAlias, status, geoCoordSys);
+    public RetResult<PageList<CameraChannel>> queryListWithChild(@RequestBody CameraChannelQueryDTO param) {
+        PageInfo<CameraChannel> pageResult = channelService.queryListWithChild(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()),
+                param.getQuery(), param.getSortName(), param.getSort(), param.getGroupAlias(), param.getStatus(), param.getGeoCoordSys());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @GetMapping(value = "/camera/cont-with-child")
     @ResponseBody
     @Operation(summary = "查询摄像机列表的总数和在线数")
     @Parameter(name = "groupAlias", description = "分组别名")
-    public List<CameraCount> queryCountWithChild(String groupAlias){
+    public List<CameraCount> queryCountWithChild(String groupAlias) {
         return channelService.queryCountWithChild(groupAlias);
     }
 
@@ -154,7 +122,7 @@ public class CameraChannelController {
     @Parameter(name = "deviceCode", description = "摄像头设备国标编号, 对于非国标摄像头可以不设置此参数")
     @Parameter(name = "geoCoordSys", description = "坐标系类型：WGS84,GCJ02、BD09")
     public CameraChannel getOne(String deviceId, @RequestParam(required = false) String deviceCode,
-                                  @RequestParam(required = false) String geoCoordSys) {
+                                @RequestParam(required = false) String geoCoordSys) {
         return channelService.queryOne(deviceId, deviceCode, geoCoordSys);
     }
 
@@ -168,11 +136,11 @@ public class CameraChannelController {
     @Parameter(name = "latitude", description = "纬度")
     @Parameter(name = "geoCoordSys", description = "坐标系类型：WGS84,GCJ02、BD09")
     public RetResult<Void> updateCamera(String deviceId,
-                                  @RequestParam(required = false) String deviceCode,
-                                  @RequestParam(required = false) String name,
-                                  @RequestParam(required = false) Double longitude,
-                                  @RequestParam(required = false) Double latitude,
-                                  @RequestParam(required = false) String geoCoordSys) {
+                                        @RequestParam(required = false) String deviceCode,
+                                        @RequestParam(required = false) String name,
+                                        @RequestParam(required = false) Double longitude,
+                                        @RequestParam(required = false) Double latitude,
+                                        @RequestParam(required = false) String geoCoordSys) {
         channelService.updateCamera(deviceId, deviceCode, name, longitude, latitude, geoCoordSys);
         return RetResponse.makeOKRsp();
     }
@@ -240,7 +208,7 @@ public class CameraChannelController {
     @Parameter(name = "deviceCode", description = "摄像头设备国标编号, 对于非国标摄像头可以不设置此参数")
     public DeferredResult<RetResult<CameraStreamContent>> play(HttpServletRequest request, String deviceId, @RequestParam(required = false) String deviceCode) {
 
-        log.info("[SY-播放摄像头] API调用，deviceId：{} ，deviceCode：{} ",deviceId, deviceCode);
+        log.info("[SY-播放摄像头] API调用，deviceId：{} ，deviceCode：{} ", deviceId, deviceCode);
         DeferredResult<RetResult<CameraStreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
 
         ErrorCallback<CameraStreamInfo> callback = (code, msg, cameraStreamInfo) -> {
@@ -250,13 +218,13 @@ public class CameraChannelController {
                 RetResult<CameraStreamContent> RetResult = RetResponse.makeOKRsp();
                 if (cameraStreamInfo.getStreamInfo() != null) {
                     if (userSetting.getUseSourceIpAsStreamIp()) {
-                        streamInfo=streamInfo.clone();//深拷贝
+                        streamInfo = streamInfo.clone();//深拷贝
                         String host;
                         try {
-                            URL url=new URL(request.getRequestURL().toString());
-                            host=url.getHost();
+                            URL url = new URL(request.getRequestURL().toString());
+                            host = url.getHost();
                         } catch (MalformedURLException e) {
-                            host=request.getLocalAddr();
+                            host = request.getLocalAddr();
                         }
                         streamInfo.changeStreamIp(host);
                     }
@@ -269,17 +237,17 @@ public class CameraChannelController {
                     if (channel.getGbPtzType() != null) {
                         cameraStreamContent.setControlType(
                                 (channel.getGbPtzType() == 1 || channel.getGbPtzType() == 4 || channel.getGbPtzType() == 5) ? 1 : 0);
-                    }else {
+                    } else {
                         cameraStreamContent.setControlType(0);
                     }
 
                     RetResult.setData(cameraStreamContent);
-                }else {
+                } else {
                     RetResult.setCode(code);
                     RetResult.setMsg(msg);
                 }
                 result.setResult(RetResult);
-            }else {
+            } else {
                 result.setResult(RetResponse.makeRsp(code, msg));
             }
         };
@@ -293,7 +261,7 @@ public class CameraChannelController {
     @Parameter(name = "deviceId", description = "通道编号")
     @Parameter(name = "deviceCode", description = "摄像头设备国标编号, 对于非国标摄像头可以不设置此参数")
     public RetResult<Void> stopPlay(String deviceId, @RequestParam(required = false) String deviceCode) {
-        log.info("[SY-停止播放摄像头] API调用，deviceId：{} ，deviceCode：{} ",deviceId, deviceCode);
+        log.info("[SY-停止播放摄像头] API调用，deviceId：{} ，deviceCode：{} ", deviceId, deviceCode);
         channelService.stopPlay(deviceId, deviceCode);
         return RetResponse.makeOKRsp();
     }
@@ -304,13 +272,13 @@ public class CameraChannelController {
     @Parameter(name = "command", description = "控制指令,允许值: left, right, up, down, upleft, upright, downleft, downright, zoomin, zoomout, stop", required = true)
     @Parameter(name = "speed", description = "速度(0-100)", required = true)
     @GetMapping("/camera/control/ptz")
-    public DeferredResult<RetResult<String>> ptz(String deviceId, @RequestParam(required = false) String deviceCode, String command, Integer speed){
+    public DeferredResult<RetResult<String>> ptz(String deviceId, @RequestParam(required = false) String deviceCode, String command, Integer speed) {
 
-        log.info("[SY-云台控制] API调用，deviceId：{} ，deviceCode：{} ，command：{} ，speed：{} ",deviceId, deviceCode, command, speed);
+        log.info("[SY-云台控制] API调用，deviceId：{} ，deviceCode：{} ，command：{} ，speed：{} ", deviceId, deviceCode, command, speed);
 
         DeferredResult<RetResult<String>> result = new DeferredResult<>();
 
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<String> RetResult = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "请求超时");
             result.setResult(RetResult);
         });
@@ -325,25 +293,21 @@ public class CameraChannelController {
         // 设置时间间隔后自动发送停止
         if (!command.equalsIgnoreCase("stop")) {
             dynamicTask.startDelay(UUID.randomUUID().toString(), () -> {
-                channelService.ptz(deviceId, deviceCode, "stop", speed, (code, msg, data) -> {});
+                channelService.ptz(deviceId, deviceCode, "stop", speed, (code, msg, data) -> {
+                });
             }, ptzControlTimeInterval);
         }
         return result;
     }
 
-    @GetMapping(value = "/camera/list-for-mobile")
+    @PostMapping(value = "/camera/list-for-mobile")
     @ResponseBody
     @Operation(summary = "查询移动设备摄像机列表")
-    @Parameter(name = "page", description = "当前页")
-    @Parameter(name = "count", description = "每页查询数量")
-    @Parameter(name = "topGroupAlias", description = "分组别名")
-    public PageInfo<CameraChannel> queryListForMobile(@RequestParam(required = false, value = "page", defaultValue = "1" )Integer page,
-                                                      @RequestParam(required = false, value = "count", defaultValue = "100")Integer count,
-                                                      @RequestParam(required = false) String topGroupAlias){
-
-        return channelService.queryListForMobile(page, count, topGroupAlias);
+    public RetResult<PageList<CameraChannel>> queryListForMobile(@RequestBody CameraChannelQueryDTO param) {
+        PageInfo<CameraChannel> pageResult = channelService.queryListForMobile(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()),
+                param.getTopGroupAlias());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
-
 
     @Operation(summary = "获取推流播放地址")
     @Parameter(name = "app", description = "应用名", required = true)
@@ -354,7 +318,7 @@ public class CameraChannelController {
     public DeferredResult<RetResult<StreamContent>> getStreamInfoByAppAndStream(HttpServletRequest request,
                                                                                 String app,
                                                                                 String stream,
-                                                                                String callId){
+                                                                                String callId) {
         StreamPush streamPush = streamPushService.getPush(app, stream);
         AssertUtils.notNull(streamPush, "地址不存在");
 
@@ -367,20 +331,20 @@ public class CameraChannelController {
         }
 
         DeferredResult<RetResult<StreamContent>> result = new DeferredResult<>(userSetting.getPlayTimeout().longValue());
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             RetResult<StreamContent> fail = RetResponse.makeRsp(ErrorCode.ERROR100.getCode(), "等待推流超时");
             result.setResult(fail);
         });
 
         streamPushPlayService.start(streamPush.getId(), (code, msg, streamInfo) -> {
             if (code == 0 && streamInfo != null) {
-                streamInfo=streamInfo.clone();//深拷贝
+                streamInfo = streamInfo.clone();//深拷贝
                 String host;
                 try {
-                    URL url=new URL(request.getRequestURL().toString());
-                    host=url.getHost();
+                    URL url = new URL(request.getRequestURL().toString());
+                    host = url.getHost();
                 } catch (MalformedURLException e) {
-                    host=request.getLocalAddr();
+                    host = request.getLocalAddr();
                 }
                 streamInfo.changeStreamIp(host);
                 RetResult<StreamContent> success = RetResponse.makeOKRsp(new StreamContent(streamInfo));
@@ -397,20 +361,20 @@ public class CameraChannelController {
     @GetMapping(value = "/push/play-without-check")
     @ResponseBody
     public RetResult<StreamContent> getStreamInfoByAppAndStreamWithoutCheck(HttpServletRequest request,
-                                                                                String app,
-                                                                                String stream,
-                                                                                String callId){
+                                                                            String app,
+                                                                            String stream,
+                                                                            String callId) {
 
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
         AssertUtils.notNull(mediaServer, "流媒体服务器不存在");
         StreamInfo streamInfo = mediaServerService.getStreamInfoByAppAndStream(mediaServer, app, stream, null, callId);
-        streamInfo=streamInfo.clone();//深拷贝
+        streamInfo = streamInfo.clone();//深拷贝
         String host;
         try {
-            URL url=new URL(request.getRequestURL().toString());
-            host=url.getHost();
+            URL url = new URL(request.getRequestURL().toString());
+            host = url.getHost();
         } catch (MalformedURLException e) {
-            host=request.getLocalAddr();
+            host = request.getLocalAddr();
         }
         streamInfo.changeStreamIp(host);
         return RetResponse.makeOKRsp(new StreamContent(streamInfo));
@@ -458,16 +422,17 @@ public class CameraChannelController {
 
     /**
      * 下载指定录像文件的压缩包
-     * @param app 应用名
+     *
+     * @param app    应用名
      * @param stream 流ID
      * @param callId 每次录像的唯一标识，置空则查询全部流媒体
      */
     @ResponseBody
     @GetMapping("/record/zip")
     public RetResult<Void> downloadZipFile(HttpServletResponse response,
-                                @RequestParam(required = false) String app,
-                                @RequestParam(required = false) String stream,
-                                @RequestParam(required = false) String callId
+                                           @RequestParam(required = false) String app,
+                                           @RequestParam(required = false) String stream,
+                                           @RequestParam(required = false) String callId
 
     ) {
         log.info("[下载指定录像文件的压缩包] 查询 app->{}, stream->{}, callId->{}", app, stream, callId);
@@ -515,71 +480,33 @@ public class CameraChannelController {
         return RetResponse.makeOKRsp();
     }
 
-    /**
-     *
-     * @param query 检索内容
-     * @param app 应用名
-     * @param stream 流ID
-     * @param startTime 开始时间(yyyy-MM-dd HH:mm:ss)
-     * @param endTime 结束时间(yyyy-MM-dd HH:mm:ss)
-     * @param mediaServerId 流媒体ID，置空则查询全部流媒体
-     * @param callId 每次录像的唯一标识，置空则查询全部流媒体
-     * @param remoteHost 拼接播放地址时使用的远程地址
-     */
     @ResponseBody
-    @GetMapping("/record/list-url")
+    @PostMapping("/record/list-url")
     @Operation(summary = "分页查询云端录像")
-    @Parameter(name = "query", description = "检索内容", required = false)
-    @Parameter(name = "app", description = "应用名", required = false)
-    @Parameter(name = "stream", description = "流ID", required = false)
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页查询数量", required = true)
-    @Parameter(name = "startTime", description = "开始时间(yyyy-MM-dd HH:mm:ss)", required = false)
-    @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
-    @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
-    @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
-    public PageInfo<CloudRecordUrl> getListWithUrl(HttpServletRequest request, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam int page, @RequestParam int count, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost
-
-    ) {
-        log.info("[云端录像] 查询URL app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", app, stream, mediaServerId, page, count, startTime, endTime, callId);
+    public RetResult<PageList<CloudRecordUrl>> getListWithUrl(HttpServletRequest request, @RequestBody CloudRecordUrlQueryDTO param) {
+        log.info("[云端录像] 查询URL app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", param.getApp(), param.getStream(), param.getMediaServerId(), param.getCurrent(), param.getSize(), param.getStartTime(), param.getEndTime(), param.getCallId());
 
         List<MediaServer> mediaServers;
-        if (!ObjectUtils.isEmpty(mediaServerId)) {
+        if (!ObjectUtils.isEmpty(param.getMediaServerId())) {
             mediaServers = new ArrayList<>();
-            MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
+            MediaServer mediaServer = mediaServerService.getOne(param.getMediaServerId());
             if (mediaServer == null) {
-                throw new CommonException("未找到流媒体: " + mediaServerId);
+                throw new CommonException("未找到流媒体: " + param.getMediaServerId());
             }
             mediaServers.add(mediaServer);
         } else {
             mediaServers = null;
         }
-        if (query != null && ObjectUtils.isEmpty(query.trim())) {
-            query = null;
-        }
-        if (app != null && ObjectUtils.isEmpty(app.trim())) {
-            app = null;
-        }
-        if (stream != null && ObjectUtils.isEmpty(stream.trim())) {
-            stream = null;
-        }
-        if (startTime != null && ObjectUtils.isEmpty(startTime.trim())) {
-            startTime = null;
-        }
-        if (endTime != null && ObjectUtils.isEmpty(endTime.trim())) {
-            endTime = null;
-        }
-        if (callId != null && ObjectUtils.isEmpty(callId.trim())) {
-            callId = null;
-        }
         MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
         if (mediaServer == null) {
             throw new CommonException("未找到流媒体节点");
         }
+        String remoteHost = param.getRemoteHost();
         if (remoteHost == null) {
             remoteHost = request.getScheme() + "://" + request.getLocalAddr() + ":" + (request.getScheme().equals("https") ? mediaServer.getHttpSSlPort() : mediaServer.getHttpPort());
         }
-        PageInfo<CloudRecordItem> cloudRecordItemPageInfo = cloudRecordService.getList(page, count, query, app, stream, startTime, endTime, mediaServers, callId, null);
+        PageInfo<CloudRecordItem> cloudRecordItemPageInfo = cloudRecordService.getList(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()),
+                param.getQuery(), param.getApp(), param.getStream(), param.getStartTime(), param.getEndTime(), mediaServers, param.getCallId(), null);
         PageInfo<CloudRecordUrl> cloudRecordUrlPageInfo = new PageInfo<>();
         if (!ObjectUtils.isEmpty(cloudRecordItemPageInfo)) {
             cloudRecordUrlPageInfo.setPageNum(cloudRecordItemPageInfo.getPageNum());
@@ -604,19 +531,19 @@ public class CameraChannelController {
             for (CloudRecordItem cloudRecordItem : cloudRecordItemList) {
                 CloudRecordUrl cloudRecordUrl = new CloudRecordUrl();
                 cloudRecordUrl.setId(cloudRecordItem.getId());
-                cloudRecordUrl.setDownloadUrl(remoteHost + "/index/api/downloadFile?file_path=" + cloudRecordItem.getFilePath() + "&save_name=" + cloudRecordItem.getStream() + "_" + cloudRecordItem.getCallId() + "_" + DateUtil.timestampMsToUrlToyyyy_MM_dd_HH_mm_ss((long)cloudRecordItem.getStartTime()));
+                cloudRecordUrl.setDownloadUrl(remoteHost + "/index/api/downloadFile?file_path=" + cloudRecordItem.getFilePath() + "&save_name=" + cloudRecordItem.getStream() + "_" + cloudRecordItem.getCallId() + "_" + DateUtil.timestampMsToUrlToyyyy_MM_dd_HH_mm_ss((long) cloudRecordItem.getStartTime()));
                 cloudRecordUrl.setPlayUrl(remoteHost + "/index/api/downloadFile?file_path=" + cloudRecordItem.getFilePath());
                 cloudRecordUrlList.add(cloudRecordUrl);
             }
             cloudRecordUrlPageInfo.setList(cloudRecordUrlList);
         }
-        return cloudRecordUrlPageInfo;
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(cloudRecordUrlPageInfo));
     }
 
     @GetMapping(value = "/forceClose")
     @ResponseBody
     @Operation(summary = "强制停止推流")
-    public RetResult<Void> stop(String app, String stream){
+    public RetResult<Void> stop(String app, String stream) {
         streamPushPlayService.stop(app, stream);
         return RetResponse.makeOKRsp();
     }
@@ -625,13 +552,13 @@ public class CameraChannelController {
     @ResponseBody
     @Operation(summary = "查询会议设备")
     @Parameter(name = "topGroupAlias", description = "分组别名")
-    public List<CameraChannel> queryMeetingChannelList(String topGroupAlias){
+    public List<CameraChannel> queryMeetingChannelList(String topGroupAlias) {
         return channelService.queryMeetingChannelList(topGroupAlias);
     }
 
     @GetMapping(value = "/test")
     @ResponseBody
-    public SYMember test(String device){
+    public SYMember test(String device) {
         return channelService.getMember(device);
     }
 

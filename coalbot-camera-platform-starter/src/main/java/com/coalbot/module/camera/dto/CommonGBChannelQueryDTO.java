@@ -30,4 +30,9 @@ public class CommonGBChannelQueryDTO extends SearchPage<CommonGBChannel> {
     @Schema(description = "父节点编码")
     private String parentDeviceId;
 
+    @Schema(description = "录制计划ID")
+    private String planId;
+    @Schema(description = "是否已经关联")
+    private Boolean hasLink;
+
 }

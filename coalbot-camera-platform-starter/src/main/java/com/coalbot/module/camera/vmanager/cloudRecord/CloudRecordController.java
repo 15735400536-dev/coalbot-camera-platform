@@ -107,69 +107,10 @@ public class CloudRecordController {
         return RetResponse.makeOKRsp(cloudRecordService.getDateList(app, stream, year, month, mediaServers));
     }
 
-//    @ResponseBody
-//    @GetMapping("/list")
-//    @Operation(summary = "分页查询云端录像")
-//    @Parameter(name = "query", description = "检索内容", required = false)
-//    @Parameter(name = "app", description = "应用名", required = false)
-//    @Parameter(name = "stream", description = "流ID", required = false)
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "startTime", description = "开始时间(yyyy-MM-dd HH:mm:ss)", required = false)
-//    @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
-//    @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
-//    @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
-//    @Parameter(name = "ascOrder", description = "是否升序排序， 升序： true， 降序： false", required = false)
-//    public RetResult<PageInfo<CloudRecordItem>> openRtpServer(@RequestParam(required = false) String query,
-//                                                              @RequestParam(required = false) String app,
-//                                                              @RequestParam(required = false) String stream,
-//                                                              @RequestParam int page,
-//                                                              @RequestParam int count,
-//                                                              @RequestParam(required = false) String startTime,
-//                                                              @RequestParam(required = false) String endTime,
-//                                                              @RequestParam(required = false) String mediaServerId,
-//                                                              @RequestParam(required = false) String callId,
-//                                                              @RequestParam(required = false) Boolean ascOrder
-//
-//    ) {
-//        log.info("[云端录像] 查询 app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", app, stream, mediaServerId, page, count, startTime, endTime, callId);
-//
-//        List<MediaServer> mediaServers;
-//        if (!ObjectUtils.isEmpty(mediaServerId)) {
-//            mediaServers = new ArrayList<>();
-//            MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
-//            if (mediaServer == null) {
-//                throw new CommonException("未找到流媒体: " + mediaServerId);
-//            }
-//            mediaServers.add(mediaServer);
-//        } else {
-//            mediaServers = null;
-//        }
-//        if (query != null && ObjectUtils.isEmpty(query.trim())) {
-//            query = null;
-//        }
-//        if (app != null && ObjectUtils.isEmpty(app.trim())) {
-//            app = null;
-//        }
-//        if (stream != null && ObjectUtils.isEmpty(stream.trim())) {
-//            stream = null;
-//        }
-//        if (startTime != null && ObjectUtils.isEmpty(startTime.trim())) {
-//            startTime = null;
-//        }
-//        if (endTime != null && ObjectUtils.isEmpty(endTime.trim())) {
-//            endTime = null;
-//        }
-//        if (callId != null && ObjectUtils.isEmpty(callId.trim())) {
-//            callId = null;
-//        }
-//        return RetResponse.makeOKRsp(cloudRecordService.getList(page, count, query, app, stream, startTime, endTime, mediaServers, callId, ascOrder));
-//    }
-
     @ResponseBody
     @PostMapping("/list")
     @Operation(summary = "分页查询云端录像")
-    public PageInfo<CloudRecordItem> openRtpServer(@RequestBody CloudRecordItemQueryDTO dto) {
+    public RetResult<PageList<CloudRecordItem>> openRtpServer(@RequestBody CloudRecordItemQueryDTO dto) {
         log.info("[云端录像] 查询 app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}",
                 dto.getApp(), dto.getStream(), dto.getMediaServerId(), dto.getCurrent(), dto.getSize(), dto.getStartTime(), dto.getEndTime(), dto.getCallId());
 
@@ -184,8 +125,9 @@ public class CloudRecordController {
         } else {
             mediaServers = null;
         }
-        return cloudRecordService.getList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+        PageInfo<CloudRecordItem> pageResult = cloudRecordService.getList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
                 dto.getQuery(), dto.getApp(), dto.getStream(), dto.getStartTime(), dto.getEndTime(), mediaServers, dto.getCallId(), dto.getAscOrder());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @ResponseBody
@@ -532,103 +474,6 @@ public class CloudRecordController {
         }
         return RetResponse.makeOKRsp();
     }
-
-//    /**
-//     * @param query         检索内容
-//     * @param app           应用名
-//     * @param stream        流ID
-//     * @param startTime     开始时间(yyyy-MM-dd HH:mm:ss)
-//     * @param endTime       结束时间(yyyy-MM-dd HH:mm:ss)
-//     * @param mediaServerId 流媒体ID，置空则查询全部流媒体
-//     * @param callId        每次录像的唯一标识，置空则查询全部流媒体
-//     * @param remoteHost    拼接播放地址时使用的远程地址
-//     */
-//    @ResponseBody
-//    @GetMapping("/list-url")
-//    @Operation(summary = "分页查询云端录像")
-//    @Parameter(name = "query", description = "检索内容", required = false)
-//    @Parameter(name = "app", description = "应用名", required = false)
-//    @Parameter(name = "stream", description = "流ID", required = false)
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "startTime", description = "开始时间(yyyy-MM-dd HH:mm:ss)", required = false)
-//    @Parameter(name = "endTime", description = "结束时间(yyyy-MM-dd HH:mm:ss)", required = false)
-//    @Parameter(name = "mediaServerId", description = "流媒体ID，置空则查询全部流媒体", required = false)
-//    @Parameter(name = "callId", description = "每次录像的唯一标识，置空则查询全部流媒体", required = false)
-//    public RetResult<PageInfo<CloudRecordUrl>> getListWithUrl(HttpServletRequest request, @RequestParam(required = false) String query, @RequestParam(required = false) String app, @RequestParam(required = false) String stream, @RequestParam int page, @RequestParam int count, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) String mediaServerId, @RequestParam(required = false) String callId, @RequestParam(required = false) String remoteHost
-//
-//    ) {
-//        log.info("[云端录像] 查询URL app->{}, stream->{}, mediaServerId->{}, page->{}, count->{}, startTime->{}, endTime->{}, callId->{}", app, stream, mediaServerId, page, count, startTime, endTime, callId);
-//
-//        List<MediaServer> mediaServers;
-//        if (!ObjectUtils.isEmpty(mediaServerId)) {
-//            mediaServers = new ArrayList<>();
-//            MediaServer mediaServer = mediaServerService.getOne(mediaServerId);
-//            if (mediaServer == null) {
-//                throw new CommonException("未找到流媒体: " + mediaServerId);
-//            }
-//            mediaServers.add(mediaServer);
-//        } else {
-//            mediaServers = null;
-//        }
-//        if (query != null && ObjectUtils.isEmpty(query.trim())) {
-//            query = null;
-//        }
-//        if (app != null && ObjectUtils.isEmpty(app.trim())) {
-//            app = null;
-//        }
-//        if (stream != null && ObjectUtils.isEmpty(stream.trim())) {
-//            stream = null;
-//        }
-//        if (startTime != null && ObjectUtils.isEmpty(startTime.trim())) {
-//            startTime = null;
-//        }
-//        if (endTime != null && ObjectUtils.isEmpty(endTime.trim())) {
-//            endTime = null;
-//        }
-//        if (callId != null && ObjectUtils.isEmpty(callId.trim())) {
-//            callId = null;
-//        }
-//        MediaServer mediaServer = mediaServerService.getDefaultMediaServer();
-//        if (mediaServer == null) {
-//            throw new CommonException("未找到流媒体节点");
-//        }
-//        if (remoteHost == null) {
-//            remoteHost = request.getScheme() + "://" + request.getLocalAddr() + ":" + (request.getScheme().equals("https") ? mediaServer.getHttpSSlPort() : mediaServer.getHttpPort());
-//        }
-//        PageInfo<CloudRecordItem> cloudRecordItemPageInfo = cloudRecordService.getList(page, count, query, app, stream, startTime, endTime, mediaServers, callId, null);
-//        PageInfo<CloudRecordUrl> cloudRecordUrlPageInfo = new PageInfo<>();
-//        if (!ObjectUtils.isEmpty(cloudRecordItemPageInfo)) {
-//            cloudRecordUrlPageInfo.setPageNum(cloudRecordItemPageInfo.getPageNum());
-//            cloudRecordUrlPageInfo.setPageSize(cloudRecordItemPageInfo.getPageSize());
-//            cloudRecordUrlPageInfo.setSize(cloudRecordItemPageInfo.getSize());
-//            cloudRecordUrlPageInfo.setEndRow(cloudRecordItemPageInfo.getEndRow());
-//            cloudRecordUrlPageInfo.setStartRow(cloudRecordItemPageInfo.getStartRow());
-//            cloudRecordUrlPageInfo.setPages(cloudRecordItemPageInfo.getPages());
-//            cloudRecordUrlPageInfo.setPrePage(cloudRecordItemPageInfo.getPrePage());
-//            cloudRecordUrlPageInfo.setNextPage(cloudRecordItemPageInfo.getNextPage());
-//            cloudRecordUrlPageInfo.setIsFirstPage(cloudRecordItemPageInfo.isIsFirstPage());
-//            cloudRecordUrlPageInfo.setIsLastPage(cloudRecordItemPageInfo.isIsLastPage());
-//            cloudRecordUrlPageInfo.setHasPreviousPage(cloudRecordItemPageInfo.isHasPreviousPage());
-//            cloudRecordUrlPageInfo.setHasNextPage(cloudRecordItemPageInfo.isHasNextPage());
-//            cloudRecordUrlPageInfo.setNavigatePages(cloudRecordItemPageInfo.getNavigatePages());
-//            cloudRecordUrlPageInfo.setNavigateFirstPage(cloudRecordItemPageInfo.getNavigateFirstPage());
-//            cloudRecordUrlPageInfo.setNavigateLastPage(cloudRecordItemPageInfo.getNavigateLastPage());
-//            cloudRecordUrlPageInfo.setNavigatepageNums(cloudRecordItemPageInfo.getNavigatepageNums());
-//            cloudRecordUrlPageInfo.setTotal(cloudRecordItemPageInfo.getTotal());
-//            List<CloudRecordUrl> cloudRecordUrlList = new ArrayList<>(cloudRecordItemPageInfo.getList().size());
-//            List<CloudRecordItem> cloudRecordItemList = cloudRecordItemPageInfo.getList();
-//            for (CloudRecordItem cloudRecordItem : cloudRecordItemList) {
-//                CloudRecordUrl cloudRecordUrl = new CloudRecordUrl();
-//                cloudRecordUrl.setId(cloudRecordItem.getId());
-//                cloudRecordUrl.setDownloadUrl(remoteHost + "/index/api/downloadFile?file_path=" + cloudRecordItem.getFilePath() + "&save_name=" + cloudRecordItem.getStream() + "_" + cloudRecordItem.getCallId() + "_" + DateUtil.timestampMsToUrlToyyyy_MM_dd_HH_mm_ss((long) cloudRecordItem.getStartTime()));
-//                cloudRecordUrl.setPlayUrl(remoteHost + "/index/api/downloadFile?file_path=" + cloudRecordItem.getFilePath());
-//                cloudRecordUrlList.add(cloudRecordUrl);
-//            }
-//            cloudRecordUrlPageInfo.setList(cloudRecordUrlList);
-//        }
-//        return RetResponse.makeOKRsp(cloudRecordUrlPageInfo);
-//    }
 
     @ResponseBody
     @PostMapping("/list-url")

@@ -7,6 +7,7 @@ import com.coalbot.module.camera.jt1078.bean.JTChannel;
 import com.coalbot.module.camera.jt1078.bean.JTDevice;
 import com.coalbot.module.camera.jt1078.service.Ijt1078Service;
 import com.coalbot.module.camera.utils.TypeUtils;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -30,22 +31,12 @@ public class JT1078TerminalController {
     @Resource
     Ijt1078Service service;
 
-//    @Operation(summary = "JT-分页查询部标设备")
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "query", description = "查询内容")
-//    @Parameter(name = "online", description = "是否在线")
-//    @GetMapping("/list")
-//    public PageInfo<JTDevice> getDevices(int page, int count,
-//                                         @RequestParam(required = false) String query,
-//                                         @RequestParam(required = false) Boolean online) {
-//        return service.getDeviceList(page, count, query, online);
-//    }
-
     @Operation(summary = "JT-分页查询部标设备")
-    @GetMapping("/list")
-    public PageInfo<JTDevice> getDevices(@RequestBody JTDeviceQueryDTO dto) {
-        return service.getDeviceList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()), dto.getQuery(), dto.getOnline());
+    @PostMapping("/list")
+    public RetResult<PageList<JTDevice>> getDevices(@RequestBody JTDeviceQueryDTO dto) {
+        PageInfo<JTDevice> pageResult = service.getDeviceList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+                dto.getQuery(), dto.getOnline());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
 
@@ -86,26 +77,13 @@ public class JT1078TerminalController {
         return RetResponse.makeOKRsp(service.getDeviceById(deviceId));
     }
 
-//
-//    @Operation(summary = "JT-查询部标通道")
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    @Parameter(name = "deviceId", description = "设备ID", required = true)
-//    @Parameter(name = "query", description = "查询内容")
-//    @GetMapping("/channel/list")
-//    public RetResult<PageInfo<JTChannel>> getChannels(int page, int count,
-//                                                      @RequestParam(required = true) String deviceId,
-//                                                      @RequestParam(required = false) String query) {
-//        assert deviceId != null;
-//        return RetResponse.makeOKRsp(service.getChannelList(page, count, deviceId, query));
-//    }
-
     @Operation(summary = "JT-查询部标通道")
     @PostMapping("/channel/list")
-    public PageInfo<JTChannel> getChannels(@RequestBody JTChannelQueryDTO dto) {
+    public RetResult<PageList<JTChannel>> getChannels(@RequestBody JTChannelQueryDTO dto) {
         assert dto.getDeviceId() != null;
-        return service.getChannelList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
+        PageInfo<JTChannel> pageResult = service.getChannelList(TypeUtils.longToInt(dto.getCurrent()), TypeUtils.longToInt(dto.getSize()),
                 dto.getDeviceId(), dto.getQuery());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @Operation(summary = "JT-查询单个部标通道")

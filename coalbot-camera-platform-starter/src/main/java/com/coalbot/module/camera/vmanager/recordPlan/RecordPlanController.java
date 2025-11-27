@@ -1,6 +1,7 @@
 package com.coalbot.module.camera.vmanager.recordPlan;
 
 import com.coalbot.module.camera.dto.ChannelQueryDTO;
+import com.coalbot.module.camera.dto.CommonGBChannelQueryDTO;
 import com.coalbot.module.camera.gb28181.bean.CommonGBChannel;
 import com.coalbot.module.camera.gb28181.service.IDeviceChannelService;
 import com.coalbot.module.camera.service.IRecordPlanService;
@@ -10,6 +11,7 @@ import com.coalbot.module.camera.utils.TypeUtils;
 import com.coalbot.module.camera.vmanager.bean.ErrorCode;
 import com.coalbot.module.camera.vmanager.recordPlan.bean.RecordPlanParam;
 import com.coalbot.module.core.exception.CommonException;
+import com.coalbot.module.core.response.PageList;
 import com.coalbot.module.core.response.RetResponse;
 import com.coalbot.module.core.response.RetResult;
 import com.github.pagehelper.PageInfo;
@@ -90,19 +92,6 @@ public class RecordPlanController {
         return RetResponse.makeOKRsp(recordPlanService.get(planId));
     }
 
-//    @ResponseBody
-//    @GetMapping("/query")
-//    @Operation(summary = "查询录制计划列表")
-//    @Parameter(name = "query", description = "检索内容", required = false)
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页查询数量", required = true)
-//    public RetResult<PageInfo<RecordPlan>> query(@RequestParam(required = false) String query, @RequestParam Integer page, @RequestParam Integer count) {
-//        if (query != null && ObjectUtils.isEmpty(query.trim())) {
-//            query = null;
-//        }
-//        return RetResponse.makeOKRsp(recordPlanService.query(page, count, query));
-//    }
-
     @ResponseBody
     @PostMapping("/query")
     @Operation(summary = "查询录制计划列表")
@@ -110,54 +99,14 @@ public class RecordPlanController {
         return RetResponse.makeOKRsp(recordPlanService.query(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getSize()), param.getQuery()));
     }
 
-//    @Operation(summary = "分页查询录制计划关联的所有通道")
-//    @Parameter(name = "page", description = "当前页", required = true)
-//    @Parameter(name = "count", description = "每页条数", required = true)
-//    @Parameter(name = "planId", description = "录制计划ID")
-//    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-//    @Parameter(name = "query", description = "查询内容")
-//    @Parameter(name = "online", description = "是否在线")
-//    @Parameter(name = "hasLink", description = "是否已经关联")
-//    @GetMapping("/channel/list")
-//    @ResponseBody
-//    public RetResult<PageInfo<CommonGBChannel>> queryChannelList(int page, int count,
-//                                                                 @RequestParam(required = false) String planId,
-//                                                                 @RequestParam(required = false) String query,
-//                                                                 @RequestParam(required = false) Integer channelType,
-//                                                                 @RequestParam(required = false) Boolean online,
-//                                                                 @RequestParam(required = false) Boolean hasLink) {
-//
-//        AssertUtils.notNull(planId, "录制计划ID不可为NULL");
-//        if (org.springframework.util.ObjectUtils.isEmpty(query)) {
-//            query = null;
-//        }
-//
-//        return RetResponse.makeOKRsp(recordPlanService.queryChannelList(page, count, query, channelType, online, planId, hasLink));
-//    }
-
     @Operation(summary = "分页查询录制计划关联的所有通道")
-    @Parameter(name = "page", description = "当前页", required = true)
-    @Parameter(name = "count", description = "每页条数", required = true)
-    @Parameter(name = "planId", description = "录制计划ID")
-    @Parameter(name = "channelType", description = "通道类型， 0：国标设备，1：推流设备，2：拉流代理")
-    @Parameter(name = "query", description = "查询内容")
-    @Parameter(name = "online", description = "是否在线")
-    @Parameter(name = "hasLink", description = "是否已经关联")
-    @GetMapping("/channel/list")
+    @PostMapping("/channel/list")
     @ResponseBody
-    public RetResult<PageInfo<CommonGBChannel>> queryChannelList(int page, int count,
-                                                                 @RequestParam(required = false) String planId,
-                                                                 @RequestParam(required = false) String query,
-                                                                 @RequestParam(required = false) Integer channelType,
-                                                                 @RequestParam(required = false) Boolean online,
-                                                                 @RequestParam(required = false) Boolean hasLink) {
-
-        AssertUtils.notNull(planId, "录制计划ID不可为NULL");
-        if (org.springframework.util.ObjectUtils.isEmpty(query)) {
-            query = null;
-        }
-
-        return RetResponse.makeOKRsp(recordPlanService.queryChannelList(page, count, query, channelType, online, planId, hasLink));
+    public RetResult<PageList<CommonGBChannel>> queryChannelList(@RequestBody CommonGBChannelQueryDTO param) {
+        AssertUtils.notNull(param.getPlanId(), "录制计划ID不可为NULL");
+        PageInfo<CommonGBChannel> pageResult = recordPlanService.queryChannelList(TypeUtils.longToInt(param.getCurrent()), TypeUtils.longToInt(param.getCurrent()),
+                param.getQuery(), param.getChannelType(), param.getOnline(), param.getPlanId(), param.getHasLink());
+        return RetResponse.makeOKRsp(TypeUtils.pageInfoToPageList(pageResult));
     }
 
     @ResponseBody
